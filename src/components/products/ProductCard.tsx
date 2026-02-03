@@ -42,38 +42,38 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                     />
                 </Link>
 
-                <CardContent className="p-5 flex flex-col flex-1">
+                <CardContent className="p-3 md:p-5 flex flex-col flex-1">
                     <Link href={`/products/${_id}`}>
-                        <h3 className="text-[15px] font-bold leading-tight mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[40px]">
+                        <h3 className="text-[13px] md:text-[15px] font-bold leading-tight mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[36px] md:min-h-[40px]">
                             {name}
                         </h3>
                     </Link>
 
-                    <div className="flex gap-0.5 mb-3">
+                    <div className="flex gap-0.5 mb-2 md:mb-3">
                         {[...Array(5)].map((_, i) => (
                             <Star
                                 key={i}
-                                className={`w-4 h-4 ${i < (rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                className={`w-3.5 h-3.5 md:w-4 md:h-4 ${i < (rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                             />
                         ))}
                     </div>
 
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-2 md:mb-3">
                         {originalPrice && (
-                            <span className="text-sm text-muted-foreground line-through">Rs {originalPrice.toLocaleString()}</span>
+                            <span className="text-xs md:text-sm text-muted-foreground line-through">Rs {originalPrice.toLocaleString()}</span>
                         )}
-                        <span className="text-lg font-black text-[#e67e22]">Rs {price.toLocaleString()}</span>
+                        <span className="text-base md:text-lg font-black text-[#e67e22]">Rs {price.toLocaleString()}</span>
                     </div>
 
                     {size && (
-                        <p className="text-sm text-muted-foreground mb-4">
+                        <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
                             Size: <span className="text-foreground font-medium">{size}</span>
                         </p>
                     )}
 
-                    <div className="mt-auto grid grid-cols-2 gap-2">
+                    <div className="mt-auto grid grid-cols-2 gap-1.5 md:gap-2">
                         <Link href={`/products/${_id}?tryon=true`} className="w-full">
-                            <Button variant="secondary" className="w-full bg-[#f0f0f0] hover:bg-[#e0e0e0] text-foreground font-bold rounded-lg h-10 border-none text-xs">
+                            <Button variant="secondary" className="w-full bg-[#f0f0f0] hover:bg-[#e0e0e0] text-foreground font-bold rounded-lg h-9 md:h-10 border-none text-[10px] md:text-xs">
                                 Try On
                             </Button>
                         </Link>
@@ -84,9 +84,9 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                                 addToCart({ id: _id, name, price, image });
                                 toast.success("Added to cart!");
                             }}
-                            className="w-full bg-primary text-white font-bold rounded-lg h-10 shadow-lg shadow-primary/20 text-xs"
+                            className="w-full bg-primary text-white font-bold rounded-lg h-9 md:h-10 shadow-lg shadow-primary/20 text-[10px] md:text-xs"
                         >
-                            <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
+                            <ShoppingCart className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1 md:mr-1.5" />
                             Add
                         </Button>
                     </div>

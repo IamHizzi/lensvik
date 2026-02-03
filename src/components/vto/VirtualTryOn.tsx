@@ -585,7 +585,7 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[900px] p-0 overflow-hidden bg-black border-none">
+            <DialogContent className="sm:max-w-[900px] max-w-[95vw] p-0 overflow-hidden bg-black border-none">
                 <DialogTitle className="sr-only">Virtual Try-On - {productName}</DialogTitle>
                 <DialogDescription className="sr-only">
                     Virtually try on {productName} using your camera with state-of-the-art AI tracking.
@@ -595,15 +595,15 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     {!isLoaded && !error && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-30">
                             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
-                            <p className="text-lg font-bold text-white uppercase tracking-widest">{loadingStatus}</p>
+                            <p className="text-sm md:text-lg font-bold text-white uppercase tracking-widest">{loadingStatus}</p>
                         </div>
                     )}
 
                     {error && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-30 p-8 text-center">
-                            <Camera className="w-12 h-12 text-red-500 mb-4" />
-                            <h3 className="text-xl font-bold text-white mb-2">Camera Error</h3>
-                            <p className="text-zinc-400 mb-6 text-sm">{error}</p>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-30 p-4 md:p-8 text-center">
+                            <Camera className="w-10 h-10 md:w-12 md:h-12 text-red-500 mb-4" />
+                            <h3 className="text-lg md:text-xl font-bold text-white mb-2">Camera Error</h3>
+                            <p className="text-zinc-400 mb-6 text-xs md:text-sm">{error}</p>
                             <Button onClick={() => window.location.reload()} variant="outline" className="text-white border-white/20">
                                 <RefreshCcw className="w-4 h-4 mr-2" /> Retry
                             </Button>
@@ -626,34 +626,34 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
                     {isLoaded && (
                         <>
-                            <div className="absolute top-4 left-4 z-40">
-                                <div className="flex items-center gap-3 bg-black/70 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-                                    <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500 animate-pulse'}`} />
-                                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">
-                                        {isPaused ? 'Paused' : isTracking ? 'AI Tracking Active' : 'Scanning Face...'}
+                            <div className="absolute top-2 md:top-4 left-2 md:left-4 z-40">
+                                <div className="flex items-center gap-1.5 md:gap-3 bg-black/70 backdrop-blur-md px-2 md:px-4 py-1.5 md:py-2 rounded-full border border-white/10">
+                                    <div className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${isTracking ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500 animate-pulse'}`} />
+                                    <span className="text-[8px] md:text-[10px] font-bold text-white uppercase tracking-wider">
+                                        {isPaused ? 'Paused' : isTracking ? 'AI Tracking' : 'Scanning...'}
                                     </span>
-                                    <span className="text-[9px] text-zinc-400 ml-2">{fps} FPS</span>
+                                    <span className="hidden md:inline text-[9px] text-zinc-400 ml-2">{fps} FPS</span>
                                 </div>
                             </div>
 
-                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
+                            <div className="hidden md:block absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
                                 <div className="bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl text-center border border-white/10 shadow-2xl">
                                     <p className="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em] mb-1">Live Preview</p>
                                     <p className="text-base font-bold text-white truncate">{productName}</p>
                                 </div>
                             </div>
 
-                            <div className="absolute bottom-6 left-6 z-40">
+                            <div className="absolute bottom-3 md:bottom-6 left-3 md:left-6 z-40">
                                 <Button
                                     onClick={() => setIsPaused(p => !p)}
-                                    className="bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full h-12 w-12 border border-white/10"
+                                    className="bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full h-10 w-10 md:h-12 md:w-12 border border-white/10"
                                 >
-                                    {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
+                                    {isPaused ? <Play className="w-4 h-4 md:w-5 md:h-5" /> : <Pause className="w-4 h-4 md:w-5 md:h-5" />}
                                 </Button>
                             </div>
 
                             {productImage && (
-                                <div className="absolute top-4 right-16 z-40">
+                                <div className="hidden md:block absolute top-4 right-16 z-40">
                                     <div className="bg-black/70 backdrop-blur-md p-2 rounded-xl border border-white/10">
                                         <img
                                             src={productImage}
@@ -670,9 +670,9 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                         onClick={onClose}
                         size="icon"
                         variant="ghost"
-                        className="absolute top-4 right-4 z-40 bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full w-10 h-10 border border-white/10"
+                        className="absolute top-2 md:top-4 right-2 md:right-4 z-40 bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full w-10 h-10 md:w-10 md:h-10 border border-white/10"
                     >
-                        <X className="w-5 h-5" />
+                        <X className="w-5 h-5 md:w-5 md:h-5" />
                     </Button>
                 </div>
             </DialogContent>

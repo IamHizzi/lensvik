@@ -36,7 +36,7 @@ export function Hero() {
     }, []);
 
     return (
-        <section className="relative h-[400px] md:h-[500px] flex items-end overflow-hidden mt-[136px] bg-[#f8f9fa]">
+        <section className="relative h-[300px] md:h-[500px] flex items-end overflow-hidden mt-[80px] md:mt-[136px] bg-[#f8f9fa]">
             {/* Slider Banners */}
             <div className="absolute inset-0 z-0">
                 <AnimatePresence mode="wait">
@@ -58,7 +58,7 @@ export function Hero() {
                 </AnimatePresence>
             </div>
 
-            <div className="container mx-auto px-6 relative z-10 pb-12">
+            <div className="container mx-auto px-4 md:px-6 relative z-10 pb-6 md:pb-12">
                 <div className="max-w-3xl">
                     <motion.div
                         key={`content-${current}`}
@@ -67,14 +67,14 @@ export function Hero() {
                         transition={{ duration: 0.5 }}
                     >
                         {/* Professional Small Buttons */}
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2 md:gap-3">
                             <Link href="/collections">
-                                <Button size="default" className="h-11 px-8 rounded-full bg-primary text-white hover:bg-primary/90 shadow-lg font-bold">
+                                <Button size="default" className="h-9 md:h-11 px-5 md:px-8 rounded-full bg-primary text-white hover:bg-primary/90 shadow-lg font-bold text-xs md:text-sm">
                                     Shop Now
                                 </Button>
                             </Link>
                             <Link href="/products/1">
-                                <Button size="default" variant="outline" className="h-11 px-8 rounded-full border border-primary/20 text-primary hover:bg-white/80 transition-all backdrop-blur-md bg-white/40 font-bold">
+                                <Button size="default" variant="outline" className="h-9 md:h-11 px-5 md:px-8 rounded-full border border-primary/20 text-primary hover:bg-white/80 transition-all backdrop-blur-md bg-white/40 font-bold text-xs md:text-sm">
                                     Virtual Try-On
                                 </Button>
                             </Link>
@@ -82,12 +82,12 @@ export function Hero() {
                     </motion.div>
 
                     {/* Progress Dots - Smaller and subtle */}
-                    <div className="flex gap-1.5 mt-8">
+                    <div className="flex gap-1.5 mt-4 md:mt-8">
                         {banners.map((_, i) => (
                             <button
                                 key={i}
                                 onClick={() => setCurrent(i)}
-                                className={`h-1.5 rounded-full transition-all ${i === current ? 'w-8 bg-primary' : 'w-2 bg-primary/20'}`}
+                                className={`h-1 md:h-1.5 rounded-full transition-all ${i === current ? 'w-6 md:w-8 bg-primary' : 'w-1.5 md:w-2 bg-primary/20'}`}
                             />
                         ))}
                     </div>
