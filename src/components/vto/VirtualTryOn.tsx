@@ -320,10 +320,10 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     });
                 }
 
-                // Create back buffer for double buffering with correct resolution
-                if (canvasRef.current) {
-                    const videoWidth = 1280;
-                    const videoHeight = 720;
+                // Create back buffer for double buffering with DYNAMIC resolution
+                if (canvasRef.current && videoRef.current) {
+                    const videoWidth = videoRef.current.videoWidth || 1280;
+                    const videoHeight = videoRef.current.videoHeight || 720;
 
                     canvasRef.current.width = videoWidth;
                     canvasRef.current.height = videoHeight;
@@ -625,7 +625,7 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
                     <canvas
                         ref={canvasRef}
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-contain md:object-cover"
                     />
 
                     {isLoaded && (
@@ -640,12 +640,12 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                                 </div>
                             </div>
 
-                            <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
+                            {/* <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
                                 <div className="bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl text-center border border-white/10 shadow-2xl">
                                     <p className="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em] mb-1">Live Preview</p>
                                     <p className="text-base font-bold text-white truncate">{productName}</p>
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="absolute bottom-10 md:bottom-8 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 z-40">
                                 <Button
