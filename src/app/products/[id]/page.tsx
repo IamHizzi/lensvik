@@ -52,10 +52,10 @@ export default function ProductPage() {
         return (
             <div className="min-h-screen bg-background">
                 <Navbar />
-                <div className="container mx-auto px-6 pt-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    <Skeleton className="aspect-square rounded-[3rem]" />
-                    <div className="space-y-6">
-                        <Skeleton className="h-12 w-3/4" />
+                <div className="container mx-auto px-4 md:px-6 pt-24 md:pt-32 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                    <Skeleton className="aspect-square rounded-3xl md:rounded-[3rem]" />
+                    <div className="space-y-4 md:space-y-6">
+                        <Skeleton className="h-10 md:h-12 w-3/4" />
                         <Skeleton className="h-6 w-1/4" />
                         <Skeleton className="h-32 w-full" />
                     </div>
@@ -76,20 +76,20 @@ export default function ProductPage() {
         <main className="min-h-screen bg-background pb-24">
             <Navbar />
 
-            <div className="container mx-auto px-6 pt-32">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div className="container mx-auto px-4 md:px-6 pt-24 md:pt-32">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16">
                     {/* Left: Gallery Section */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="space-y-6"
+                        className="space-y-4 md:space-y-6"
                     >
-                        <div className="relative aspect-square rounded-[3rem] overflow-hidden glass border border-white/20 group">
+                        <div className="relative aspect-square rounded-3xl md:rounded-[3rem] overflow-hidden glass border border-white/20 group">
                             <Image
                                 src={product.image}
                                 alt={product.name}
                                 fill
-                                className="object-contain p-8 group-hover:scale-110 transition-transform duration-700"
+                                className="object-contain p-4 md:p-8 group-hover:scale-110 transition-transform duration-700"
                             />
                             <div className="absolute top-6 right-6 flex flex-col gap-3">
                                 <Button size="icon" variant="secondary" className="rounded-full shadow-lg">
@@ -116,19 +116,19 @@ export default function ProductPage() {
                         animate={{ opacity: 1, x: 0 }}
                         className="flex flex-col"
                     >
-                        <header className="mb-8">
-                            <Badge variant="outline" className="mb-4 text-primary border-primary/20 bg-primary/5 uppercase tracking-widest text-[10px] py-1 px-3">
+                        <header className="mb-6 md:mb-8">
+                            <Badge variant="outline" className="mb-3 md:mb-4 text-primary border-primary/20 bg-primary/5 uppercase tracking-widest text-[9px] md:text-[10px] py-1 px-2 md:px-3">
                                 Premium Collection
                             </Badge>
-                            <h1 className="text-6xl font-black tracking-tighter mb-4">{product.name}</h1>
-                            <div className="flex items-center gap-4">
+                            <h1 className="text-3xl md:text-6xl font-black tracking-tighter mb-3 md:mb-4">{product.name}</h1>
+                            <div className="flex items-center gap-3 md:gap-4">
                                 <div>
                                     {product.originalPrice && (
-                                        <p className="text-xl text-muted-foreground line-through">Rs {product.originalPrice.toLocaleString()}</p>
+                                        <p className="text-lg md:text-xl text-muted-foreground line-through">Rs {product.originalPrice.toLocaleString()}</p>
                                     )}
-                                    <p className="text-5xl font-black text-primary">Rs {product.price.toLocaleString()}</p>
+                                    <p className="text-3xl md:text-5xl font-black text-primary">Rs {product.price.toLocaleString()}</p>
                                 </div>
-                                <div className="h-12 w-[1px] bg-border mx-4" />
+                                <div className="h-10 md:h-12 w-[1px] bg-border mx-2 md:mx-4" />
                                 <div className="flex flex-col gap-1">
                                     <div className="flex items-center gap-1 text-yellow-500">
                                         {"★★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}
@@ -138,51 +138,51 @@ export default function ProductPage() {
                             </div>
                         </header>
 
-                        <div className="space-y-8 mb-12">
+                        <div className="space-y-6 md:space-y-8 mb-10 md:mb-12">
                             <section>
-                                <h3 className="text-xs uppercase font-bold tracking-widest text-muted-foreground mb-3">The Narrative</h3>
-                                <p className="text-lg leading-relaxed text-muted-foreground">
+                                <h3 className="text-[10px] md:text-xs uppercase font-bold tracking-widest text-muted-foreground mb-2 md:mb-3">The Narrative</h3>
+                                <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
                                     {product.description || "Experimental architecture meets optical precision. Hand-assembled from surgical-grade titanium for a weightless experience."}
                                 </p>
                             </section>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3 md:gap-4">
                                 <Button
                                     onClick={() => setIsVTOModalOpen(true)}
                                     size="lg"
-                                    className="h-16 rounded-[2rem] font-bold text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 group"
+                                    className="h-14 md:h-16 rounded-2xl md:rounded-[2rem] font-bold text-base md:text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 group"
                                 >
                                     <motion.span
                                         animate={{ opacity: [1, 0.5, 1] }}
                                         transition={{ duration: 2, repeat: Infinity }}
                                         className="inline-block w-2 h-2 rounded-full bg-white mr-2"
                                     />
-                                    Virtual Try-On
+                                    Try-On
                                 </Button>
                                 <Button
                                     onClick={handleAddToCart}
                                     size="lg"
                                     variant="outline"
-                                    className="h-16 rounded-[2rem] font-bold text-lg border-2 hover:bg-primary/5 transition-all group"
+                                    className="h-14 md:h-16 rounded-2xl md:rounded-[2rem] font-bold text-base md:text-lg border-2 hover:bg-primary/5 transition-all group"
                                 >
-                                    <ShoppingCart className="mr-2 group-hover:scale-110 transition-transform" />
-                                    Add to Cart
+                                    <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 mr-2 group-hover:scale-110 transition-transform" />
+                                    Add
                                 </Button>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-6 py-8 border-y border-border/50 mb-12">
+                        <div className="grid grid-cols-3 gap-4 md:gap-6 py-6 md:py-8 border-y border-border/50 mb-10 md:mb-12">
                             <div className="flex flex-col items-center text-center">
-                                <Truck className="w-6 h-6 text-primary mb-2" />
-                                <span className="text-[10px] uppercase font-bold tracking-tighter">Fast Delivery</span>
+                                <Truck className="w-5 h-5 md:w-6 md:h-6 text-primary mb-2" />
+                                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-tighter">Fast Delivery</span>
                             </div>
                             <div className="flex flex-col items-center text-center">
-                                <ShieldCheck className="w-6 h-6 text-primary mb-2" />
-                                <span className="text-[10px] uppercase font-bold tracking-tighter">2-Year Warranty</span>
+                                <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-primary mb-2" />
+                                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-tighter">2-Year Warranty</span>
                             </div>
                             <div className="flex flex-col items-center text-center">
-                                <Ruler className="w-6 h-6 text-primary mb-2" />
-                                <span className="text-[10px] uppercase font-bold tracking-tighter">Perfect Fit</span>
+                                <Ruler className="w-5 h-5 md:w-6 md:h-6 text-primary mb-2" />
+                                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-tighter">Perfect Fit</span>
                             </div>
                         </div>
 

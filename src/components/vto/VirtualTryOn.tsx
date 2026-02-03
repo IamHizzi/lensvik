@@ -320,11 +320,17 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     });
                 }
 
-                // Create back buffer for double buffering
+                // Create back buffer for double buffering with correct resolution
                 if (canvasRef.current) {
+                    const videoWidth = 1280;
+                    const videoHeight = 720;
+
+                    canvasRef.current.width = videoWidth;
+                    canvasRef.current.height = videoHeight;
+
                     backBufferRef.current = document.createElement('canvas');
-                    backBufferRef.current.width = canvasRef.current.width;
-                    backBufferRef.current.height = canvasRef.current.height;
+                    backBufferRef.current.width = videoWidth;
+                    backBufferRef.current.height = videoHeight;
                 }
 
                 if (isMounted) {
@@ -585,13 +591,13 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[900px] max-w-[95vw] p-0 overflow-hidden bg-black border-none">
+            <DialogContent className="sm:max-w-[900px] w-full h-[100dvh] sm:h-auto max-w-none sm:rounded-2xl p-0 overflow-hidden bg-black border-none flex flex-col">
                 <DialogTitle className="sr-only">Virtual Try-On - {productName}</DialogTitle>
                 <DialogDescription className="sr-only">
                     Virtually try on {productName} using your camera with state-of-the-art AI tracking.
                 </DialogDescription>
 
-                <div className="relative w-full" style={{ aspectRatio: '640/480' }}>
+                <div className="relative flex-1 w-full bg-black overflow-hidden aspect-video sm:aspect-none sm:min-h-[500px]">
                     {!isLoaded && !error && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-30">
                             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -619,36 +625,34 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
                     <canvas
                         ref={canvasRef}
-                        className="absolute inset-0 w-full h-full"
-                        width={640}
-                        height={480}
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
 
                     {isLoaded && (
                         <>
-                            <div className="absolute top-2 md:top-4 left-2 md:left-4 z-40">
-                                <div className="flex items-center gap-1.5 md:gap-3 bg-black/70 backdrop-blur-md px-2 md:px-4 py-1.5 md:py-2 rounded-full border border-white/10">
-                                    <div className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${isTracking ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500 animate-pulse'}`} />
-                                    <span className="text-[8px] md:text-[10px] font-bold text-white uppercase tracking-wider">
+                            <div className="absolute top-4 left-4 z-40">
+                                <div className="flex items-center gap-1.5 md:gap-3 bg-black/70 backdrop-blur-md px-3 py-2 rounded-full border border-white/10">
+                                    <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500 animate-pulse'}`} />
+                                    <span className="text-[10px] md:text-[11px] font-bold text-white uppercase tracking-wider">
                                         {isPaused ? 'Paused' : isTracking ? 'AI Tracking' : 'Scanning...'}
                                     </span>
                                     <span className="hidden md:inline text-[9px] text-zinc-400 ml-2">{fps} FPS</span>
                                 </div>
                             </div>
 
-                            <div className="hidden md:block absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
+                            <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
                                 <div className="bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl text-center border border-white/10 shadow-2xl">
                                     <p className="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em] mb-1">Live Preview</p>
                                     <p className="text-base font-bold text-white truncate">{productName}</p>
                                 </div>
                             </div>
 
-                            <div className="absolute bottom-3 md:bottom-6 left-3 md:left-6 z-40">
+                            <div className="absolute bottom-10 md:bottom-8 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 z-40">
                                 <Button
                                     onClick={() => setIsPaused(p => !p)}
-                                    className="bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full h-10 w-10 md:h-12 md:w-12 border border-white/10"
+                                    className="bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full h-14 w-14 md:h-12 md:w-12 border border-white/10 shadow-2xl"
                                 >
-                                    {isPaused ? <Play className="w-4 h-4 md:w-5 md:h-5" /> : <Pause className="w-4 h-4 md:w-5 md:h-5" />}
+                                    {isPaused ? <Play className="w-6 h-6 md:w-5 md:h-5" /> : <Pause className="w-6 h-6 md:w-5 md:h-5" />}
                                 </Button>
                             </div>
 
@@ -670,9 +674,9 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                         onClick={onClose}
                         size="icon"
                         variant="ghost"
-                        className="absolute top-2 md:top-4 right-2 md:right-4 z-40 bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full w-10 h-10 md:w-10 md:h-10 border border-white/10"
+                        className="absolute top-4 right-4 z-40 bg-black/70 text-white hover:bg-white/10 backdrop-blur-md rounded-full w-12 h-12 md:w-10 md:h-10 border border-white/10 shadow-xl"
                     >
-                        <X className="w-5 h-5 md:w-5 md:h-5" />
+                        <X className="w-6 h-6 md:w-5 md:h-5" />
                     </Button>
                 </div>
             </DialogContent>
