@@ -354,18 +354,18 @@ export function SizeFinder() {
     };
 
     return (
-        <Card className="p-8 bg-white border border-slate-200 relative overflow-hidden shadow-xl lg:shadow-2xl rounded-3xl">
+        <Card className="p-5 sm:p-8 bg-white border border-slate-200 relative overflow-hidden shadow-xl lg:shadow-2xl rounded-3xl">
             {/* Soft Ambient Background Glows */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[120px] -mr-48 -mt-48 pointer-events-none opacity-40" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -ml-32 -mb-32 pointer-events-none opacity-30" />
 
-            <div className="flex items-center gap-6 mb-10 relative z-10">
-                <div className="w-16 h-16 rounded-[22px] bg-primary/5 flex items-center justify-center border border-primary/10 shadow-sm group transition-all hover:bg-primary/10">
-                    <Scan className="w-8 h-8 text-primary" />
+            <div className="flex items-center gap-4 sm:gap-6 mb-8 sm:mb-10 relative z-10">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-[22px] bg-primary/5 flex items-center justify-center border border-primary/10 shadow-sm group transition-all hover:bg-primary/10">
+                    <Scan className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 <div>
-                    <h3 className="text-2xl font-black tracking-tight text-zinc-900 leading-none mb-2">Fit Profile™ Analysis</h3>
-                    <p className="text-[10px] text-primary uppercase tracking-[0.3em] font-black opacity-80">3D Mesh Reconstruction Engine</p>
+                    <h3 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-900 leading-none mb-2">Fit Profile™ Analysis</h3>
+                    <p className="text-[8px] sm:text-[10px] text-primary uppercase tracking-[0.2em] sm:tracking-[0.3em] font-black opacity-80">3D Mesh Reconstruction Engine</p>
                 </div>
             </div>
 
@@ -379,7 +379,7 @@ export function SizeFinder() {
                         className="space-y-10 relative z-10"
                     >
                         <div className="space-y-6">
-                            <p className="text-[17px] text-zinc-600 leading-relaxed font-medium">
+                            <p className="text-[15px] sm:text-[17px] text-zinc-600 leading-relaxed font-medium">
                                 Clinical-grade 3D mesh reconstruction with multi-frame fusion, perspective correction, and per-metric confidence scoring. Accurate to ±0.5mm.
                             </p>
                             <div className="grid grid-cols-2 gap-4">
@@ -446,38 +446,66 @@ export function SizeFinder() {
                             </div>
 
                             {/* Status Badge */}
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl px-6 py-2.5 rounded-full border border-slate-200 shadow-xl flex items-center gap-3 z-30">
-                                <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-amber-500 animate-pulse'}`} />
-                                <p className="text-[10px] font-black text-zinc-900 uppercase tracking-[0.15em]">
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl px-4 sm:px-6 py-2 sm:py-2.5 rounded-full border border-slate-200 shadow-xl flex items-center gap-2 sm:gap-3 z-30">
+                                <div className={`w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${isTracking ? 'bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-amber-500 animate-pulse'}`} />
+                                <p className="text-[9px] sm:text-[10px] font-black text-zinc-900 uppercase tracking-[0.12em] sm:tracking-[0.15em] whitespace-nowrap">
                                     {statusText}
                                 </p>
                             </div>
 
                             {/* Telemetry Overlay */}
                             {telemetry && (
-                                <div className="absolute top-3 left-3 z-30 bg-black/60 backdrop-blur-sm rounded-xl px-3 py-2 space-y-0.5">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${telemetry.calibrationMode === 'iris' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                                        <span className="text-[8px] text-white/80 font-bold uppercase tracking-wider">
-                                            {telemetry.calibrationMode === 'iris' ? 'Iris Lock' : 'IOD Fallback'}
+                                <div className="absolute top-3 left-3 z-30 bg-black/60 backdrop-blur-sm rounded-xl px-2 sm:px-3 py-1.5 sm:py-2 space-y-0.5 sm:space-y-1">
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${telemetry.calibrationMode === 'iris' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                                        <span className="text-[7px] sm:text-[8px] text-white/80 font-bold uppercase tracking-wider">
+                                            {telemetry.calibrationMode === 'iris' ? (
+                                                <span className="sm:inline hidden">Iris Lock</span>
+                                            ) : (
+                                                <span className="sm:inline hidden">IOD Fallback</span>
+                                            )}
+                                            {telemetry.calibrationMode === 'iris' ? (
+                                                <span className="sm:hidden inline">Iris</span>
+                                            ) : (
+                                                <span className="sm:hidden inline">IOD</span>
+                                            )}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${telemetry.expressionActive ? 'bg-amber-400' : 'bg-emerald-400'}`} />
-                                        <span className="text-[8px] text-white/80 font-bold uppercase tracking-wider">
-                                            {telemetry.expressionActive ? 'Expr. Compensating' : 'Neutral'}
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${telemetry.expressionActive ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                                        <span className="text-[7px] sm:text-[8px] text-white/80 font-bold uppercase tracking-wider">
+                                            {telemetry.expressionActive ? (
+                                                <span className="sm:inline hidden">Expr. Comp.</span>
+                                            ) : (
+                                                <span className="sm:inline hidden">Neutral</span>
+                                            )}
+                                            {telemetry.expressionActive ? (
+                                                <span className="sm:hidden inline">Expr</span>
+                                            ) : (
+                                                <span className="sm:hidden inline">OK</span>
+                                            )}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`w-1.5 h-1.5 rounded-full ${(telemetry.occlusionFlags.leftEye || telemetry.occlusionFlags.rightEye || telemetry.occlusionFlags.nose)
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${(telemetry.occlusionFlags.leftEye || telemetry.occlusionFlags.rightEye || telemetry.occlusionFlags.nose)
                                             ? 'bg-red-400' : 'bg-emerald-400'
                                             }`} />
-                                        <span className="text-[8px] text-white/80 font-bold uppercase tracking-wider">
+                                        <span className="text-[7px] sm:text-[8px] text-white/80 font-bold uppercase tracking-wider">
                                             {(telemetry.occlusionFlags.leftEye || telemetry.occlusionFlags.rightEye || telemetry.occlusionFlags.nose)
-                                                ? 'Occlusion Detected' : 'Clear Field'}
+                                                ? (
+                                                    <span className="sm:inline hidden">Occlusion</span>
+                                                ) : (
+                                                    <span className="sm:inline hidden">Clear Field</span>
+                                                )}
+                                            {(telemetry.occlusionFlags.leftEye || telemetry.occlusionFlags.rightEye || telemetry.occlusionFlags.nose)
+                                                ? (
+                                                    <span className="sm:hidden inline">OCCL</span>
+                                                ) : (
+                                                    <span className="sm:hidden inline">Clear</span>
+                                                )}
                                         </span>
                                     </div>
-                                    <span className="text-[7px] text-white/40 font-mono">{telemetry.frameProcessingMs.toFixed(1)}ms</span>
+                                    <span className="text-[6px] sm:text-[7px] text-white/40 font-mono block transition-opacity sm:opacity-100 opacity-60">{telemetry.frameProcessingMs.toFixed(0)}ms</span>
                                 </div>
                             )}
                         </div>
@@ -524,8 +552,8 @@ export function SizeFinder() {
                                     </div>
                                 </div>
 
-                                <p className="text-zinc-500 text-xs font-black uppercase tracking-widest mb-2">Optimal Fit Selection</p>
-                                <h4 className="text-6xl font-black text-zinc-900 tracking-tighter mb-6">{recommendation.size} Size</h4>
+                                <p className="text-zinc-500 text-[10px] sm:text-xs font-black uppercase tracking-widest mb-2">Optimal Fit Selection</p>
+                                <h4 className="text-4xl sm:text-6xl font-black text-zinc-900 tracking-tighter mb-6">{recommendation.size} Size</h4>
 
                                 <div className="flex items-center gap-4 mt-auto">
                                     <div className="flex gap-1.5">
@@ -541,23 +569,24 @@ export function SizeFinder() {
                         </div>
 
                         {/* Measurement Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                             {[
                                 { label: "PD", val: measurements.ipd, unit: "mm", conf: measurements.confidenceBreakdown.pd },
-                                { label: "Face Width", val: measurements.faceWidth, unit: "mm", conf: measurements.confidenceBreakdown.faceWidth },
+                                { label: "Width", val: measurements.faceWidth, unit: "mm", conf: measurements.confidenceBreakdown.faceWidth },
                                 { label: "Bridge", val: measurements.bridgeWidth, unit: "mm", conf: measurements.confidenceBreakdown.bridge },
                                 { label: "Temple", val: measurements.templeLength, unit: "mm", conf: measurements.confidenceBreakdown.temple }
                             ].map((m, i) => (
-                                <div key={i} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-center shadow-sm hover:bg-white hover:border-primary/20 hover:shadow-md transition-all duration-300 group">
-                                    <p className="text-[9px] text-zinc-400 uppercase font-black tracking-[0.15em] mb-2 group-hover:text-primary transition-colors">{m.label}</p>
-                                    <p className="text-2xl font-black text-zinc-900 leading-none mb-2">{Math.round(m.val)}<span className="text-[10px] text-zinc-400 font-black ml-1">mm</span></p>
-                                    <div className="h-1 bg-slate-200 rounded-full overflow-hidden mt-2">
-                                        <div
+                                <div key={i} className="bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-sm hover:bg-white hover:border-primary/20 hover:shadow-md transition-all duration-300 group">
+                                    <p className="text-[8px] sm:text-[9px] text-zinc-400 uppercase font-black tracking-[0.1em] sm:tracking-[0.15em] mb-1 sm:mb-2 group-hover:text-primary transition-colors">{m.label}</p>
+                                    <p className="text-xl sm:text-2xl font-black text-zinc-900 leading-none mb-1 sm:mb-2">{Math.round(m.val)}<span className="text-[9px] sm:text-[10px] text-zinc-400 font-black ml-0.5">mm</span></p>
+                                    <div className="h-1 bg-slate-200 rounded-full overflow-hidden mt-1 sm:mt-2">
+                                        <motion.div
                                             className={`h-full rounded-full ${m.conf >= 0.8 ? 'bg-emerald-500' : m.conf >= 0.6 ? 'bg-amber-500' : 'bg-red-400'}`}
-                                            style={{ width: `${m.conf * 100}%` }}
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${m.conf * 100}%` }}
                                         />
                                     </div>
-                                    <p className={`text-[8px] font-bold mt-1 ${m.conf >= 0.8 ? 'text-emerald-500' : m.conf >= 0.6 ? 'text-amber-500' : 'text-red-400'}`}>
+                                    <p className={`text-[7px] sm:text-[8px] font-bold mt-1 ${m.conf >= 0.8 ? 'text-emerald-500' : m.conf >= 0.6 ? 'text-amber-500' : 'text-red-400'}`}>
                                         {Math.round(m.conf * 100)}%
                                     </p>
                                 </div>
@@ -575,26 +604,26 @@ export function SizeFinder() {
                         </div>
 
                         {/* Spec Box */}
-                        <div className="bg-slate-50 rounded-[32px] p-8 border border-slate-100 relative overflow-hidden">
+                        <div className="bg-slate-50 rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 border border-slate-100 relative overflow-hidden">
                             <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-8">
-                                    <p className="text-[11px] font-black text-zinc-500 uppercase tracking-[0.3em]">Personalized Frame Architecture™</p>
-                                    <div className={`text-[10px] px-4 py-1.5 rounded-full font-black uppercase tracking-widest transition-all ${measurements.noseShape === 'High' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-primary/10 text-primary border border-primary/20'}`}>
+                                <div className="flex items-center justify-between mb-6 sm:mb-8">
+                                    <p className="text-[9px] sm:text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em] sm:tracking-[0.3em]">Personalized Frame Architecture™</p>
+                                    <div className={`text-[8px] sm:text-[10px] px-3 sm:px-4 py-1 sm:py-1.5 rounded-full font-black uppercase tracking-widest transition-all ${measurements.noseShape === 'High' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-primary/10 text-primary border border-primary/20'}`}>
                                         {measurements.noseShape} Profile
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-3 gap-0 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                                    <div className="text-center p-6 border-r border-slate-100">
-                                        <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest mb-2">Lens</p>
-                                        <p className="text-2xl font-black text-zinc-900 leading-none">{recommendation.lensWidth}<span className="text-[10px] ml-1">mm</span></p>
+                                <div className="grid grid-cols-3 gap-0 bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                                    <div className="text-center p-4 sm:p-6 border-r border-slate-100">
+                                        <p className="text-[8px] sm:text-[9px] text-zinc-400 uppercase font-black tracking-widest mb-1 sm:mb-2">Lens</p>
+                                        <p className="text-xl sm:text-2xl font-black text-zinc-900 leading-none">{recommendation.lensWidth}<span className="text-[9px] sm:text-[10px] ml-0.5">mm</span></p>
                                     </div>
-                                    <div className="text-center p-6 border-r border-slate-100">
-                                        <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest mb-2">Bridge</p>
-                                        <p className="text-2xl font-black text-zinc-900 leading-none">{recommendation.bridgeWidth}<span className="text-[10px] ml-1">mm</span></p>
+                                    <div className="text-center p-4 sm:p-6 border-r border-slate-100">
+                                        <p className="text-[8px] sm:text-[9px] text-zinc-400 uppercase font-black tracking-widest mb-1 sm:mb-2">Bridge</p>
+                                        <p className="text-xl sm:text-2xl font-black text-zinc-900 leading-none">{recommendation.bridgeWidth}<span className="text-[9px] sm:text-[10px] ml-0.5">mm</span></p>
                                     </div>
-                                    <div className="text-center p-6">
-                                        <p className="text-[9px] text-zinc-400 uppercase font-black tracking-widest mb-2">Temple</p>
-                                        <p className="text-2xl font-black text-zinc-900 leading-none">{recommendation.templeLength}<span className="text-[10px] ml-1">mm</span></p>
+                                    <div className="text-center p-4 sm:p-6">
+                                        <p className="text-[8px] sm:text-[9px] text-zinc-400 uppercase font-black tracking-widest mb-1 sm:mb-2">Temple</p>
+                                        <p className="text-xl sm:text-2xl font-black text-zinc-900 leading-none">{recommendation.templeLength}<span className="text-[9px] sm:text-[10px] ml-0.5">mm</span></p>
                                     </div>
                                 </div>
                             </div>
