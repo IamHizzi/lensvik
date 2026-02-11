@@ -39,11 +39,11 @@ export default function CategoryPage() {
         <main className="min-h-screen bg-background pt-32 pb-24">
             <Navbar />
             <div className="container mx-auto px-6">
-                <header className="mb-16">
+                <header className="mb-10 md:mb-16 text-center md:text-left">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-6xl font-black tracking-tighter mb-4"
+                        className="text-4xl md:text-8xl font-black tracking-tighter mb-2 md:mb-4 uppercase italic"
                     >
                         {categoryName}
                     </motion.h1>
@@ -51,14 +51,14 @@ export default function CategoryPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-lg text-muted-foreground"
+                        className="text-sm md:text-xl text-muted-foreground font-medium"
                     >
-                        Explore our premium collection of {categoryName.toLowerCase()}.
+                        Explore our premium collection of {categoryName.toLowerCase()} curated for visionaries.
                     </motion.p>
                 </header>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
                         {[1, 2, 3, 4].map(i => (
                             <div key={i} className="aspect-[4/5] bg-muted animate-pulse rounded-2xl" />
                         ))}
@@ -72,7 +72,7 @@ export default function CategoryPage() {
                             hidden: { opacity: 0 },
                             show: { opacity: 1, transition: { staggerChildren: 0.1 } }
                         }}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+                        className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8"
                     >
                         {products.map((product, index) => (
                             <ProductCard key={product._id} {...product} index={index} />

@@ -138,16 +138,16 @@ export default function ProductPage() {
                         className="flex flex-col"
                     >
                         <header className="mb-6 md:mb-8">
-                            <Badge variant="outline" className="mb-3 md:mb-4 text-primary border-primary/20 bg-primary/5 uppercase tracking-widest text-[9px] md:text-[10px] py-1 px-2 md:px-3 font-black">
+                            <Badge variant="outline" className="mb-3 md:mb-4 text-primary border-primary/20 bg-primary/5 uppercase tracking-widest text-[8px] md:text-[10px] py-1 px-2 md:px-3 font-black">
                                 {isPrescriptionProduct ? "Customizable Frame" : "Premium Collection"}
                             </Badge>
-                            <h1 className="text-3xl md:text-6xl font-black tracking-tighter mb-3 md:mb-4 italic">{product.name}</h1>
+                            <h1 className="text-2xl md:text-6xl font-black tracking-tighter mb-2 md:mb-4 italic line-clamp-2 md:line-clamp-none">{product.name}</h1>
                             <div className="flex items-center gap-3 md:gap-4">
                                 <div>
                                     {product.originalPrice && (
-                                        <p className="text-lg md:text-xl text-muted-foreground line-through">Rs {product.originalPrice.toLocaleString()}</p>
+                                        <p className="text-base md:text-xl text-muted-foreground line-through">Rs {product.originalPrice.toLocaleString()}</p>
                                     )}
-                                    <p className="text-3xl md:text-5xl font-black text-primary font-sans italic">Rs {product.price.toLocaleString()}</p>
+                                    <p className="text-2xl md:text-5xl font-black text-primary font-sans italic">Rs {product.price.toLocaleString()}</p>
                                 </div>
                                 <div className="h-10 md:h-12 w-[1px] bg-border mx-2 md:mx-4" />
                                 <div className="flex flex-col gap-1">
@@ -159,10 +159,10 @@ export default function ProductPage() {
                             </div>
                         </header>
 
-                        <div className="space-y-6 md:space-y-8 mb-10 md:mb-12">
+                        <div className="space-y-4 md:space-y-8 mb-8 md:mb-12">
                             <section>
-                                <h3 className="text-[10px] md:text-xs uppercase font-bold tracking-widest text-muted-foreground mb-2 md:mb-3">The Architectural Vision</h3>
-                                <p className="text-base md:text-lg leading-relaxed text-muted-foreground font-medium">
+                                <h3 className="text-[9px] md:text-xs uppercase font-bold tracking-widest text-muted-foreground mb-1 md:mb-3">The Architectural Vision</h3>
+                                <p className="text-sm md:text-lg leading-relaxed text-muted-foreground font-medium">
                                     {product.description || "Experimental architecture meets optical precision. Hand-assembled from surgical-grade titanium for a weightless experience."}
                                 </p>
                             </section>
@@ -197,27 +197,27 @@ export default function ProductPage() {
                                         onClick={handleAddToCart}
                                         size="lg"
                                         variant="outline"
-                                        className="h-14 md:h-16 rounded-2xl md:rounded-[2rem] font-black text-base md:text-lg border-2 hover:bg-primary/5 transition-all group italic"
+                                        className="h-14 md:h-16 rounded-2xl md:rounded-[2rem] font-black text-xs md:text-lg border-2 hover:bg-primary/5 transition-all group italic"
                                     >
-                                        <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 mr-2 group-hover:scale-110 transition-transform" />
+                                        <ShoppingCart className="w-4 h-4 md:w-6 md:h-6 mr-1 md:mr-2 group-hover:scale-110 transition-transform" />
                                         Add to Cart
                                     </Button>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-4 md:gap-6 py-6 md:py-8 border-y border-border/50 mb-10 md:mb-12">
+                        <div className="grid grid-cols-3 gap-2 md:gap-6 py-4 md:py-8 border-y border-border/50 mb-8 md:mb-12">
                             <div className="flex flex-col items-center text-center">
-                                <Truck className="w-5 h-5 md:w-6 md:h-6 text-primary mb-2" />
-                                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-tighter">Fast Delivery</span>
+                                <Truck className="w-4 h-4 md:w-6 md:h-6 text-primary mb-1 md:mb-2" />
+                                <span className="text-[7px] md:text-[10px] uppercase font-bold tracking-tighter">Fast Delivery</span>
                             </div>
                             <div className="flex flex-col items-center text-center">
-                                <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-primary mb-2" />
-                                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-tighter">2-Year Warranty</span>
+                                <ShieldCheck className="w-4 h-4 md:w-6 md:h-6 text-primary mb-1 md:mb-2" />
+                                <span className="text-[7px] md:text-[10px] uppercase font-bold tracking-tighter">2-Year Warranty</span>
                             </div>
                             <div className="flex flex-col items-center text-center">
-                                <Ruler className="w-5 h-5 md:w-6 md:h-6 text-primary mb-2" />
-                                <span className="text-[9px] md:text-[10px] uppercase font-bold tracking-tighter">Perfect Fit</span>
+                                <Ruler className="w-4 h-4 md:w-6 md:h-6 text-primary mb-1 md:mb-2" />
+                                <span className="text-[7px] md:text-[10px] uppercase font-bold tracking-tighter">Perfect Fit</span>
                             </div>
                         </div>
 

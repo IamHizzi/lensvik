@@ -97,42 +97,42 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { onClose(); reset(); } }}>
-            <DialogContent className="sm:max-w-[600px] md:max-w-[680px] p-0 gap-0 rounded-2xl border-slate-200/80 overflow-hidden">
+            <DialogContent className="w-[calc(100%-2rem)] sm:max-w-[600px] md:max-w-[680px] p-0 gap-0 rounded-2xl border-slate-200/80 overflow-hidden">
 
                 {/* ── Header ── */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 relative overflow-hidden shrink-0">
+                <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-slate-100">
+                    <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:xl bg-slate-100 border border-slate-200 relative overflow-hidden shrink-0">
                             <Image src={productImage} alt={productName} fill className="object-contain p-1" />
                         </div>
                         <div>
                             <DialogHeader className="p-0 space-y-0">
-                                <DialogTitle className="text-[15px] font-semibold text-slate-900 leading-tight">{productName}</DialogTitle>
+                                <DialogTitle className="text-[13px] md:text-[15px] font-semibold text-slate-900 leading-tight line-clamp-1">{productName}</DialogTitle>
                             </DialogHeader>
-                            <p className="text-[12px] text-slate-400 font-medium">Lens Configuration</p>
+                            <p className="text-[10px] md:text-[12px] text-slate-400 font-medium">Lens Configuration</p>
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-[11px] text-slate-400 font-medium">Est. Total</p>
-                        <p className="text-[15px] font-bold text-slate-900">Rs {totalPrice.toLocaleString()}</p>
+                        <p className="text-[10px] md:text-[11px] text-slate-400 font-medium">Est. Total</p>
+                        <p className="text-[13px] md:text-[15px] font-bold text-slate-900 leading-tight">Rs {totalPrice.toLocaleString()}</p>
                     </div>
                 </div>
 
                 {/* ── Stepper ── */}
-                <div className="flex items-center gap-0.5 px-6 py-3 bg-slate-50/80 border-b border-slate-100">
+                <div className="flex items-center gap-0.5 px-3 md:px-6 py-2 md:py-3 bg-slate-50/80 border-b border-slate-100 overflow-x-auto no-scrollbar">
                     {steps.map((s, i) => (
                         <React.Fragment key={s.id}>
                             <button
                                 onClick={() => step > s.id && setStep(s.id)}
-                                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${step === s.id ? 'bg-primary text-white shadow-sm' :
+                                className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-1 rounded-lg text-[10px] md:text-[11px] font-semibold transition-all shrink-0 ${step === s.id ? 'bg-primary text-white shadow-sm' :
                                     step > s.id ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 cursor-pointer' :
                                         'text-slate-400'
                                     }`}
                             >
-                                {step > s.id ? <Check className="w-3 h-3" /> : <span>{s.id}</span>}
-                                <span>{s.label}</span>
+                                {step > s.id ? <Check className="w-2.5 h-2.5" /> : <span>{s.id}</span>}
+                                <span className={step === s.id ? "block" : "hidden sm:block"}>{s.label}</span>
                             </button>
-                            {i < steps.length - 1 && <ChevronRight className="w-3 h-3 text-slate-300 mx-0.5 shrink-0" />}
+                            {i < steps.length - 1 && <ChevronRight className="w-2.5 h-2.5 text-slate-300 mx-0.5 shrink-0" />}
                         </React.Fragment>
                     ))}
                 </div>
@@ -147,20 +147,20 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                                 transition={{ duration: 0.2 }} className="flex-1 p-6 overflow-hidden"
                             >
                                 {/* Vision Usage */}
-                                <p className="text-[13px] font-semibold text-slate-800 mb-3">What do you need glasses for?</p>
-                                <div className="grid grid-cols-4 gap-2 mb-5">
+                                <p className="text-xs md:text-[13px] font-semibold text-slate-800 mb-2 md:mb-3">What do you need glasses for?</p>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 md:mb-5">
                                     {visionUsages.map(v => {
                                         const Icon = v.icon;
                                         const sel = visionUsage === v.id;
                                         return (
                                             <button key={v.id} onClick={() => setVisionUsage(v.id)}
-                                                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all text-center ${sel ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'
+                                                className={`flex items-center md:flex-col gap-3 md:gap-1.5 p-2.5 md:p-3 rounded-xl border transition-all text-left md:text-center ${sel ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'
                                                     }`}
                                             >
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${sel ? 'bg-primary text-white' : 'bg-slate-50 text-slate-400'}`}>
-                                                    <Icon className="w-4 h-4" />
+                                                <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center shrink-0 ${sel ? 'bg-primary text-white' : 'bg-slate-50 text-slate-400'}`}>
+                                                    <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                                 </div>
-                                                <span className={`text-[10px] font-semibold leading-tight ${sel ? 'text-primary' : 'text-slate-600'}`}>{v.label}</span>
+                                                <span className={`text-[10px] md:text-[10px] font-semibold leading-tight ${sel ? 'text-primary' : 'text-slate-600'}`}>{v.label}</span>
                                             </button>
                                         );
                                     })}
@@ -180,19 +180,19 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                     {/* Right Eye */}
                                     <div>
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <span className="w-4 h-4 rounded-full bg-blue-500 text-white text-[8px] font-bold flex items-center justify-center">R</span>
-                                            <span className="text-[11px] font-semibold text-slate-600">Right Eye (OD)</span>
+                                        <div className="flex items-center gap-1.5 mb-1.5 md:mb-2">
+                                            <span className="w-3.5 h-3.5 rounded-full bg-blue-500 text-white text-[8px] font-bold flex items-center justify-center">R</span>
+                                            <span className="text-[10px] md:text-[11px] font-semibold text-slate-600">Right Eye (OD)</span>
                                         </div>
-                                        <div className="grid grid-cols-3 gap-2">
+                                        <div className="grid grid-cols-3 gap-1.5 md:gap-2">
                                             {[{ l: "SPH", k: "od_sph" }, { l: "CYL", k: "od_cyl" }, { l: "AXIS", k: "od_axis" }].map(f => (
                                                 <div key={f.k}>
-                                                    <label className="text-[9px] font-semibold text-slate-400 uppercase block mb-1">{f.l}</label>
+                                                    <label className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase block mb-1">{f.l}</label>
                                                     <input type="text" placeholder="0.00"
-                                                        className="w-full h-9 rounded-lg bg-slate-50 border border-slate-200 px-2 text-[13px] font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                                        className="w-full h-8 md:h-9 rounded-lg bg-slate-50 border border-slate-200 px-1 md:px-2 text-xs md:text-[13px] font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                                         value={(measurements as any)[f.k]}
                                                         onChange={e => setMeasurements({ ...measurements, [f.k]: e.target.value })}
                                                     />
@@ -203,16 +203,16 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
 
                                     {/* Left Eye */}
                                     <div>
-                                        <div className="flex items-center gap-1.5 mb-2">
-                                            <span className="w-4 h-4 rounded-full bg-green-500 text-white text-[8px] font-bold flex items-center justify-center">L</span>
-                                            <span className="text-[11px] font-semibold text-slate-600">Left Eye (OS)</span>
+                                        <div className="flex items-center gap-1.5 mb-1.5 md:mb-2">
+                                            <span className="w-3.5 h-3.5 rounded-full bg-green-500 text-white text-[8px] font-bold flex items-center justify-center">L</span>
+                                            <span className="text-[10px] md:text-[11px] font-semibold text-slate-600">Left Eye (OS)</span>
                                         </div>
-                                        <div className="grid grid-cols-3 gap-2">
+                                        <div className="grid grid-cols-3 gap-1.5 md:gap-2">
                                             {[{ l: "SPH", k: "os_sph" }, { l: "CYL", k: "os_cyl" }, { l: "AXIS", k: "os_axis" }].map(f => (
                                                 <div key={f.k}>
-                                                    <label className="text-[9px] font-semibold text-slate-400 uppercase block mb-1">{f.l}</label>
+                                                    <label className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase block mb-1">{f.l}</label>
                                                     <input type="text" placeholder="0.00"
-                                                        className="w-full h-9 rounded-lg bg-slate-50 border border-slate-200 px-2 text-[13px] font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                                        className="w-full h-8 md:h-9 rounded-lg bg-slate-50 border border-slate-200 px-1 md:px-2 text-xs md:text-[13px] font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                                         value={(measurements as any)[f.k]}
                                                         onChange={e => setMeasurements({ ...measurements, [f.k]: e.target.value })}
                                                     />
@@ -223,10 +223,10 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                                 </div>
 
                                 {/* PD */}
-                                <div className="flex items-center gap-3 mt-3">
-                                    <label className="text-[11px] font-semibold text-slate-500">PD (mm)</label>
+                                <div className="flex items-center gap-3 mt-4 md:mt-3">
+                                    <label className="text-xs md:text-[11px] font-semibold text-slate-500">PD (mm)</label>
                                     <input type="text" placeholder="63"
-                                        className="w-20 h-9 rounded-lg bg-slate-50 border border-slate-200 px-2 text-[13px] font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                        className="w-16 md:w-20 h-8 md:h-9 rounded-lg bg-slate-50 border border-slate-200 px-2 text-xs md:text-[13px] font-medium text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                         value={measurements.pd}
                                         onChange={e => setMeasurements({ ...measurements, pd: e.target.value })}
                                     />
@@ -237,10 +237,10 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                         {/* ═══ Step 2: Lens Category ═══ */}
                         {step === 2 && (
                             <motion.div key="s2" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }}
-                                transition={{ duration: 0.2 }} className="flex-1 p-6 overflow-hidden"
+                                transition={{ duration: 0.2 }} className="flex-1 p-4 md:p-6 overflow-hidden scrollbar-hide"
                             >
-                                <p className="text-[13px] font-semibold text-slate-800 mb-1">Choose Lens Category</p>
-                                <p className="text-[11px] text-slate-400 mb-4">Based on your selection, we&apos;ve highlighted a recommendation.</p>
+                                <p className="text-xs md:text-[13px] font-semibold text-slate-800 mb-1">Choose Lens Category</p>
+                                <p className="text-[10px] md:text-[11px] text-slate-400 mb-3 md:mb-4">Based on your selection, we&apos;ve highlighted a recommendation.</p>
 
                                 <div className="space-y-3">
                                     {lensCategories.map(cat => {
@@ -248,11 +248,11 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                                         const rec = visionUsages.find(v => v.id === visionUsage)?.recommend === cat.id;
                                         return (
                                             <button key={cat.id} onClick={() => setLensCategory(cat.id)}
-                                                className={`w-full flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${sel ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'
+                                                className={`w-full flex items-start gap-3 md:gap-4 p-3 md:p-4 rounded-xl border-2 text-left transition-all ${sel ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'
                                                     }`}
                                             >
-                                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${sel ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
-                                                    {sel ? <Check className="w-4 h-4" /> : <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-300" />}
+                                                <div className={`w-8 h-8 md:w-9 md:h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${sel ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                                    {sel ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <div className="w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border-2 border-slate-300" />}
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-0.5">
@@ -275,10 +275,10 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                         {/* ═══ Step 3: Lens Type ═══ */}
                         {step === 3 && (
                             <motion.div key="s3" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }}
-                                transition={{ duration: 0.2 }} className="flex-1 p-6 overflow-hidden"
+                                transition={{ duration: 0.2 }} className="flex-1 p-4 md:p-6 overflow-hidden scrollbar-hide"
                             >
-                                <p className="text-[13px] font-semibold text-slate-800 mb-1">Choose Lens Coating</p>
-                                <p className="text-[11px] text-slate-400 mb-4">Select coating for your {lensCategories.find(c => c.id === lensCategory)?.name} lenses.</p>
+                                <p className="text-xs md:text-[13px] font-semibold text-slate-800 mb-1">Choose Lens Coating</p>
+                                <p className="text-[10px] md:text-[11px] text-slate-400 mb-3 md:mb-4">Select coating for your {lensCategories.find(c => c.id === lensCategory)?.name} lenses.</p>
 
                                 <div className="space-y-3">
                                     {lensTypes.map(type => {
@@ -288,15 +288,15 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                                                 className={`w-full flex items-start gap-4 p-4 rounded-xl border-2 text-left transition-all ${sel ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'
                                                     }`}
                                             >
-                                                <div className="w-10 h-10 rounded-lg shrink-0 flex items-center justify-center border border-slate-200" style={{ backgroundColor: type.color }}>
-                                                    {sel && <Check className="w-4 h-4 text-primary" />}
+                                                <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg shrink-0 flex items-center justify-center border border-slate-200" style={{ backgroundColor: type.color }}>
+                                                    {sel && <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />}
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex items-center justify-between mb-0.5">
-                                                        <span className={`text-[13px] font-semibold ${sel ? 'text-primary' : 'text-slate-800'}`}>{type.name}</span>
-                                                        <span className={`text-[13px] font-bold ${sel ? 'text-primary' : 'text-slate-700'}`}>+ Rs {type.price.toLocaleString()}</span>
+                                                        <span className={`text-xs md:text-[13px] font-semibold ${sel ? 'text-primary' : 'text-slate-800'}`}>{type.name}</span>
+                                                        <span className={`text-xs md:text-[13px] font-bold ${sel ? 'text-primary' : 'text-slate-700'}`}>+ Rs {type.price.toLocaleString()}</span>
                                                     </div>
-                                                    <p className="text-[11px] text-slate-500 mb-2">{type.desc}</p>
+                                                    <p className="text-[10px] md:text-[11px] text-slate-500 mb-2">{type.desc}</p>
                                                     <div className="flex flex-wrap gap-1">
                                                         {type.features.map(f => (
                                                             <span key={f} className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${sel ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500'}`}>{f}</span>
@@ -313,9 +313,9 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                         {/* ═══ Step 4: Review ═══ */}
                         {step === 4 && (
                             <motion.div key="s4" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }}
-                                transition={{ duration: 0.2 }} className="flex-1 p-6 overflow-hidden"
+                                transition={{ duration: 0.2 }} className="flex-1 p-4 md:p-6 overflow-hidden scrollbar-hide"
                             >
-                                <p className="text-[13px] font-semibold text-slate-800 mb-4">Review Your Configuration</p>
+                                <p className="text-xs md:text-[13px] font-semibold text-slate-800 mb-3 md:mb-4">Review Your Configuration</p>
 
                                 <div className="space-y-2.5">
                                     {/* Line items */}
@@ -376,24 +376,24 @@ export function PrescriptionConfigurator({ isOpen, onClose, productName, product
                 </div>
 
                 {/* ── Footer ── */}
-                <div className="flex items-center gap-3 px-6 py-4 border-t border-slate-100 bg-white">
+                <div className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-3 md:py-4 border-t border-slate-100 bg-white">
                     {step > 1 && (
-                        <Button variant="outline" onClick={handleBack} size="sm" className="h-10 px-4 rounded-lg text-[13px] font-semibold">
-                            <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back
+                        <Button variant="outline" onClick={handleBack} size="sm" className="h-9 md:h-10 px-3 md:px-4 rounded-lg text-xs md:text-[13px] font-semibold">
+                            <ArrowLeft className="w-3 md:w-3.5 h-3 md:h-3.5 mr-1 md:mr-1.5" /> Back
                         </Button>
                     )}
                     <div className="flex-1" />
                     {step < 4 ? (
                         <Button onClick={handleNext} disabled={!canProceed()} size="sm"
-                            className="h-10 px-6 rounded-lg text-[13px] font-semibold bg-primary hover:bg-primary/90 disabled:opacity-40"
+                            className="h-9 md:h-10 px-4 md:px-6 rounded-lg text-xs md:text-[13px] font-semibold bg-primary hover:bg-primary/90 disabled:opacity-40"
                         >
-                            Continue <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                            Continue <ArrowRight className="w-3 md:w-3.5 h-3 md:h-3.5 ml-1 md:ml-1.5" />
                         </Button>
                     ) : (
                         <Button onClick={handleConfirm} size="sm"
-                            className="h-10 px-6 rounded-lg text-[13px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+                            className="h-9 md:h-10 px-4 md:px-6 rounded-lg text-xs md:text-[13px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
                         >
-                            Proceed to Checkout <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                            Proceed <span className="hidden sm:inline ml-1">to Checkout</span> <ArrowRight className="w-3 md:w-3.5 h-3 md:h-3.5 ml-1 md:ml-1.5" />
                         </Button>
                     )}
                 </div>

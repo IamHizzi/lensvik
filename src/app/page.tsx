@@ -46,8 +46,8 @@ export default function Home() {
       <TrustBadges />
 
       {/* Mid-Page Banner (Call to Action) */}
-      <section className="container mx-auto px-6 py-12">
-        <div className="rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden shadow-2xl h-[400px] flex flex-col items-center justify-center">
+      <section className="container mx-auto px-4 md:px-6 py-8 md:py-12">
+        <div className="rounded-[2rem] md:rounded-[3rem] p-8 md:p-24 text-center relative overflow-hidden shadow-2xl h-[350px] md:h-[400px] flex flex-col items-center justify-center">
           <img
             src="/images/WhatsApp-Image-2026-01-24-at-2.52.35-PM.jpeg"
             alt="Fit Guarantee"
@@ -56,13 +56,13 @@ export default function Home() {
           <div className="absolute inset-0 bg-primary/60 mix-blend-multiply" />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
 
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8 text-white">Find Your Perfect Fit <br /> in Seconds.</h2>
-            <p className="text-lg text-white/80 mb-12 max-w-xl mx-auto font-medium">
+          <div className="relative z-10 px-4">
+            <h2 className="text-3xl md:text-6xl font-bold tracking-tighter mb-6 md:mb-8 text-white">Find Your Perfect Fit <br /> in Seconds.</h2>
+            <p className="text-sm md:text-lg text-white/80 mb-8 md:mb-12 max-w-xl mx-auto font-medium">
               Stop guessing your size. Use our AI-powered biometric scanner to find the frame that actually fits your face.
             </p>
             <Link href="/products/1">
-              <button className="h-16 px-12 rounded-full bg-white text-primary font-bold text-lg hover:scale-105 transition-transform shadow-xl">
+              <button className="h-14 md:h-16 px-8 md:px-12 rounded-full bg-white text-primary font-bold text-base md:text-lg hover:scale-105 transition-transform shadow-xl">
                 Launch Size Finder
               </button>
             </Link>
@@ -71,20 +71,20 @@ export default function Home() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="container mx-auto px-6 py-24 mb-12 border-t border-border">
-        <div className="glass rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden border border-primary/10">
+      <section className="container mx-auto px-4 md:px-6 py-16 md:py-24 mb-6 md:mb-12 border-t border-border">
+        <div className="glass rounded-[2rem] md:rounded-[3rem] p-8 md:p-24 text-center relative overflow-hidden border border-primary/10">
           <div className="absolute top-0 left-0 w-full h-full bg-primary/5 -z-10" />
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-6">Join the Lensvik Vision</h2>
-          <p className="text-lg text-muted-foreground mb-12 max-w-xl mx-auto">
+          <h2 className="text-3xl md:text-6xl font-bold tracking-tighter mb-4 md:mb-6">Join the Lensvik Vision</h2>
+          <p className="text-sm md:text-lg text-muted-foreground mb-8 md:mb-12 max-w-xl mx-auto">
             Get 10% off your first order and stay updated with our latest drops.
           </p>
-          <div className="flex flex-wrap justify-center gap-4 max-w-lg mx-auto">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-lg mx-auto">
             <input
               type="email"
               placeholder="Enter your email"
-              className="h-16 px-8 rounded-full bg-white border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 flex-1 min-w-[300px]"
+              className="h-14 md:h-16 px-6 md:px-8 rounded-full bg-white border border-border focus:outline-none focus:ring-2 focus:ring-primary/20 flex-1 w-full"
             />
-            <button className="h-16 px-12 rounded-full bg-primary text-white font-bold hover:opacity-90 transition-opacity shadow-lg">
+            <button className="h-14 md:h-16 px-8 md:px-12 rounded-full bg-primary text-white font-bold text-base md:text-lg hover:opacity-90 transition-opacity shadow-lg w-full sm:w-auto">
               Subscribe
             </button>
           </div>

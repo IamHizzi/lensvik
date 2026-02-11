@@ -29,9 +29,9 @@ export function Footer() {
     };
 
     return (
-        <footer className="bg-background border-t border-border pt-16 md:pt-24 pb-12">
+        <footer className="bg-background border-t border-border pt-12 md:pt-24 pb-8 md:pb-12">
             <div className="container mx-auto px-4 md:px-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12 mb-12 md:mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-16">
                     {/* Brand Info */}
                     <div className="flex flex-col gap-4 md:gap-6">
                         <Link href="/" className="text-2xl md:text-3xl font-bold text-primary tracking-tighter">

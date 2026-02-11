@@ -70,21 +70,21 @@ export default function CheckoutPage() {
         <main className="min-h-screen bg-background pt-32 pb-24">
             <Navbar />
             <div className="container mx-auto px-4 md:px-6">
-                <div className="flex flex-col mb-12">
-                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter italic">Checkout</h1>
-                    <div className="w-24 h-2 bg-primary mt-4 rounded-full" />
+                <div className="flex flex-col mb-8 md:mb-12">
+                    <h1 className="text-3xl md:text-7xl font-black tracking-tighter italic">Checkout</h1>
+                    <div className="w-16 md:w-24 h-1.5 md:h-2 bg-primary mt-2 md:mt-4 rounded-full" />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-start">
                     {/* LEFT: Shipping Details Form */}
-                    <div className="space-y-10">
-                        <section className="glass p-8 md:p-12 rounded-[3.5rem] border border-primary/10 relative overflow-hidden">
+                    <div className="space-y-6 md:space-y-10">
+                        <section className="glass p-6 md:p-12 rounded-3xl md:rounded-[3.5rem] border border-primary/10 relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-6 opacity-10">
                                 <Truck className="w-32 h-32 text-primary" />
                             </div>
 
-                            <h2 className="text-3xl font-black tracking-tight mb-8 flex items-center gap-3 italic">
-                                <MapPin className="text-primary w-8 h-8" />
+                            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-6 md:mb-8 flex items-center gap-3 italic">
+                                <MapPin className="text-primary w-6 h-6 md:w-8 md:h-8" />
                                 Shipping Details
                             </h2>
 
@@ -152,18 +152,18 @@ export default function CheckoutPage() {
 
                                 <div className="pt-6">
                                     <h3 className="text-xs uppercase font-bold tracking-[0.2em] text-muted-foreground mb-4">Payment Method</h3>
-                                    <div className="p-6 rounded-[2rem] border-2 border-primary bg-primary/5 flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white">
-                                                <Info className="w-5 h-5" />
+                                    <div className="p-4 md:p-6 rounded-2xl md:rounded-[2rem] border-2 border-primary bg-primary/5 flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-all">
+                                        <div className="flex items-center gap-3 md:gap-4">
+                                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
+                                                <Info className="w-4 h-4 md:w-5 md:h-5" />
                                             </div>
                                             <div>
-                                                <p className="font-black text-lg italic">Cash on Delivery (COD)</p>
-                                                <p className="text-xs text-muted-foreground font-medium">Pay when you receive your package</p>
+                                                <p className="font-black text-base md:text-lg italic">Cash on Delivery (COD)</p>
+                                                <p className="text-[10px] md:text-xs text-muted-foreground font-medium">Pay when you receive your package</p>
                                             </div>
                                         </div>
-                                        <div className="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center">
-                                            <div className="w-3 h-3 rounded-full bg-primary" />
+                                        <div className="w-5 h-5 md:w-6 md:h-6 rounded-full border-2 border-primary flex items-center justify-center shrink-0">
+                                            <div className="w-2.5 h-2.5 md:w-3 h-3 rounded-full bg-primary" />
                                         </div>
                                     </div>
                                 </div>
@@ -172,9 +172,9 @@ export default function CheckoutPage() {
                     </div>
 
                     {/* RIGHT: Order Summary */}
-                    <div className="space-y-8">
-                        <section className="bg-slate-50 p-8 md:p-12 rounded-[3.5rem] border border-border relative">
-                            <h2 className="text-3xl font-black tracking-tight mb-8 italic">Order Summary</h2>
+                    <div className="space-y-6 md:space-y-8">
+                        <section className="bg-slate-50 p-6 md:p-12 rounded-3xl md:rounded-[3.5rem] border border-border relative">
+                            <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-6 md:mb-8 italic">Order Summary</h2>
 
                             <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 mb-8 custom-scrollbar">
                                 <AnimatePresence>
@@ -240,10 +240,10 @@ export default function CheckoutPage() {
                                 </div>
                                 <div className="h-[2px] bg-primary/10 my-6" />
                                 <div className="flex justify-between items-end">
-                                    <span className="text-xl font-black italic tracking-tighter">Net Total</span>
+                                    <span className="text-lg md:text-xl font-black italic tracking-tighter">Net Total</span>
                                     <div className="text-right">
-                                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Pay on Delivery</p>
-                                        <p className="text-5xl font-black text-primary font-sans italic tracking-tighter">Rs {cartTotal.toLocaleString()}</p>
+                                        <p className="text-[9px] md:text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Pay on Delivery</p>
+                                        <p className="text-3xl md:text-5xl font-black text-primary font-sans italic tracking-tighter">Rs {cartTotal.toLocaleString()}</p>
                                     </div>
                                 </div>
                             </div>
@@ -252,11 +252,11 @@ export default function CheckoutPage() {
                                 type="submit"
                                 onClick={handleCheckout}
                                 disabled={isProcessing}
-                                className="w-full h-20 rounded-full font-black text-xl bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/20 mt-10 hover:scale-[1.02] transition-all italic active:scale-95 group relative overflow-hidden"
+                                className="w-full h-16 md:h-20 rounded-full font-black text-lg md:text-xl bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/20 mt-8 md:mt-10 hover:scale-[1.02] transition-all italic active:scale-95 group relative overflow-hidden"
                             >
                                 <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                                 {isProcessing ? "Processing..." : "Place Order (COD)"}
-                                <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                                <ArrowRight className="ml-2 md:ml-3 w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-2 transition-transform" />
                             </Button>
 
                             <div className="mt-8 flex items-center justify-center gap-6 p-4 bg-white/50 rounded-2xl border border-white/50">

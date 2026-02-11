@@ -39,10 +39,10 @@ const CATEGORIES = [
 
 export function CategoryGrid() {
     return (
-        <section className="py-24 container mx-auto px-6">
-            <div className="flex flex-col items-center mb-16 text-center">
-                <h2 className="text-[10px] uppercase font-bold tracking-[0.3em] text-primary mb-4">Explore our world</h2>
-                <h3 className="text-4xl md:text-5xl font-bold tracking-tighter">Shop by Category</h3>
+        <section className="py-16 md:py-24 container mx-auto px-4 md:px-6">
+            <div className="flex flex-col items-center mb-10 md:mb-16 text-center">
+                <h2 className="text-[10px] uppercase font-bold tracking-[0.3em] text-primary mb-3 md:mb-4">Explore our world</h2>
+                <h3 className="text-3xl md:text-5xl font-bold tracking-tighter">Shop by Category</h3>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
