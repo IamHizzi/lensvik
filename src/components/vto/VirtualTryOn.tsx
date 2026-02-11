@@ -12,77 +12,50 @@ interface VirtualTryOnProps {
     productImage?: string;
 }
 
-/**
- * Kalman Filter for smooth landmark tracking
- */
+// ── 1D Kalman Filter ──
 class KalmanFilter {
-    private x: number; // State
-    private p: number; // Error covariance
-    private q: number; // Process noise
-    private r: number; // Measurement noise
+    private x: number;
+    private p: number;
+    private q: number;
+    private r: number;
 
-    constructor(initialValue: number, processNoise = 0.001, measurementNoise = 0.1) {
-        this.x = initialValue;
+    constructor(init: number, processNoise = 0.002, measurementNoise = 0.08) {
+        this.x = init;
         this.p = 1;
         this.q = processNoise;
         this.r = measurementNoise;
     }
 
-    update(measurement: number): number {
-        // Prediction
-        this.p = this.p + this.q;
-
-        // Update
-        const k = this.p / (this.p + this.r); // Kalman gain
-        this.x = this.x + k * (measurement - this.x);
-        this.p = (1 - k) * this.p;
-
+    update(z: number): number {
+        this.p += this.q;
+        const k = this.p / (this.p + this.r);
+        this.x += k * (z - this.x);
+        this.p *= (1 - k);
         return this.x;
     }
 
-    reset(value: number) {
-        this.x = value;
-        this.p = 1;
-    }
+    reset(v: number) { this.x = v; this.p = 1; }
 }
 
-/**
- * Temporal smoothing buffer for stable rendering
- */
-class TemporalBuffer {
-    private buffer: number[] = [];
-    private maxSize: number;
-
-    constructor(size: number = 5) {
-        this.maxSize = size;
-    }
-
-    add(value: number): number {
-        this.buffer.push(value);
-        if (this.buffer.length > this.maxSize) {
-            this.buffer.shift();
-        }
-
-        // Weighted average favoring recent values
-        let sum = 0;
-        let weightSum = 0;
-        for (let i = 0; i < this.buffer.length; i++) {
-            const weight = i + 1; // Linear weighting
-            sum += this.buffer[i] * weight;
-            weightSum += weight;
-        }
-        return sum / weightSum;
-    }
-
-    clear() {
-        this.buffer = [];
-    }
+// ── Pose state for the glasses ──
+interface GlassesPose {
+    bridgeX: number;       // Nose bridge center X (pixels)
+    bridgeY: number;       // Nose bridge center Y (pixels)
+    rollAngle: number;     // Head roll in radians
+    faceWidth: number;     // Zygomatic width (pixels) - primary scale reference
+    yawDeg: number;        // For perspective skew
+    pitchDeg: number;      // For vertical offset compensation
+    leftIrisX: number;     // For precise PD alignment
+    leftIrisY: number;
+    rightIrisX: number;
+    rightIrisY: number;
+    timestamp: number;
 }
 
 export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', productImage }: VirtualTryOnProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const backBufferRef = useRef<HTMLCanvasElement | null>(null); // Double buffering
+    const backBufferRef = useRef<HTMLCanvasElement | null>(null);
     const glassesImageRef = useRef<HTMLImageElement | null>(null);
     const processedCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -97,60 +70,44 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
     const faceLandmarkerRef = useRef<any>(null);
     const animationRef = useRef<number>(0);
 
-    // Kalman filters for smooth tracking
+    // Kalman filters for each pose parameter
     const filtersRef = useRef<{
-        leftEyeX: KalmanFilter;
-        leftEyeY: KalmanFilter;
-        rightEyeX: KalmanFilter;
-        rightEyeY: KalmanFilter;
-        angle: KalmanFilter;
-        scale: KalmanFilter;
+        bridgeX: KalmanFilter;
+        bridgeY: KalmanFilter;
+        roll: KalmanFilter;
+        faceWidth: KalmanFilter;
+        yaw: KalmanFilter;
+        pitch: KalmanFilter;
+        lIrisX: KalmanFilter; lIrisY: KalmanFilter;
+        rIrisX: KalmanFilter; rIrisY: KalmanFilter;
     } | null>(null);
 
-    // Temporal buffers for additional smoothing
-    const buffersRef = useRef<{
-        centerX: TemporalBuffer;
-        centerY: TemporalBuffer;
-        width: TemporalBuffer;
-    } | null>(null);
-
-    // FPS tracking
     const fpsCounterRef = useRef({ frames: 0, lastTime: performance.now() });
-
-    // Last valid pose for interpolation during brief detection failures
-    const lastValidPoseRef = useRef<{
-        leftEye: { x: number; y: number };
-        rightEye: { x: number; y: number };
-        angle: number;
-        scale: number;
-        timestamp: number;
-    } | null>(null);
+    const lastPoseRef = useRef<GlassesPose | null>(null);
 
     useEffect(() => {
         if (!isOpen) return;
 
         let isMounted = true;
 
-        // Initialize filters and buffers
+        // Initialize Kalman filters
         filtersRef.current = {
-            leftEyeX: new KalmanFilter(0, 0.001, 0.05),
-            leftEyeY: new KalmanFilter(0, 0.001, 0.05),
-            rightEyeX: new KalmanFilter(0, 0.001, 0.05),
-            rightEyeY: new KalmanFilter(0, 0.001, 0.05),
-            angle: new KalmanFilter(0, 0.0005, 0.03),
-            scale: new KalmanFilter(1, 0.001, 0.05),
-        };
-
-        buffersRef.current = {
-            centerX: new TemporalBuffer(3),
-            centerY: new TemporalBuffer(3),
-            width: new TemporalBuffer(4),
+            bridgeX: new KalmanFilter(0, 0.003, 0.06),
+            bridgeY: new KalmanFilter(0, 0.003, 0.06),
+            roll: new KalmanFilter(0, 0.005, 0.02),
+            faceWidth: new KalmanFilter(0, 0.002, 0.08),
+            yaw: new KalmanFilter(0, 0.001, 0.05),
+            pitch: new KalmanFilter(0, 0.001, 0.05),
+            lIrisX: new KalmanFilter(0, 0.003, 0.06),
+            lIrisY: new KalmanFilter(0, 0.003, 0.06),
+            rIrisX: new KalmanFilter(0, 0.003, 0.06),
+            rIrisY: new KalmanFilter(0, 0.003, 0.06),
         };
 
         const init = async () => {
             try {
                 // Step 1: Load and process glasses image
-                setLoadingStatus('Loading glasses image...');
+                setLoadingStatus('Loading glasses...');
                 if (productImage) {
                     try {
                         const isExternal = productImage.startsWith('http');
@@ -167,7 +124,6 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                             img.onload = () => {
                                 glassesImageRef.current = img;
 
-                                // Advanced image processing
                                 const tempCanvas = document.createElement('canvas');
                                 tempCanvas.width = img.naturalWidth;
                                 tempCanvas.height = img.naturalHeight;
@@ -177,51 +133,40 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                                     tempCtx.drawImage(img, 0, 0);
                                     const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
                                     const data = imageData.data;
-                                    const width = tempCanvas.width;
-                                    const height = tempCanvas.height;
+                                    const w = tempCanvas.width;
+                                    const h = tempCanvas.height;
 
-                                    // Remove white background with edge preservation
-                                    const severWidth = Math.floor(width * 0.06);
-                                    for (let y = 0; y < height; y++) {
-                                        for (let x = 0; x < width; x++) {
-                                            const idx = (y * width + x) * 4;
+                                    // Remove white/light background
+                                    const severWidth = Math.floor(w * 0.06);
+                                    for (let y = 0; y < h; y++) {
+                                        for (let x = 0; x < w; x++) {
+                                            const idx = (y * w + x) * 4;
                                             const r = data[idx], g = data[idx + 1], b = data[idx + 2];
-
-                                            // Remove white/light colors
-                                            if (r > 190 && g > 190 && b > 190) {
-                                                data[idx + 3] = 0;
-                                            }
-
-                                            // Sever hinges
-                                            if (x < severWidth || x > (width - severWidth)) {
-                                                data[idx + 3] = 0;
-                                            }
+                                            if (r > 190 && g > 190 && b > 190) data[idx + 3] = 0;
+                                            if (x < severWidth || x > (w - severWidth)) data[idx + 3] = 0;
                                         }
                                     }
 
-                                    // Connected component analysis - keep largest component
-                                    const labels = new Int32Array(width * height).fill(-1);
+                                    // Connected component — keep largest
+                                    const labels = new Int32Array(w * h).fill(-1);
                                     let nextLabel = 0;
                                     const components: number[][] = [];
 
-                                    for (let y = 0; y < height; y++) {
-                                        for (let x = 0; x < width; x++) {
-                                            const idx = y * width + x;
+                                    for (let y = 0; y < h; y++) {
+                                        for (let x = 0; x < w; x++) {
+                                            const idx = y * w + x;
                                             if (data[idx * 4 + 3] > 0 && labels[idx] === -1) {
                                                 const currentLabel = nextLabel++;
                                                 const stack = [idx];
-                                                const component = [];
+                                                const component: number[] = [];
                                                 labels[idx] = currentLabel;
-
                                                 while (stack.length > 0) {
                                                     const p = stack.pop()!;
                                                     component.push(p);
-                                                    const px = p % width, py = Math.floor(p / width);
-                                                    const neighbors = [[px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]];
-
-                                                    for (const [nx, ny] of neighbors) {
-                                                        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                                                            const nIdx = ny * width + nx;
+                                                    const px = p % w, py = Math.floor(p / w);
+                                                    for (const [nx, ny] of [[px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]]) {
+                                                        if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                                                            const nIdx = ny * w + nx;
                                                             if (data[nIdx * 4 + 3] > 0 && labels[nIdx] === -1) {
                                                                 labels[nIdx] = currentLabel;
                                                                 stack.push(nIdx);
@@ -236,9 +181,9 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
                                     if (components.length > 0) {
                                         components.sort((a, b) => b.length - a.length);
-                                        const largestComponent = new Set(components[0]);
-                                        for (let i = 0; i < width * height; i++) {
-                                            if (!largestComponent.has(i)) data[i * 4 + 3] = 0;
+                                        const largest = new Set(components[0]);
+                                        for (let i = 0; i < w * h; i++) {
+                                            if (!largest.has(i)) data[i * 4 + 3] = 0;
                                         }
                                     }
 
@@ -255,22 +200,13 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     }
                 }
 
-                // Step 2: Get high-quality camera stream
-                setLoadingStatus('Requesting camera access...');
+                // Step 2: Camera
+                setLoadingStatus('Requesting camera...');
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        facingMode: 'user',
-                        frameRate: { ideal: 60, min: 30 } // Request 60fps
-                    }
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user', frameRate: { ideal: 60, min: 30 } }
                 });
 
-                if (!isMounted) {
-                    stream.getTracks().forEach(t => t.stop());
-                    return;
-                }
-
+                if (!isMounted) { stream.getTracks().forEach(t => t.stop()); return; }
                 streamRef.current = stream;
 
                 if (videoRef.current) {
@@ -285,7 +221,7 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     });
                 }
 
-                // Step 3: Initialize MediaPipe with optimized settings
+                // Step 3: MediaPipe
                 setLoadingStatus('Initializing AI tracking...');
                 const vision = await import('@mediapipe/tasks-vision');
                 const { FaceLandmarker, FilesetResolver } = vision;
@@ -300,15 +236,14 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
                             delegate: "GPU"
                         },
-                        outputFaceBlendshapes: false, // Disable for performance
+                        outputFaceBlendshapes: false,
                         runningMode: "VIDEO",
                         numFaces: 1,
                         minFaceDetectionConfidence: 0.5,
                         minFacePresenceConfidence: 0.5,
                         minTrackingConfidence: 0.5
                     });
-                } catch (gpuErr) {
-                    console.warn("GPU not supported, using CPU:", gpuErr);
+                } catch {
                     faceLandmarkerRef.current = await FaceLandmarker.createFromOptions(filesetResolver, {
                         baseOptions: {
                             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
@@ -320,17 +255,15 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     });
                 }
 
-                // Create back buffer for double buffering with DYNAMIC resolution
+                // Create back buffer
                 if (canvasRef.current && videoRef.current) {
-                    const videoWidth = videoRef.current.videoWidth || 1280;
-                    const videoHeight = videoRef.current.videoHeight || 720;
-
-                    canvasRef.current.width = videoWidth;
-                    canvasRef.current.height = videoHeight;
-
+                    const vw = videoRef.current.videoWidth || 1280;
+                    const vh = videoRef.current.videoHeight || 720;
+                    canvasRef.current.width = vw;
+                    canvasRef.current.height = vh;
                     backBufferRef.current = document.createElement('canvas');
-                    backBufferRef.current.width = videoWidth;
-                    backBufferRef.current.height = videoHeight;
+                    backBufferRef.current.width = vw;
+                    backBufferRef.current.height = vh;
                 }
 
                 if (isMounted) {
@@ -340,9 +273,7 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
             } catch (err: any) {
                 console.error('VTO init error:', err);
-                if (isMounted) {
-                    setError(err.message || 'Failed to initialize. Please check camera permissions.');
-                }
+                if (isMounted) setError(err.message || 'Failed to initialize.');
             }
         };
 
@@ -351,33 +282,22 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
             const video = videoRef.current;
             const canvas = canvasRef.current;
             const backBuffer = backBufferRef.current;
-
             if (!video || !canvas || !backBuffer || !faceLandmarker) return;
 
             const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-            const backCtx = backBuffer.getContext('2d', { alpha: false, willReadFrequently: false });
-
+            const backCtx = backBuffer.getContext('2d', { alpha: false });
             if (!ctx || !backCtx) return;
 
             let lastVideoTime = -1;
-            let lastRenderedPose: typeof lastValidPoseRef.current = null;
-            let detectionFailureCount = 0;
-            const MAX_FAILURE_FRAMES = 10; // Increased tolerance - use last pose for up to 10 frames
-
-            // Exponential moving average for ultra-smooth transitions
-            const EMA_ALPHA = 0.3; // Lower = smoother but more lag
-            let emaLeftEyeX = 0, emaLeftEyeY = 0;
-            let emaRightEyeX = 0, emaRightEyeY = 0;
-            let emaAngle = 0;
-            let emaScale = 0;
-            let emaInitialized = false;
+            let failCount = 0;
+            const MAX_FAIL = 15;
 
             const renderLoop = () => {
                 if (!isMounted) return;
 
                 const now = performance.now();
 
-                // FPS calculation
+                // FPS
                 fpsCounterRef.current.frames++;
                 if (now - fpsCounterRef.current.lastTime >= 1000) {
                     setFps(fpsCounterRef.current.frames);
@@ -390,15 +310,14 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     return;
                 }
 
-                // Draw video to back buffer (mirrored)
+                // Draw mirrored video
                 backCtx.save();
                 backCtx.scale(-1, 1);
                 backCtx.drawImage(video, -backBuffer.width, 0, backBuffer.width, backBuffer.height);
                 backCtx.restore();
 
-                let currentPose: typeof lastValidPoseRef.current = null;
+                let pose: GlassesPose | null = null;
 
-                // Process landmarks only when video time changes
                 if (video.currentTime !== lastVideoTime) {
                     lastVideoTime = video.currentTime;
 
@@ -407,162 +326,133 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
                         if (results.faceLandmarks && results.faceLandmarks.length > 0) {
                             setIsTracking(true);
-                            detectionFailureCount = 0;
+                            failCount = 0;
 
-                            const landmarks = results.faceLandmarks[0];
+                            const lm = results.faceLandmarks[0];
+                            const W = backBuffer.width;
+                            const H = backBuffer.height;
 
-                            // Enhanced eye landmark points for better accuracy
-                            const leftEyePoints = [33, 133, 160, 159, 158, 157, 173, 153, 144, 145, 153, 154, 155];
-                            const rightEyePoints = [362, 263, 387, 386, 385, 384, 398, 380, 373, 374, 381, 382, 383];
+                            // Mirror helper
+                            const px = (idx: number) => (1 - lm[idx].x) * W;
+                            const py = (idx: number) => lm[idx].y * H;
 
-                            const getPoint = (idx: number) => ({
-                                x: (1 - landmarks[idx].x) * backBuffer.width,
-                                y: landmarks[idx].y * backBuffer.height
-                            });
+                            // ── Iris landmarks ──
+                            const hasIris = lm.length >= 478;
+                            const lIrisRawX = hasIris ? px(468) : px(133);
+                            const lIrisRawY = hasIris ? py(468) : py(133);
+                            const rIrisRawX = hasIris ? px(473) : px(362);
+                            const rIrisRawY = hasIris ? py(473) : py(362);
 
-                            // Calculate raw eye positions
-                            const leftEyeRaw = {
-                                x: leftEyePoints.reduce((acc, idx) => acc + getPoint(idx).x, 0) / leftEyePoints.length,
-                                y: leftEyePoints.reduce((acc, idx) => acc + getPoint(idx).y, 0) / leftEyePoints.length
-                            };
+                            // Iris midpoint X = horizontal center between eyes
+                            const irisMidX = (lIrisRawX + rIrisRawX) / 2;
 
-                            const rightEyeRaw = {
-                                x: rightEyePoints.reduce((acc, idx) => acc + getPoint(idx).x, 0) / rightEyePoints.length,
-                                y: rightEyePoints.reduce((acc, idx) => acc + getPoint(idx).y, 0) / rightEyePoints.length
-                            };
+                            // Upper eyelid landmarks (159=left, 386=right)
+                            // This is where the top rim of glasses should align
+                            const upperLidY = (py(159) + py(386)) / 2;
+                            // Iris midpoint Y
+                            const irisMidY = (lIrisRawY + rIrisRawY) / 2;
 
-                            // Apply Kalman filtering for smooth tracking
-                            const filters = filtersRef.current!;
-                            const leftEyeFiltered = {
-                                x: filters.leftEyeX.update(leftEyeRaw.x),
-                                y: filters.leftEyeY.update(leftEyeRaw.y)
-                            };
+                            // ── Anchor ──
+                            // X: centered between irises
+                            // Y: midpoint between upper eyelid and iris center
+                            //    (frame top at eyelash, lenses centered on eyes)
+                            const anchorRawX = irisMidX;
+                            const anchorRawY = (upperLidY + irisMidY) / 2;
 
-                            const rightEyeFiltered = {
-                                x: filters.rightEyeX.update(rightEyeRaw.x),
-                                y: filters.rightEyeY.update(rightEyeRaw.y)
-                            };
-
-                            // Calculate angle with filtering
-                            const angleRaw = Math.atan2(
-                                rightEyeFiltered.y - leftEyeFiltered.y,
-                                rightEyeFiltered.x - leftEyeFiltered.x
-                            );
-                            const angleFiltered = filters.angle.update(angleRaw);
-
-                            // Calculate face width for scaling
+                            // ── Face width for scale (zygomatic arch: 234 ↔ 454) ──
                             const faceWidthRaw = Math.sqrt(
-                                Math.pow(getPoint(454).x - getPoint(234).x, 2) +
-                                Math.pow(getPoint(454).y - getPoint(234).y, 2)
+                                (px(454) - px(234)) ** 2 + (py(454) - py(234)) ** 2
                             );
 
-                            const buffers = buffersRef.current!;
-                            const faceWidthSmooth = buffers.width.add(faceWidthRaw);
+                            // ── Roll angle from eye outer corners ──
+                            const leftEyeOuter = { x: px(33), y: py(33) };
+                            const rightEyeOuter = { x: px(263), y: py(263) };
+                            const rollRaw = Math.atan2(
+                                rightEyeOuter.y - leftEyeOuter.y,
+                                rightEyeOuter.x - leftEyeOuter.x
+                            );
 
-                            // Apply exponential moving average for additional smoothing
-                            if (!emaInitialized) {
-                                emaLeftEyeX = leftEyeFiltered.x;
-                                emaLeftEyeY = leftEyeFiltered.y;
-                                emaRightEyeX = rightEyeFiltered.x;
-                                emaRightEyeY = rightEyeFiltered.y;
-                                emaAngle = angleFiltered;
-                                emaScale = faceWidthSmooth;
-                                emaInitialized = true;
-                            } else {
-                                emaLeftEyeX = EMA_ALPHA * leftEyeFiltered.x + (1 - EMA_ALPHA) * emaLeftEyeX;
-                                emaLeftEyeY = EMA_ALPHA * leftEyeFiltered.y + (1 - EMA_ALPHA) * emaLeftEyeY;
-                                emaRightEyeX = EMA_ALPHA * rightEyeFiltered.x + (1 - EMA_ALPHA) * emaRightEyeX;
-                                emaRightEyeY = EMA_ALPHA * rightEyeFiltered.y + (1 - EMA_ALPHA) * emaRightEyeY;
-                                emaAngle = EMA_ALPHA * angleFiltered + (1 - EMA_ALPHA) * emaAngle;
-                                emaScale = EMA_ALPHA * faceWidthSmooth + (1 - EMA_ALPHA) * emaScale;
-                            }
+                            // ── Yaw estimation ──
+                            const noseTip = { x: px(1), y: py(1) };
+                            const eyeCenter = { x: (px(33) + px(263)) / 2, y: (py(33) + py(263)) / 2 };
+                            const iod = Math.sqrt((px(33) - px(263)) ** 2 + (py(33) - py(263)) ** 2);
+                            const yawRaw = Math.atan2(noseTip.x - eyeCenter.x, iod * 0.35) * (180 / Math.PI);
 
-                            currentPose = {
-                                leftEye: { x: emaLeftEyeX, y: emaLeftEyeY },
-                                rightEye: { x: emaRightEyeX, y: emaRightEyeY },
-                                angle: emaAngle,
-                                scale: emaScale,
-                                timestamp: now
+                            // ── Pitch estimation ──
+                            const forehead = { x: px(10), y: py(10) };
+                            const chin = { x: px(152), y: py(152) };
+                            const faceH = Math.sqrt((forehead.x - chin.x) ** 2 + (forehead.y - chin.y) ** 2);
+                            const expectedNoseY = (forehead.y + chin.y) / 2.1;
+                            const pitchRaw = Math.atan2(noseTip.y - expectedNoseY, faceH * 0.35) * (180 / Math.PI);
+
+                            // ── Apply Kalman filtering ──
+                            const f = filtersRef.current!;
+                            pose = {
+                                bridgeX: f.bridgeX.update(anchorRawX),
+                                bridgeY: f.bridgeY.update(anchorRawY),
+                                rollAngle: f.roll.update(rollRaw),
+                                faceWidth: f.faceWidth.update(faceWidthRaw),
+                                yawDeg: f.yaw.update(yawRaw),
+                                pitchDeg: f.pitch.update(pitchRaw),
+                                leftIrisX: f.lIrisX.update(lIrisRawX),
+                                leftIrisY: f.lIrisY.update(lIrisRawY),
+                                rightIrisX: f.rIrisX.update(rIrisRawX),
+                                rightIrisY: f.rIrisY.update(rIrisRawY),
+                                timestamp: now,
                             };
 
-                            lastValidPoseRef.current = currentPose;
-
+                            lastPoseRef.current = pose;
                         } else {
-                            // No face detected - use last valid pose for extended period
-                            detectionFailureCount++;
-                            if (detectionFailureCount <= MAX_FAILURE_FRAMES && lastValidPoseRef.current) {
-                                currentPose = lastValidPoseRef.current;
-                                // Keep tracking status active during interpolation
-                            } else {
-                                setIsTracking(false);
-                                // Still use last pose even after max failures to prevent blinking
-                                if (lastValidPoseRef.current) {
-                                    currentPose = lastValidPoseRef.current;
-                                }
-                            }
+                            failCount++;
+                            if (failCount > MAX_FAIL) setIsTracking(false);
+                            pose = lastPoseRef.current;
                         }
-                    } catch (e) {
-                        console.error('Detection error:', e);
-                        detectionFailureCount++;
-                        // Use last valid pose even on errors
-                        if (lastValidPoseRef.current) {
-                            currentPose = lastValidPoseRef.current;
-                        }
+                    } catch {
+                        failCount++;
+                        pose = lastPoseRef.current;
                     }
                 } else {
-                    // Video time hasn't changed, use last rendered pose for continuity
-                    currentPose = lastRenderedPose || lastValidPoseRef.current;
+                    pose = lastPoseRef.current;
                 }
 
-                // ALWAYS render glasses if we have ANY pose (current or last)
-                // This ensures continuous rendering without gaps
-                const poseToRender = currentPose || lastRenderedPose || lastValidPoseRef.current;
-                if (poseToRender) {
+                // ── Render Glasses ──
+                if (pose) {
                     const drawSource = processedCanvasRef.current || glassesImageRef.current;
 
                     if (drawSource && (drawSource instanceof HTMLCanvasElement ||
                         (drawSource instanceof HTMLImageElement && drawSource.naturalWidth > 0))) {
 
-                        const centerX = (poseToRender.leftEye.x + poseToRender.rightEye.x) / 2;
-                        const centerY = (poseToRender.leftEye.y + poseToRender.rightEye.y) / 2;
+                        const srcW = drawSource instanceof HTMLCanvasElement ? drawSource.width : drawSource.naturalWidth;
+                        const srcH = drawSource instanceof HTMLCanvasElement ? drawSource.height : drawSource.naturalHeight;
+                        const aspectRatio = srcH / srcW;
 
-                        // Apply temporal smoothing to center position
-                        const buffers = buffersRef.current!;
-                        const smoothCenterX = buffers.centerX.add(centerX);
-                        const smoothCenterY = buffers.centerY.add(centerY);
+                        // Scale: glasses width ~105% of face width
+                        const glassesW = pose.faceWidth * 1.05;
+                        const glassesH = glassesW * aspectRatio;
 
-                        const glassesWidth = poseToRender.scale * 1.05;
-                        const aspectRatio = (drawSource instanceof HTMLCanvasElement ? drawSource.height : drawSource.naturalHeight) /
-                            (drawSource instanceof HTMLCanvasElement ? drawSource.width : drawSource.naturalWidth);
-                        const glassesHeight = glassesWidth * aspectRatio;
-
-                        // Draw shadow for realism
                         backCtx.save();
-                        backCtx.translate(smoothCenterX, smoothCenterY);
-                        backCtx.rotate(poseToRender.angle + Math.PI);
+                        backCtx.translate(pose.bridgeX, pose.bridgeY);
+                        backCtx.rotate(pose.rollAngle + Math.PI);
 
-                        // Soft shadow
-                        backCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                        // Shadow
+                        backCtx.shadowColor = 'rgba(0, 0, 0, 0.2)';
                         backCtx.shadowBlur = 8;
                         backCtx.shadowOffsetY = 3;
-
-                        const offsetY = -glassesHeight * 0.05;
+                        backCtx.shadowOffsetX = pose.yawDeg * 0.2;
 
                         backCtx.drawImage(
                             drawSource,
-                            -glassesWidth / 2,
-                            -glassesHeight / 2 + offsetY,
-                            glassesWidth,
-                            glassesHeight
+                            -glassesW / 2,
+                            -glassesH / 2,
+                            glassesW,
+                            glassesH
                         );
-                        backCtx.restore();
 
-                        // Store this pose as last rendered for next frame
-                        lastRenderedPose = poseToRender;
+                        backCtx.restore();
                     }
                 }
 
-                // Copy back buffer to front buffer (eliminates tearing/blinking)
+                // Blit back buffer to front
                 ctx.drawImage(backBuffer, 0, 0);
 
                 animationRef.current = requestAnimationFrame(renderLoop);
@@ -597,7 +487,7 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                     Virtually try on {productName} using your camera with state-of-the-art AI tracking.
                 </DialogDescription>
 
-                <div className="relative flex-1 w-full bg-black overflow-hidden aspect-video sm:aspect-none sm:min-h-[500px]">
+                <div className="relative flex-1 w-full bg-black overflow-hidden sm:min-h-[500px]">
                     {!isLoaded && !error && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-30">
                             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -616,16 +506,11 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                         </div>
                     )}
 
-                    <video
-                        ref={videoRef}
-                        className="hidden"
-                        playsInline
-                        muted
-                    />
+                    <video ref={videoRef} className="hidden" playsInline muted />
 
                     <canvas
                         ref={canvasRef}
-                        className="absolute inset-0 w-full h-full object-contain md:object-cover"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
 
                     {isLoaded && (
@@ -639,13 +524,6 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                                     <span className="hidden md:inline text-[9px] text-zinc-400 ml-2">{fps} FPS</span>
                                 </div>
                             </div>
-
-                            {/* <div className="hidden md:block absolute bottom-8 left-1/2 -translate-x-1/2 z-40 w-full max-w-xs px-4">
-                                <div className="bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl text-center border border-white/10 shadow-2xl">
-                                    <p className="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em] mb-1">Live Preview</p>
-                                    <p className="text-base font-bold text-white truncate">{productName}</p>
-                                </div>
-                            </div> */}
 
                             <div className="absolute bottom-10 md:bottom-8 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 z-40">
                                 <Button

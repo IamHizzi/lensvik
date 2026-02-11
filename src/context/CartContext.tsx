@@ -2,17 +2,29 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
+export interface PrescriptionData {
+    measurements: {
+        od_sph: string; od_cyl: string; od_axis: string;
+        os_sph: string; os_cyl: string; os_axis: string;
+        pd: string;
+    };
+    lensCategory: { name: string; price: number };
+    lensType: { name: string; price: number };
+}
+
 export interface CartItem {
-    id: string;
+    id: string; // Unique entry ID (could be productID_prescriptionHash)
+    productId: string;
     name: string;
     price: number;
     image: string;
     quantity: number;
+    prescription?: PrescriptionData;
 }
 
 interface CartContextType {
     cart: CartItem[];
-    addToCart: (item: Omit<CartItem, "quantity">) => void;
+    addToCart: (item: Omit<CartItem, "quantity" | "id">) => void;
     removeFromCart: (id: string) => void;
     updateQuantity: (id: string, quantity: number) => void;
     clearCart: () => void;
@@ -42,17 +54,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("lensvik-cart", JSON.stringify(cart));
     }, [cart]);
 
-    const addToCart = (product: Omit<CartItem, "quantity">) => {
+    const addToCart = (product: Omit<CartItem, "quantity" | "id">) => {
         setCart((prevCart) => {
-            const existingItem = prevCart.find((item) => item.id === product.id);
+            // Generate a unique ID based on product and prescription configuration
+            const prescriptionHash = product.prescription
+                ? btoa(JSON.stringify(product.prescription)).substring(0, 8)
+                : "none";
+            const itemId = `${product.productId}_${prescriptionHash}`;
+
+            const existingItem = prevCart.find((item) => item.id === itemId);
             if (existingItem) {
                 return prevCart.map((item) =>
-                    item.id === product.id
+                    item.id === itemId
                         ? { ...item, quantity: item.quantity + 1 }
                         : item
                 );
             }
-            return [...prevCart, { ...product, quantity: 1 }];
+            return [...prevCart, { ...product, id: itemId, quantity: 1 }];
         });
     };
 

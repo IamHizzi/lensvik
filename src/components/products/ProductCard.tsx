@@ -81,7 +81,7 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                addToCart({ id: _id, name, price, image });
+                                addToCart({ productId: _id, name, price, image });
                                 toast.success("Added to cart!");
                             }}
                             className="w-full bg-primary text-white font-bold rounded-lg h-9 md:h-10 shadow-lg shadow-primary/20 text-[10px] md:text-xs"

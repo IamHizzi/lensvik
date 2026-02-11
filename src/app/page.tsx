@@ -19,7 +19,6 @@ export default function Home() {
     <main className="min-h-screen bg-background selection:bg-primary selection:text-white">
       <Navbar />
       <Hero />
-      <TrustBadges />
       <CategoryGrid />
 
       <ProductStrip
@@ -28,6 +27,23 @@ export default function Home() {
         products={FEATURED_PRODUCTS}
         viewAllHref="/collections/featured"
       />
+
+      <ProductStrip
+        title="Trending Collections"
+        subtitle="Stay ahead of the curve with our latest designer-inspired frames."
+        products={TRENDING_PRODUCTS}
+        viewAllHref="/collections/trending"
+        lightBg
+      />
+
+      <ProductStrip
+        title="New Arrivals"
+        subtitle="Fresh from the workshop. Explore our newest materials and color palettes."
+        products={NEW_ARRIVALS}
+        viewAllHref="/collections/new-arrivals"
+      />
+
+      <TrustBadges />
 
       {/* Mid-Page Banner (Call to Action) */}
       <section className="container mx-auto px-6 py-12">
@@ -53,21 +69,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <ProductStrip
-        title="Trending Collections"
-        subtitle="Stay ahead of the curve with our latest designer-inspired frames."
-        products={TRENDING_PRODUCTS}
-        viewAllHref="/collections/trending"
-        lightBg
-      />
-
-      <ProductStrip
-        title="New Arrivals"
-        subtitle="Fresh from the workshop. Explore our newest materials and color palettes."
-        products={NEW_ARRIVALS}
-        viewAllHref="/collections/new-arrivals"
-      />
 
       {/* Newsletter Section */}
       <section className="container mx-auto px-6 py-24 mb-12 border-t border-border">
