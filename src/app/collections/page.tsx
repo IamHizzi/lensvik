@@ -26,14 +26,14 @@ export default function CollectionsPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-background pt-32 pb-24">
+        <main className="min-h-screen bg-background pt-20 md:pt-24 pb-16">
             <Navbar />
             <div className="container mx-auto px-6">
-                <header className="mb-10 md:mb-16 text-center">
+                <header className="mb-6 md:mb-10 text-center">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-8xl font-black tracking-tighter mb-2 md:mb-4 uppercase italic"
+                        className="text-2xl md:text-4xl font-black tracking-tighter mb-1 md:mb-2 uppercase italic"
                     >
                         Our Collections
                     </motion.h1>
@@ -41,7 +41,7 @@ export default function CollectionsPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-sm md:text-xl text-muted-foreground font-medium"
+                        className="text-xs md:text-sm text-muted-foreground font-medium"
                     >
                         Precision eyewear curated for your unique style.
                     </motion.p>
@@ -65,7 +65,7 @@ export default function CollectionsPage() {
                                 transition: { staggerChildren: 0.1 }
                             }
                         }}
-                        className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8"
+                        className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-5"
                     >
                         {products.map((product, index) => (
                             <ProductCard key={product._id} {...product} index={index} />

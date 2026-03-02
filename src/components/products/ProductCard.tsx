@@ -42,31 +42,31 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                     />
                 </Link>
 
-                <CardContent className="p-3 md:p-5 flex flex-col flex-1">
+                <CardContent className="p-3 md:p-4 flex flex-col flex-1">
                     <Link href={`/products/${_id}`}>
-                        <h3 className="text-[13px] md:text-[15px] font-bold leading-tight mb-2 group-hover:text-primary transition-colors line-clamp-2 min-h-[36px] md:min-h-[40px]">
+                        <h3 className="text-[12px] md:text-[14px] font-bold leading-tight mb-1.5 group-hover:text-primary transition-colors line-clamp-2 min-h-[32px] md:min-h-[36px]">
                             {name}
                         </h3>
                     </Link>
 
-                    <div className="flex gap-0.5 mb-2 md:mb-3">
+                    <div className="flex gap-0.5 mb-1.5 md:mb-2">
                         {[...Array(5)].map((_, i) => (
                             <Star
                                 key={i}
-                                className={`w-3.5 h-3.5 md:w-4 md:h-4 ${i < (rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                className={`w-3 h-3 md:w-3.5 md:h-3.5 ${i < (rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                             />
                         ))}
                     </div>
 
-                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                    <div className="flex items-center gap-2 mb-1.5 md:mb-2">
                         {originalPrice && (
                             <span className="text-xs md:text-sm text-muted-foreground line-through">Rs {originalPrice.toLocaleString()}</span>
                         )}
-                        <span className="text-base md:text-lg font-black text-[#e67e22]">Rs {price.toLocaleString()}</span>
+                        <span className="text-sm md:text-base font-black text-[#e67e22]">Rs {price.toLocaleString()}</span>
                     </div>
 
                     {size && (
-                        <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
+                        <p className="text-[10px] md:text-xs text-muted-foreground mb-2 md:mb-3">
                             Size: <span className="text-foreground font-medium">{size}</span>
                         </p>
                     )}

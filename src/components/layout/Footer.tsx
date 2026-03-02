@@ -29,15 +29,15 @@ export function Footer() {
     };
 
     return (
-        <footer className="bg-background border-t border-border pt-12 md:pt-24 pb-8 md:pb-12">
+        <footer className="bg-background border-t border-border pt-8 md:pt-14 pb-6 md:pb-8">
             <div className="container mx-auto px-4 md:px-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-10 md:mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-8 md:mb-10">
                     {/* Brand Info */}
-                    <div className="flex flex-col gap-4 md:gap-6">
-                        <Link href="/" className="text-2xl md:text-3xl font-bold text-primary tracking-tighter">
+                    <div className="flex flex-col gap-3 md:gap-4">
+                        <Link href="/" className="text-xl md:text-2xl font-bold text-primary tracking-tighter">
                             LENSVIK
                         </Link>
-                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                        <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
                             Redefining eyewear with AI-powered precision. Find your perfect fit effortlessly with our advanced virtual try-on technology.
                         </p>
                         <div className="flex items-center gap-4">
@@ -55,8 +55,8 @@ export function Footer() {
 
                     {/* Quick Links */}
                     <div>
-                        <h4 className="font-bold text-base md:text-lg mb-4 md:mb-6 uppercase tracking-widest text-primary">Shop</h4>
-                        <ul className="flex flex-col gap-3 md:gap-4">
+                        <h4 className="font-bold text-sm md:text-base mb-3 md:mb-4 uppercase tracking-widest text-primary">Shop</h4>
+                        <ul className="flex flex-col gap-2 md:gap-3">
                             {footerLinks.shop.map((link) => (
                                 <li key={link.name}>
                                     <Link href={link.href} className="text-sm md:text-base text-muted-foreground hover:text-primary transition-colors">
@@ -69,8 +69,8 @@ export function Footer() {
 
                     {/* Customer Service */}
                     <div>
-                        <h4 className="font-bold text-base md:text-lg mb-4 md:mb-6 uppercase tracking-widest text-primary">Customer Care</h4>
-                        <ul className="flex flex-col gap-3 md:gap-4">
+                        <h4 className="font-bold text-sm md:text-base mb-3 md:mb-4 uppercase tracking-widest text-primary">Customer Care</h4>
+                        <ul className="flex flex-col gap-2 md:gap-3">
                             {footerLinks.support.map((link) => (
                                 <li key={link.name}>
                                     <Link href={link.href} className="text-sm md:text-base text-muted-foreground hover:text-primary transition-colors">
@@ -82,9 +82,9 @@ export function Footer() {
                     </div>
 
                     {/* Newsletter & Contact */}
-                    <div className="flex flex-col gap-6 md:gap-8">
+                    <div className="flex flex-col gap-4 md:gap-6">
                         <div>
-                            <h4 className="font-bold text-base md:text-lg mb-4 md:mb-6 uppercase tracking-widest text-primary">Join the Vision</h4>
+                            <h4 className="font-bold text-sm md:text-base mb-3 md:mb-4 uppercase tracking-widest text-primary">Join the Vision</h4>
                             <p className="text-xs md:text-sm text-muted-foreground mb-4">Subscribe for exclusive updates and early access to new collections.</p>
                             <div className="flex gap-2">
                                 <input

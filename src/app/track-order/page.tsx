@@ -11,14 +11,14 @@ export default function TrackOrderPage() {
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <section className="pt-40 pb-20 container mx-auto px-6">
+            <section className="pt-24 pb-12 container mx-auto px-6">
                 <div className="max-w-2xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-center mb-12"
                     >
-                        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">Track Your Order</h1>
+                        <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-3">Track Your Order</h1>
                         <p className="text-lg text-muted-foreground">
                             Enter your order details below to see the current status of your shipment.
                         </p>
@@ -28,7 +28,7 @@ export default function TrackOrderPage() {
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border border-primary/5 glass relative overflow-hidden"
+                        className="bg-white p-8 md:p-12 rounded-2xl shadow-xl border border-primary/5 glass relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-[80px]" />
 
@@ -40,7 +40,7 @@ export default function TrackOrderPage() {
                                     <input
                                         type="text"
                                         placeholder="e.g. LV-12345678"
-                                        className="w-full h-16 pl-14 pr-6 rounded-2xl bg-primary/5 border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-mono"
+                                        className="w-full h-12 pl-14 pr-6 rounded-xl bg-primary/5 border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-mono text-sm"
                                     />
                                 </div>
                             </div>
@@ -52,12 +52,12 @@ export default function TrackOrderPage() {
                                     <input
                                         type="email"
                                         placeholder="your@email.com"
-                                        className="w-full h-16 pl-14 pr-6 rounded-2xl bg-primary/5 border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                        className="w-full h-12 pl-14 pr-6 rounded-xl bg-primary/5 border border-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
                                     />
                                 </div>
                             </div>
 
-                            <Button className="w-full h-16 rounded-2xl text-lg font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95">
+                            <Button className="w-full h-12 rounded-xl text-base font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95">
                                 Track My Shipment
                             </Button>
                         </div>

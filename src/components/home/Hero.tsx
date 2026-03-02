@@ -36,7 +36,7 @@ export function Hero() {
     }, []);
 
     return (
-        <section className="relative h-[300px] md:h-[500px] flex items-end overflow-hidden mt-[80px] md:mt-[136px] bg-[#f8f9fa]">
+        <section className="relative h-[240px] md:h-[400px] flex items-end overflow-hidden mt-[56px] md:mt-[76px] bg-[#f8f9fa]">
             {/* Slider Banners */}
             <div className="absolute inset-0 z-0">
                 <AnimatePresence mode="wait">

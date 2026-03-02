@@ -4,72 +4,120 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-const CATEGORIES = [
-    {
-        name: "Sunglasses",
-        image: "/images/front-banner-images-1.jpg",
-        href: "/category/sunglasses",
-        count: "120+ Styles"
-    },
-    {
-        name: "Prescription",
-        image: "/images/front-banner-images-2.jpg",
-        href: "/category/prescription",
-        count: "80+ Styles"
-    },
-    {
-        name: "Blue Light",
-        image: "/images/front-banner-images-3.jpg",
-        href: "/category/blue-light",
-        count: "45+ Styles"
-    },
-    {
-        name: "Kids",
-        image: "/images/front-banner-images-4.jpg",
-        href: "/category/kids",
-        count: "30+ Styles"
-    },
-    {
-        name: "Accessories",
-        image: "/images/front-banner-images-5.jpg",
-        href: "/category/accessories",
-        count: "15+ Items"
-    }
+// ── Category sections matching the mobile design ──
+const EYEGLASSES = [
+    { name: "Men", image: "/images/front-banner-images-1.jpg", href: "/category/eyeglasses?sub=men" },
+    { name: "Women", image: "/images/front-banner-images-2.jpg", href: "/category/eyeglasses?sub=women" },
+    { name: "Kids", image: "/images/front-banner-images-4.jpg", href: "/category/eyeglasses?sub=kids" },
+    { name: "On Sale", image: "/images/front-banner-images-3.jpg", href: "/category/eyeglasses?sub=sale" },
 ];
+
+const SUNGLASSES = [
+    { name: "Men", image: "/images/front-banner-images-1.jpg", href: "/category/sunglasses?sub=men" },
+    { name: "Women", image: "/images/front-banner-images-2.jpg", href: "/category/sunglasses?sub=women" },
+    { name: "Kids", image: "/images/front-banner-images-4.jpg", href: "/category/sunglasses?sub=kids" },
+    { name: "On Sale", image: "/images/front-banner-images-5.jpg", href: "/category/sunglasses?sub=sale" },
+];
+
+const NEXTGEN = [
+    { name: "Digital Glasses", image: "/images/changes/copilot_image_1764700749276.jpeg", href: "/category/nextgen?sub=digital" },
+    { name: "Transition Glasses", image: "/images/changes/copilot_image_1764438794480.jpeg", href: "/category/nextgen?sub=transition" },
+    { name: "Smart Glasses", image: "/images/changes/image_1764333424584.jpeg", href: "/category/nextgen?sub=smart" },
+    { name: "Sunshade", image: "/images/changes/copilot_image_1763813104749.jpeg", href: "/category/nextgen?sub=sunshade" },
+];
+
+const CONTACT_LENSES = [
+    { name: "Clear", image: "/images/front-banner-images-3.jpg", href: "/category/contact-lenses?sub=clear" },
+    { name: "Color", image: "/images/front-banner-images-5.jpg", href: "/category/contact-lenses?sub=color" },
+    { name: "Solution", image: "/images/front-banner-images-2.jpg", href: "/category/contact-lenses?sub=solution" },
+    { name: "Trial Pack", image: "/images/front-banner-images-1.jpg", href: "/category/contact-lenses?sub=trial" },
+];
+
+interface CategorySection {
+    title: string;
+    tag?: string;
+    items: { name: string; image: string; href: string }[];
+}
+
+const SECTIONS: CategorySection[] = [
+    { title: "Eyeglasses", tag: "with Power", items: EYEGLASSES },
+    { title: "Sunglasses", items: SUNGLASSES },
+    { title: "Lensvik NextGen Collection", items: NEXTGEN },
+    { title: "Contact Lenses & Accessories", items: CONTACT_LENSES },
+];
+
+function CategoryCard({ item, index }: { item: { name: string; image: string; href: string }; index: number }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            viewport={{ once: true }}
+            className="flex-shrink-0 w-[100px] md:w-auto"
+        >
+            <Link href={item.href} className="group block">
+                <div className="relative overflow-hidden rounded-2xl md:rounded-3xl aspect-[4/5] md:aspect-[4/5] bg-muted border border-white/30 shadow-sm hover:shadow-lg transition-shadow">
+                    <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100px, 200px"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                </div>
+                <p className="text-center text-xs md:text-sm font-bold mt-2 text-foreground/80 group-hover:text-primary transition-colors truncate">
+                    {item.name}
+                </p>
+            </Link>
+        </motion.div>
+    );
+}
+
+function SectionBlock({ section }: { section: CategorySection }) {
+    return (
+        <div className="mb-5 md:mb-10">
+            {/* Section Header */}
+            <div className="flex items-center gap-2 mb-3 md:mb-4">
+                <h3 className="text-base md:text-xl font-extrabold tracking-tight text-[#1a1550]">
+                    {section.title}
+                </h3>
+                {section.tag && (
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider bg-[#1a1550] text-white px-2.5 py-0.5 rounded-full">
+                        {section.tag}
+                    </span>
+                )}
+            </div>
+
+            {/* Mobile: horizontal scroll | Desktop: grid */}
+            <div className="flex md:hidden gap-3 overflow-x-auto pb-2 scroll-smooth scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+                {section.items.map((item, i) => (
+                    <CategoryCard key={item.name} item={item} index={i} />
+                ))}
+            </div>
+
+            <div className="hidden md:grid md:grid-cols-4 lg:grid-cols-4 gap-6">
+                {section.items.map((item, i) => (
+                    <CategoryCard key={item.name} item={item} index={i} />
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export function CategoryGrid() {
     return (
-        <section className="py-16 md:py-24 container mx-auto px-4 md:px-6">
-            <div className="flex flex-col items-center mb-10 md:mb-16 text-center">
-                <h2 className="text-[10px] uppercase font-bold tracking-[0.3em] text-primary mb-3 md:mb-4">Explore our world</h2>
-                <h3 className="text-3xl md:text-5xl font-bold tracking-tighter">Shop by Category</h3>
+        <section className="py-6 md:py-10 container mx-auto px-4 md:px-6">
+            {/* Desktop header */}
+            <div className="hidden md:flex flex-col items-center mb-8 text-center">
+                <h2 className="text-[10px] uppercase font-bold tracking-[0.3em] text-primary mb-3">Explore our world</h2>
+                <h3 className="text-2xl md:text-3xl font-bold tracking-tighter">Shop by Category</h3>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                {CATEGORIES.map((cat, index) => (
-                    <motion.div
-                        key={cat.name}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        viewport={{ once: true }}
-                    >
-                        <Link href={cat.href} className="group block relative overflow-hidden rounded-3xl aspect-[4/5] glass border border-white/40">
-                            <Image
-                                src={cat.image}
-                                alt={cat.name}
-                                fill
-                                className="object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[30%] group-hover:grayscale-0"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-                            <div className="absolute bottom-6 left-6 text-white text-left">
-                                <p className="text-[10px] uppercase font-bold tracking-widest opacity-80 mb-1">{cat.count}</p>
-                                <h4 className="text-xl font-bold tracking-tight">{cat.name}</h4>
-                            </div>
-                        </Link>
-                    </motion.div>
-                ))}
-            </div>
+            {/* Render all sections */}
+            {SECTIONS.map((section) => (
+                <SectionBlock key={section.title} section={section} />
+            ))}
         </section>
     );
 }

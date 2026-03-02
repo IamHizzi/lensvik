@@ -13,10 +13,10 @@ export function Navbar() {
     const menuItems = [
         { name: "Home", href: "/" },
         { name: "Shop", href: "/collections" },
+        { name: "Eyeglasses", href: "/category/eyeglasses" },
         { name: "Sunglasses", href: "/category/sunglasses" },
-        { name: "Prescription", href: "/category/prescription" },
-        { name: "Blue Light", href: "/category/blue-light" },
-        { name: "Kids", href: "/category/kids" },
+        { name: "NextGen", href: "/category/nextgen" },
+        { name: "Contact Lenses", href: "/category/contact-lenses" },
         { name: "Accessories", href: "/category/accessories" },
     ];
 
@@ -28,38 +28,54 @@ export function Navbar() {
 
     return (
         <header className="fixed top-0 w-full z-50">
-            {/* Top Bar - Mini Nav (Hidden on small screens) */}
-            <div className="bg-primary text-white py-2 px-6 hidden md:block text-[11px] font-bold uppercase tracking-widest text-center">
-                Free Shipping on All Orders Over Rs 15,000 | Use Code LENSVIK10 for 10% OFF
+            {/* Top Bar - Slimmed down */}
+            <div className="bg-primary text-white py-1 md:py-1.5 px-6 hidden md:block text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-center border-b border-white/5">
+                Free Shipping on All Orders Over Rs 15,000 | Code: <span className="text-white/100">LENSVIK10</span>
             </div>
 
-            {/* Main Navbar */}
-            <nav className="glass border-b border-white/20 px-4 md:px-6 py-3 md:py-4 flex flex-col gap-4">
-                <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-8">
-                        <Link href="/" className="text-xl md:text-2xl font-bold text-primary tracking-tighter">
+            {/* Main Navbar - Condensed Single Level */}
+            <nav className="glass border-b border-white/20 px-4 md:px-8 py-1.5 md:py-2">
+                <div className="flex items-center justify-between w-full max-w-screen-2xl mx-auto">
+                    {/* Brand & Desktop Logo */}
+                    <div className="flex items-center gap-12">
+                        <Link href="/" className="text-xl md:text-2xl font-black text-primary tracking-tighter italic uppercase">
                             LENSVIK
                         </Link>
 
-                        {/* Secondary Links (Hidden on small screens) */}
-                        <div className="hidden lg:flex items-center gap-4 text-[10px] uppercase font-bold tracking-wider text-muted-foreground/60 border-l border-border pl-4">
+                        {/* Integrated Navigation Menu (Desktop Only) */}
+                        <div className="hidden lg:flex items-center gap-6">
+                            {menuItems.map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className="text-[10px] xl:text-[11px] font-black uppercase tracking-widest hover:text-primary transition-all relative group italic"
+                                >
+                                    {item.name}
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Right-side Actions */}
+                    <div className="flex items-center gap-1 md:gap-3">
+                        {/* Secondary Links - Hidden on Mobile, Small on Desktop */}
+                        <div className="hidden xl:flex items-center gap-4 text-[9px] uppercase font-bold tracking-widest text-muted-foreground/50 mr-4">
                             {secondaryItems.map((item) => (
                                 <Link key={item.name} href={item.href} className="hover:text-primary transition-colors italic">
                                     {item.name}
                                 </Link>
                             ))}
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 md:gap-4">
-                        <Button variant="ghost" size="icon" className="w-9 h-9 md:w-10 md:h-10">
-                            <User className="w-5 h-5" />
+                        <Button variant="ghost" size="icon" className="w-9 h-9 md:w-10 md:h-10 text-slate-800">
+                            <User className="w-5 h-5 md:w-[22px] md:h-[22px]" />
                         </Button>
-                        <Link href="/checkout">
-                            <Button variant="ghost" size="icon" className="relative w-9 h-9 md:w-10 md:h-10">
-                                <ShoppingCart className="w-5 h-5" />
+                        <Link href="/cart">
+                            <Button variant="ghost" size="icon" className="relative w-9 h-9 md:w-10 md:h-10 text-slate-800">
+                                <ShoppingCart className="w-5 h-5 md:w-[22px] md:h-[22px]" />
                                 {cartCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-primary text-white text-[9px] md:text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                                    <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-[8px] md:text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black shadow-lg shadow-primary/20">
                                         {cartCount}
                                     </span>
                                 )}
@@ -68,38 +84,24 @@ export function Navbar() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="md:hidden w-9 h-9"
+                            className="lg:hidden w-9 h-9 text-slate-800"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                         >
-                            <Menu className="w-5 h-5" />
+                            <Menu className="w-6 h-6" />
                         </Button>
                     </div>
-                </div>
-
-                {/* Navigation Menu (Desktop) */}
-                <div className="hidden md:flex items-center justify-center gap-8 py-1 border-t border-white/10">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className="text-[12px] font-bold uppercase tracking-widest hover:text-primary transition-all relative group"
-                        >
-                            {item.name}
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
-                        </Link>
-                    ))}
                 </div>
             </nav>
 
             {/* Mobile Menu Overlay */}
-            <div className={`md:hidden fixed inset-0 z-50 bg-white/95 backdrop-blur-xl transition-all duration-300 ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
-                <div className="flex flex-col h-full p-6">
-                    <div className="flex items-center justify-between mb-8">
-                        <Link href="/" className="text-xl font-bold text-primary tracking-tighter" onClick={() => setIsMenuOpen(false)}>
+            <div className={`lg:hidden fixed inset-0 z-50 bg-white/98 backdrop-blur-2xl transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
+                <div className="flex flex-col h-full p-6 pb-12">
+                    <div className="flex items-center justify-between mb-12">
+                        <Link href="/" className="text-2xl font-black text-primary tracking-tighter italic uppercase" onClick={() => setIsMenuOpen(false)}>
                             LENSVIK
                         </Link>
-                        <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
-                            <X className="w-6 h-6" />
+                        <Button variant="ghost" size="icon" className="text-slate-900" onClick={() => setIsMenuOpen(false)}>
+                            <X className="w-8 h-8" />
                         </Button>
                     </div>
 
@@ -109,19 +111,20 @@ export function Navbar() {
                                 key={item.name}
                                 href={item.href}
                                 onClick={() => setIsMenuOpen(false)}
-                                className="text-lg font-black uppercase tracking-widest text-primary border-b border-primary/5 pb-4"
+                                className="text-xl font-black italic uppercase tracking-tighter text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between group"
                             >
                                 {item.name}
+                                <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                             </Link>
                         ))}
 
-                        <div className="mt-8 pt-8 border-t border-border space-y-4">
+                        <div className="mt-8 pt-8 grid grid-cols-1 gap-4">
                             {secondaryItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.href}
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="block text-sm font-bold uppercase tracking-widest text-muted-foreground italic"
+                                    className="text-xs font-black uppercase tracking-widest text-slate-400 italic"
                                 >
                                     {item.name}
                                 </Link>
@@ -129,11 +132,15 @@ export function Navbar() {
                         </div>
                     </div>
 
-                    <div className="mt-auto pt-8">
-                        <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Support</p>
-                            <p className="text-sm font-black text-primary">Need help? 24/7 Hotline</p>
-                            <p className="text-lg font-black text-primary/80">+92 300 0000000</p>
+                    <div className="mt-auto">
+                        <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Customer Support</p>
+                                <p className="text-xl font-black text-primary italic">+92 300 0000000</p>
+                            </div>
+                            <Button className="w-full bg-slate-900 text-white font-black italic uppercase tracking-widest h-12 rounded-xl">
+                                Live Chat Now
+                            </Button>
                         </div>
                     </div>
                 </div>

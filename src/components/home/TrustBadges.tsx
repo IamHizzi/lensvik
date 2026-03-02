@@ -28,9 +28,9 @@ export function TrustBadges() {
     ];
 
     return (
-        <section className="bg-primary/5 py-12 md:py-16 border-y border-primary/10">
+        <section className="bg-primary/5 py-8 md:py-10 border-y border-primary/10">
             <div className="container mx-auto px-4 md:px-6">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
                     {badges.map((badge, index) => (
                         <motion.div
                             key={badge.title}
@@ -38,10 +38,10 @@ export function TrustBadges() {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
                             viewport={{ once: true }}
-                            className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-3 md:gap-4 bg-white/50 p-4 md:p-6 rounded-2xl glass border border-white/40"
+                            className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-2 md:gap-3 bg-white/50 p-3 md:p-4 rounded-xl glass border border-white/40"
                         >
-                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                <badge.icon className="w-6 h-6" />
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                <badge.icon className="w-5 h-5" />
                             </div>
                             <div>
                                 <h4 className="font-bold text-sm uppercase tracking-wider">{badge.title}</h4>

@@ -33,16 +33,16 @@ export default function ReturnPolicyPage() {
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <section className="pt-40 pb-20 container mx-auto px-6">
+            <section className="pt-24 pb-12 container mx-auto px-6">
                 <div className="max-w-4xl mx-auto">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 text-center"
+                        className="text-3xl md:text-5xl font-bold tracking-tighter mb-4 text-center"
                     >
                         Return Policy
                     </motion.h1>
-                    <p className="text-xl text-muted-foreground text-center mb-16">
+                    <p className="text-lg text-muted-foreground text-center mb-12">
                         Our goal is to ensure you see the world clearly. If it doesn't fit, we'll make it right.
                     </p>
 
@@ -53,12 +53,12 @@ export default function ReturnPolicyPage() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: index * 0.1 }}
-                                className="p-10 rounded-[2.5rem] glass border border-primary/10 hover:border-primary/30 transition-all group"
+                                className="p-6 rounded-2xl glass border border-primary/10 hover:border-primary/30 transition-all group"
                             >
                                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-white transition-all shadow-inner">
                                     <policy.icon className="w-7 h-7" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4">{policy.title}</h3>
+                                <h3 className="text-xl font-bold mb-3">{policy.title}</h3>
                                 <p className="text-muted-foreground leading-relaxed">
                                     {policy.content}
                                 </p>
@@ -67,7 +67,7 @@ export default function ReturnPolicyPage() {
                     </div>
 
                     <div className="bg-primary/5 p-12 rounded-[3rem] border border-primary/20">
-                        <h2 className="text-3xl font-bold mb-8 tracking-tight">Important Conditions</h2>
+                        <h2 className="text-2xl font-bold mb-6 tracking-tight">Important Conditions</h2>
                         <ul className="space-y-6 text-muted-foreground">
                             <li className="flex items-start gap-4">
                                 <span className="w-2 h-2 rounded-full bg-primary mt-2.5 shrink-0" />

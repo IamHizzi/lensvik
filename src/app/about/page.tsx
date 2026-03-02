@@ -9,17 +9,17 @@ export default function AboutPage() {
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <section className="pt-40 pb-20 container mx-auto px-6">
+            <section className="pt-24 pb-12 container mx-auto px-6">
                 <div className="max-w-4xl mx-auto">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-5xl md:text-7xl font-bold tracking-tighter mb-12 text-center"
+                        className="text-3xl md:text-5xl font-bold tracking-tighter mb-8 text-center"
                     >
                         Our Story
                     </motion.h1>
 
-                    <div className="aspect-video rounded-[3rem] overflow-hidden mb-16 shadow-2xl relative">
+                    <div className="aspect-video rounded-2xl overflow-hidden mb-12 shadow-xl relative">
                         <img
                             src="/images/WhatsApp-Image-2025-11-22-at-3.17.43-PM-1.jpeg"
                             alt="Lensvik Team"
@@ -29,7 +29,7 @@ export default function AboutPage() {
                     </div>
 
                     <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed space-y-8">
-                        <p className="text-2xl text-foreground font-medium italic border-l-4 border-primary pl-6">
+                        <p className="text-xl text-foreground font-medium italic border-l-4 border-primary pl-4">
                             "Vision is not just seeing; it's experiencing the world with clarity and confidence."
                         </p>
                         <p>
@@ -41,11 +41,11 @@ export default function AboutPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-12">
                             <div className="bg-primary text-white p-12 rounded-[2rem] shadow-xl">
-                                <h3 className="text-3xl font-bold mb-4 text-white">Our Mission</h3>
+                                <h3 className="text-2xl font-bold mb-3 text-white">Our Mission</h3>
                                 <p className="opacity-90">To democratize premium eyewear by combining state-of-the-art AI technology with timeless design, ensuring every customer finds their perfect fit from the comfort of their home.</p>
                             </div>
                             <div className="bg-white border border-border p-12 rounded-[2rem] shadow-xl">
-                                <h3 className="text-3xl font-bold mb-4 text-primary">Our Values</h3>
+                                <h3 className="text-2xl font-bold mb-3 text-primary">Our Values</h3>
                                 <ul className="space-y-4 text-sm font-bold uppercase tracking-widest text-muted-foreground">
                                     <li className="flex items-center gap-3"><span className="w-2 h-2 bg-primary rounded-full" /> Precision Engineering</li>
                                     <li className="flex items-center gap-3"><span className="w-2 h-2 bg-primary rounded-full" /> Transparent Quality</li>
