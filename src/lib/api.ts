@@ -12,6 +12,7 @@ export interface Product {
     image: string;
     vtoImage?: string;
     category: string;
+    subcategory?: string;
     frameType: string;
     description?: string;
     measurements?: {

@@ -8,12 +8,30 @@ import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { ProductStrip } from "@/components/home/ProductStrip";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { SAMPLE_PRODUCTS } from "@/data/products";
+import { getProducts, Product } from "@/lib/api";
+import React, { useEffect, useState } from "react";
 
 export default function Home() {
-  const FEATURED_PRODUCTS = SAMPLE_PRODUCTS.slice(0, 4);
-  const TRENDING_PRODUCTS = [...SAMPLE_PRODUCTS].reverse().slice(0, 4);
-  const NEW_ARRIVALS = SAMPLE_PRODUCTS.slice(-4).reverse();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+        setProducts(data);
+      } catch (err) {
+        console.error("Failed to fetch products", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const FEATURED_PRODUCTS = products.slice(0, 4);
+  const TRENDING_PRODUCTS = [...products].reverse().slice(0, 4);
+  const NEW_ARRIVALS = products.slice(-4).reverse();
 
   return (
     <main className="min-h-screen bg-background selection:bg-primary selection:text-white">
@@ -26,6 +44,7 @@ export default function Home() {
         subtitle="Handpicked eyewear for the modern visionary. Discover our most loved styles."
         products={FEATURED_PRODUCTS}
         viewAllHref="/collections/featured"
+        loading={loading}
       />
 
       <ProductStrip
@@ -34,6 +53,7 @@ export default function Home() {
         products={TRENDING_PRODUCTS}
         viewAllHref="/collections/trending"
         lightBg
+        loading={loading}
       />
 
       <ProductStrip
@@ -41,6 +61,7 @@ export default function Home() {
         subtitle="Fresh from the workshop. Explore our newest materials and color palettes."
         products={NEW_ARRIVALS}
         viewAllHref="/collections/new-arrivals"
+        loading={loading}
       />
 
       <TrustBadges />

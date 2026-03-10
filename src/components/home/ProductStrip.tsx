@@ -5,15 +5,18 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface ProductStripProps {
     title: string;
     subtitle?: string;
     products: any[];
     viewAllHref: string;
     lightBg?: boolean;
+    loading?: boolean;
 }
 
-export function ProductStrip({ title, subtitle, products, viewAllHref, lightBg = false }: ProductStripProps) {
+export function ProductStrip({ title, subtitle, products, viewAllHref, lightBg = false, loading = false }: ProductStripProps) {
     return (
         <section className={`py-8 md:py-14 ${lightBg ? 'bg-primary/5' : 'bg-background'}`}>
             <div className="container mx-auto px-4 md:px-6">
@@ -27,25 +30,37 @@ export function ProductStrip({ title, subtitle, products, viewAllHref, lightBg =
                     </Link>
                 </div>
 
-                <motion.div
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true }}
-                    variants={{
-                        hidden: { opacity: 0 },
-                        show: {
-                            opacity: 1,
-                            transition: {
-                                staggerChildren: 0.1
+                {loading ? (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+                        {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="space-y-3">
+                                <Skeleton className="aspect-square rounded-2xl w-full" />
+                                <Skeleton className="h-4 w-2/3" />
+                                <Skeleton className="h-4 w-1/3" />
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <motion.div
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true }}
+                        variants={{
+                            hidden: { opacity: 0 },
+                            show: {
+                                opacity: 1,
+                                transition: {
+                                    staggerChildren: 0.1
+                                }
                             }
-                        }
-                    }}
-                    className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5"
-                >
-                    {products.map((product, index) => (
-                        <ProductCard key={product._id || product.id} {...product} index={index} />
-                    ))}
-                </motion.div>
+                        }}
+                        className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5"
+                    >
+                        {products.map((product, index) => (
+                            <ProductCard key={product._id || product.id} {...product} index={index} />
+                        ))}
+                    </motion.div>
+                )}
             </div>
         </section>
     );

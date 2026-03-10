@@ -10,6 +10,7 @@ dotenv.config({ path: path.join(__dirname, '../.env.local') });
 
 // Product Schema
 const ProductSchema = new mongoose.Schema({
+    _id: { type: String, required: true },
     name: { type: String, required: true },
     price: { type: Number, required: true },
     originalPrice: Number,
@@ -33,6 +34,7 @@ const Product = mongoose.model('Product', ProductSchema);
 // Products to seed
 const PRODUCTS = [
     {
+        _id: "1",
         name: "Modern Chic - 0693 - Gold Series",
         price: 3200,
         originalPrice: 4500,
@@ -47,6 +49,7 @@ const PRODUCTS = [
         measurements: { lensWidth: 54, bridgeWidth: 17, templeLength: 140 }
     },
     {
+        _id: "2",
         name: "Urban Style - 0727 - Midnight",
         price: 2800,
         originalPrice: 3800,
@@ -61,20 +64,22 @@ const PRODUCTS = [
         measurements: { lensWidth: 55, bridgeWidth: 18, templeLength: 145 }
     },
     {
+        _id: "3",
         name: "Artisan Craft - 0123 - Tortoise",
         price: 3500,
         originalPrice: 4900,
         size: "Medium",
         rating: 5,
-        image: "/images/L-432-433.png",
-        vtoImage: "/images/L-432-433.png",
+        image: "/images/changes/IMG-20251014-WA0058.jpg.jpeg",
+        vtoImage: "/images/changes/IMG-20251014-WA0058.jpg.jpeg",
         category: "Eyeglasses",
         subcategory: "Women",
-        frameType: "rect",
-        description: "Handcrafted tortoise shell pattern with premium blue light protection.",
-        measurements: { lensWidth: 53, bridgeWidth: 19, templeLength: 142 }
+        frameType: "round",
+        description: "Handcrafted tortoise shell round frame with premium blue light protection.",
+        measurements: { lensWidth: 48, bridgeWidth: 19, templeLength: 142 }
     },
     {
+        _id: "4",
         name: "Classic Vision - 0143 - Slate",
         price: 3100,
         originalPrice: 4200,
@@ -89,6 +94,7 @@ const PRODUCTS = [
         measurements: { lensWidth: 56, bridgeWidth: 18, templeLength: 148 }
     },
     {
+        _id: "5",
         name: "Aero Precision - 2196-L - Matte Black",
         price: 1699,
         originalPrice: 3000,
@@ -103,74 +109,79 @@ const PRODUCTS = [
         measurements: { lensWidth: 52, bridgeWidth: 18, templeLength: 145 }
     },
     {
-        name: "Marble Grey - MX-410 - Wayfarer",
+        _id: "6",
+        name: "Heritage Round - HR-410 - Tortoise",
         price: 2499,
         originalPrice: 3999,
-        size: "Medium",
-        rating: 5,
-        image: "/images/changes/copilot_image_1763813104749.jpeg",
-        vtoImage: "/images/changes/copilot_image_1763813104749.jpeg",
-        category: "Eyeglasses",
-        subcategory: "Men",
-        frameType: "rect",
-        description: "Grey marble textured wayfarer with a modern slim profile. Lightweight acetate for all-day comfort.",
-        measurements: { lensWidth: 54, bridgeWidth: 18, templeLength: 142 }
-    },
-    {
-        name: "Elite Square - ES-220 - Gold Accent",
-        price: 3799,
-        originalPrice: 5200,
         size: "Large",
         rating: 5,
-        image: "/images/changes/copilot_image_1764438794480.jpeg",
-        vtoImage: "/images/changes/copilot_image_1764438794480.jpeg",
+        image: "/images/changes/IMG_20260306_234015.jpg.jpeg",
+        vtoImage: "/images/changes/IMG_20260306_234015.jpg.jpeg",
+        category: "Eyeglasses",
+        subcategory: "Men",
+        frameType: "round",
+        description: "Premium wide tortoise shell round frame with polished metal bridge. Classic vintage aesthetic meets modern engineering.",
+        measurements: { lensWidth: 50, bridgeWidth: 20, templeLength: 145 }
+    },
+    {
+        _id: "7",
+        name: "Noir Cat-Eye - NC-220 - Gold Accent",
+        price: 3799,
+        originalPrice: 5200,
+        size: "Medium",
+        rating: 5,
+        image: "/images/changes/IMG_20260306_234309.jpg.jpeg",
+        vtoImage: "/images/changes/IMG_20260306_234309.jpg.jpeg",
         category: "Eyeglasses",
         subcategory: "Women",
-        frameType: "rect",
-        description: "Oversized square frame in glossy black with 18K gold-plated hinge accents.",
-        measurements: { lensWidth: 56, bridgeWidth: 17, templeLength: 145 }
+        frameType: "cat",
+        description: "Dramatic cat-eye silhouette in glossy black with 18K gold inner rim accents. Statement elegance for the modern woman.",
+        measurements: { lensWidth: 54, bridgeWidth: 17, templeLength: 140 }
     },
     {
-        name: "Junior Flex - JF-101 - Bumblebee",
-        price: 1299,
-        originalPrice: 1999,
-        size: "Small",
-        rating: 5,
-        image: "/images/changes/copilot_image_1764444276880.jpeg",
-        vtoImage: "/images/changes/copilot_image_1764444276880.jpeg",
-        category: "Eyeglasses",
-        subcategory: "Kids",
-        frameType: "rect",
-        description: "Durable black frame with vibrant yellow temple tips. Designed for active kids with flexible hinges.",
-        measurements: { lensWidth: 46, bridgeWidth: 15, templeLength: 125 }
-    },
-    {
+        _id: "8",
         name: "Stealth Slim - SS-330 - Navy",
         price: 2199,
         originalPrice: 3500,
         size: "Medium",
         rating: 5,
-        image: "/images/changes/copilot_image_1764700749276.jpeg",
-        vtoImage: "/images/changes/copilot_image_1764700749276.jpeg",
+        image: "/images/changes/IMG_20260306_234235.jpg.jpeg",
+        vtoImage: "/images/changes/IMG_20260306_234235.jpg.jpeg",
+        category: "Eyeglasses",
+        subcategory: "Men",
+        frameType: "rect",
+        description: "Ultra-slim matte navy rectangular frame with blue light block technology. Perfect for long screen hours.",
+        measurements: { lensWidth: 54, bridgeWidth: 17, templeLength: 142 }
+    },
+    {
+        _id: "9",
+        name: "Crystal Clear - CC-500 - Transparent",
+        price: 1899,
+        originalPrice: 2999,
+        size: "Medium",
+        rating: 5,
+        image: "/images/changes/IMG_20260306_234347.jpg.jpeg",
+        vtoImage: "/images/changes/IMG_20260306_234347.jpg.jpeg",
         category: "NextGen",
         subcategory: "Digital Glasses",
         frameType: "rect",
-        description: "Ultra-slim matte navy frame with blue light block technology. Perfect for long screen hours.",
-        measurements: { lensWidth: 52, bridgeWidth: 17, templeLength: 140 }
+        description: "Ultra-lightweight transparent acetate frame with anti-glare coating. Invisible look, maximum clarity for digital professionals.",
+        measurements: { lensWidth: 53, bridgeWidth: 18, templeLength: 140 }
     },
     {
-        name: "Grand Vista - GV-500 - Copper Edition",
-        price: 4299,
-        originalPrice: 5999,
+        _id: "10",
+        name: "Arctic Frost - AF-600 - Ice Edition",
+        price: 2299,
+        originalPrice: 3499,
         size: "Large",
         rating: 5,
-        image: "/images/changes/image_1764333424584.jpeg",
-        vtoImage: "/images/changes/image_1764333424584.jpeg",
+        image: "/images/changes/IMG_20260306_234430.jpg.jpeg",
+        vtoImage: "/images/changes/IMG_20260306_234430.jpg.jpeg",
         category: "NextGen",
         subcategory: "Smart Glasses",
         frameType: "rect",
-        description: "Premium oversized frame with copper accent studs. Transition lenses included for indoor-outdoor versatility.",
-        measurements: { lensWidth: 58, bridgeWidth: 19, templeLength: 148 }
+        description: "Premium frosted crystal frame with wide lens design. Photochromic-ready for seamless indoor-outdoor transitions.",
+        measurements: { lensWidth: 56, bridgeWidth: 19, templeLength: 145 }
     }
 ];
 

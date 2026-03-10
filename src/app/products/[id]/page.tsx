@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { VirtualTryOn } from "@/components/vto/VirtualTryOn";
 import { SizeFinder } from "@/components/size-finder/SizeFinder";
@@ -20,6 +20,7 @@ import { PrescriptionConfigurator } from "@/components/products/PrescriptionConf
 export default function ProductPage() {
     const { id } = useParams();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [isVTOModalOpen, setIsVTOModalOpen] = useState(false);
@@ -38,6 +39,12 @@ export default function ProductPage() {
         };
         fetchProduct();
     }, [id]);
+
+    useEffect(() => {
+        if (searchParams.get('tryon') === 'true') {
+            setIsVTOModalOpen(true);
+        }
+    }, [searchParams]);
 
     const handleAddToCart = () => {
         if (product) {
@@ -216,7 +223,6 @@ export default function ProductPage() {
                             </div>
                         </div>
 
-                        <SizeFinder />
                     </motion.div>
                 </div>
             </div>

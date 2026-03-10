@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/products/ProductCard";
@@ -10,6 +10,9 @@ import { getProducts, Product } from "@/lib/api";
 
 export default function CategoryPage() {
     const { slug } = useParams();
+    const searchParams = useSearchParams();
+    const subRoute = searchParams.get('sub');
+
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -18,9 +21,19 @@ export default function CategoryPage() {
             try {
                 const allProducts = await getProducts();
                 // Filter by category slug (case-insensitive)
-                const filtered = allProducts.filter(p =>
+                let filtered = allProducts.filter(p =>
                     p.category.toLowerCase().replace(/\s+/g, '-') === slug
                 );
+
+                // Further filter by subcategory if exists
+                if (subRoute && subRoute !== 'sale') {
+                    filtered = filtered.filter(p =>
+                        p.subcategory && p.subcategory.toLowerCase() === subRoute.toLowerCase()
+                    );
+                } else if (subRoute === 'sale') {
+                    filtered = filtered.filter(p => (p.originalPrice || 0) > p.price);
+                }
+
                 setProducts(filtered);
             } catch (err) {
                 console.error("Failed to fetch products", err);
@@ -29,11 +42,14 @@ export default function CategoryPage() {
             }
         };
         fetchProducts();
-    }, [slug]);
+    }, [slug, subRoute]);
 
     const categoryName = slug ? (slug as string).split('-').map(word =>
         word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' ') : "";
+
+    const subName = subRoute ? subRoute.charAt(0).toUpperCase() + subRoute.slice(1) : "";
+    const displayName = subRoute ? `${categoryName} - ${subName}` : categoryName;
 
     return (
         <main className="min-h-screen bg-background pt-20 md:pt-24 pb-16">
@@ -45,7 +61,7 @@ export default function CategoryPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-2xl md:text-4xl font-black tracking-tighter mb-1 md:mb-2 uppercase italic"
                     >
-                        {categoryName}
+                        {displayName}
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -53,7 +69,7 @@ export default function CategoryPage() {
                         transition={{ delay: 0.1 }}
                         className="text-xs md:text-sm text-muted-foreground font-medium"
                     >
-                        Explore our premium collection of {categoryName.toLowerCase()} curated for visionaries.
+                        Explore our premium collection of {displayName.toLowerCase()} curated for visionaries.
                     </motion.p>
                 </header>
 
