@@ -6,31 +6,31 @@ import Image from "next/image";
 
 // ── Category sections matching the mobile design ──
 const EYEGLASSES = [
-    { name: "Men", image: "/images/front-banner-images-1.jpg", href: "/category/eyeglasses?sub=men" },
-    { name: "Women", image: "/images/front-banner-images-2.jpg", href: "/category/eyeglasses?sub=women" },
-    { name: "Kids", image: "/images/front-banner-images-4.jpg", href: "/category/eyeglasses?sub=kids" },
-    { name: "On Sale", image: "/images/front-banner-images-3.jpg", href: "/category/eyeglasses?sub=sale" },
+    { name: "Men", image: "/images/men.png", href: "/category/eyeglasses?sub=men" },
+    { name: "Women", image: "/images/women eye.png", href: "/category/eyeglasses?sub=women" },
+    { name: "Kids", image: "/images/kid eye.png", href: "/category/eyeglasses?sub=kids" },
+    { name: "On Sale", image: "/images/on sale eye.png", href: "/category/eyeglasses?sub=sale" },
 ];
 
 const SUNGLASSES = [
-    { name: "Men", image: "/images/front-banner-images-1.jpg", href: "/category/sunglasses?sub=men" },
-    { name: "Women", image: "/images/front-banner-images-2.jpg", href: "/category/sunglasses?sub=women" },
-    { name: "Kids", image: "/images/front-banner-images-4.jpg", href: "/category/sunglasses?sub=kids" },
-    { name: "On Sale", image: "/images/front-banner-images-5.jpg", href: "/category/sunglasses?sub=sale" },
+    { name: "Men", image: "/images/men sun.png", href: "/category/sunglasses?sub=men" },
+    { name: "Women", image: "/images/women sun.png", href: "/category/sunglasses?sub=women" },
+    { name: "Kids", image: "/images/kids sun.png", href: "/category/sunglasses?sub=kids" },
+    { name: "On Sale", image: "/images/on sale sunglasses.png", href: "/category/sunglasses?sub=sale" },
 ];
 
 const NEXTGEN = [
-    { name: "Digital Glasses", image: "/images/changes/copilot_image_1764700749276.jpeg", href: "/category/nextgen?sub=digital" },
-    { name: "Transition Glasses", image: "/images/changes/copilot_image_1764438794480.jpeg", href: "/category/nextgen?sub=transition" },
-    { name: "Smart Glasses", image: "/images/changes/image_1764333424584.jpeg", href: "/category/nextgen?sub=smart" },
-    { name: "Sunshade", image: "/images/changes/copilot_image_1763813104749.jpeg", href: "/category/nextgen?sub=sunshade" },
+    { name: "Digital Glasses", image: "/images/digital glasses.png", href: "/category/nextgen?sub=digital" },
+    { name: "Transition Glasses", image: "/images/transition glasses.png", href: "/category/nextgen?sub=transition" },
+    { name: "Smart Glasses", image: "/images/smart glasses.jpeg", href: "/category/nextgen?sub=smart" },
+    { name: "Sunshade", image: "/images/sunshade.webp", href: "/category/nextgen?sub=sunshade" },
 ];
 
 const CONTACT_LENSES = [
-    { name: "Clear", image: "/images/front-banner-images-3.jpg", href: "/category/contact-lenses?sub=clear" },
-    { name: "Color", image: "/images/front-banner-images-5.jpg", href: "/category/contact-lenses?sub=color" },
+    { name: "Clear", image: "/images/clear.png", href: "/category/contact-lenses?sub=clear" },
+    { name: "Color", image: "/images/color.png", href: "/category/contact-lenses?sub=color" },
     { name: "Solution", image: "/images/front-banner-images-2.jpg", href: "/category/contact-lenses?sub=solution" },
-    { name: "Trial Pack", image: "/images/front-banner-images-1.jpg", href: "/category/contact-lenses?sub=trial" },
+    { name: "Trial Pack", image: "/images/front-banner-images-3.jpg", href: "/category/contact-lenses?sub=trial pack" },
 ];
 
 interface CategorySection {
@@ -53,7 +53,7 @@ function CategoryCard({ item, index }: { item: { name: string; image: string; hr
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
             viewport={{ once: true }}
-            className="flex-shrink-0 w-[100px] md:w-auto"
+            className="flex-shrink-0 w-full md:w-auto"
         >
             <Link href={item.href} className="group block">
                 <div className="relative overflow-hidden rounded-2xl md:rounded-3xl aspect-[4/5] md:aspect-[4/5] bg-muted border border-white/30 shadow-sm hover:shadow-lg transition-shadow">
@@ -62,7 +62,7 @@ function CategoryCard({ item, index }: { item: { name: string; image: string; hr
                         alt={item.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        sizes="(max-width: 768px) 100px, 200px"
+                        sizes="(max-width: 768px) 100px, 25vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
                 </div>
@@ -89,8 +89,8 @@ function SectionBlock({ section }: { section: CategorySection }) {
                 )}
             </div>
 
-            {/* Mobile: horizontal scroll | Desktop: grid */}
-            <div className="flex md:hidden gap-3 overflow-x-auto pb-2 scroll-smooth scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Mobile: 4-column grid | Desktop: grid */}
+            <div className="grid md:hidden grid-cols-4 gap-2 md:gap-3 mb-2">
                 {section.items.map((item, i) => (
                     <CategoryCard key={item.name} item={item} index={i} />
                 ))}
@@ -107,7 +107,7 @@ function SectionBlock({ section }: { section: CategorySection }) {
 
 export function CategoryGrid() {
     return (
-        <section className="py-6 md:py-10 container mx-auto px-4 md:px-6">
+        <section className="py-6 md:py-10 w-full max-w-screen-2xl mx-auto px-4 md:px-6">
             {/* Desktop header */}
             <div className="hidden md:flex flex-col items-center mb-8 text-center">
                 <h2 className="text-[10px] uppercase font-bold tracking-[0.3em] text-primary mb-3">Explore our world</h2>

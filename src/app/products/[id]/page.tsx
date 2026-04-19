@@ -3,19 +3,30 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
-import { VirtualTryOn } from "@/components/vto/VirtualTryOn";
-import { SizeFinder } from "@/components/size-finder/SizeFinder";
+import dynamic from "next/dynamic";
 import { getProductById, Product } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Heart, Share2, Ruler, ShieldCheck, Truck, ArrowRight } from "lucide-react";
+import { ShoppingCart, Heart, Share2, Ruler, ShieldCheck, Truck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import Image from "next/image";
+import { LensConfigurator } from "@/components/products/LensConfigurator";
+import { VariationSelector } from "@/components/products/VariationSelector";
+import { ProductSpecs } from "@/components/products/ProductSpecs";
+import { RelatedProducts } from "@/components/products/RelatedProducts";
 
-import { PrescriptionConfigurator } from "@/components/products/PrescriptionConfigurator";
+// Dynamic imports for heavy VTO/Size components
+const VirtualTryOn = dynamic(() => import("@/components/vto/VirtualTryOn").then(mod => mod.VirtualTryOn), {
+    ssr: false,
+    loading: () => <Skeleton className="w-full h-full rounded-3xl" />
+});
+
+const SizeFinder = dynamic(() => import("@/components/size-finder/SizeFinder").then(mod => mod.SizeFinder), {
+    ssr: false
+});
 
 export default function ProductPage() {
     const { id } = useParams();
@@ -24,6 +35,7 @@ export default function ProductPage() {
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [isVTOModalOpen, setIsVTOModalOpen] = useState(false);
+    const [isLensModalOpen, setIsLensModalOpen] = useState(false);
     const { addToCart } = useCart();
 
     useEffect(() => {
@@ -88,10 +100,9 @@ export default function ProductPage() {
         <main className="min-h-screen bg-background pb-16">
             <Navbar />
 
-            <div className="container mx-auto px-4 md:px-6 pt-20 md:pt-24">
+            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pt-28 md:pt-36">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
                     {/* Left: Gallery Section */}
-                    {/* ... (keep existing gallery motion.div) ... */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -103,6 +114,8 @@ export default function ProductPage() {
                                 alt={product.name}
                                 fill
                                 className="object-contain p-4 md:p-8 group-hover:scale-110 transition-transform duration-700"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                priority
                             />
                             <div className="absolute top-6 right-6 flex flex-col gap-3">
                                 <Button size="icon" variant="secondary" className="rounded-full shadow-lg">
@@ -114,10 +127,16 @@ export default function ProductPage() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-4 md:grid-cols-4 gap-3 md:gap-4">
                             {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="aspect-square rounded-2xl glass border border-white/10 overflow-hidden opacity-60 hover:opacity-100 cursor-pointer transition-opacity relative">
-                                    <Image src={product.image} alt={product.name} fill className="object-contain p-2" />
+                                <div key={i} className="aspect-square rounded-xl md:rounded-2xl glass border border-white/10 overflow-hidden opacity-60 hover:opacity-100 cursor-pointer transition-opacity relative">
+                                    <Image
+                                        src={product.image}
+                                        alt={product.name}
+                                        fill
+                                        className="object-contain p-2 md:p-3"
+                                        sizes="(max-width: 768px) 25vw, 100px"
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -137,61 +156,78 @@ export default function ProductPage() {
                             <div className="flex items-center gap-2 md:gap-3">
                                 <div>
                                     {product.originalPrice && (
-                                        <p className="text-base md:text-xl text-muted-foreground line-through">Rs {product.originalPrice.toLocaleString()}</p>
+                                        <p className="text-small text-muted-foreground line-through decoration-primary/20">Rs {product.originalPrice.toLocaleString()}</p>
                                     )}
-                                    <p className="text-xl md:text-2xl font-black text-primary font-sans italic">Rs {product.price.toLocaleString()}</p>
+                                    <p className="price-tag text-primary">Rs {product.price.toLocaleString()}</p>
                                 </div>
                                 <div className="h-10 md:h-12 w-[1px] bg-border mx-2 md:mx-4" />
-                                <div className="flex flex-col gap-1">
-                                    <div className="flex items-center gap-1 text-yellow-500">
-                                        {"★★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}
-                                    </div>
-                                    <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">(48 Reviews)</span>
+                                <div className="flex flex-wrap gap-2">
+                                    <Badge className="bg-primary/5 text-primary border-primary/20 label-tag px-3 py-1 animate-pulse">
+                                        High-Index Available
+                                    </Badge>
+                                    <Badge className="bg-slate-50 text-slate-400 border-slate-200 label-tag px-3 py-1">
+                                        RX Ready
+                                    </Badge>
                                 </div>
                             </div>
                         </header>
 
                         <div className="space-y-3 md:space-y-5 mb-5 md:mb-8">
                             <section>
-                                <h3 className="text-[9px] md:text-xs uppercase font-bold tracking-widest text-muted-foreground mb-1 md:mb-3italic">The Architectural Vision</h3>
-                                <p className="text-sm md:text-lg leading-relaxed text-muted-foreground font-medium">
+                                <p className="text-sm md:text-lg leading-relaxed text-muted-foreground font-medium italic mb-6">
                                     {product.description || "Experimental architecture meets optical precision. Hand-assembled from surgical-grade titanium for a weightless experience."}
                                 </p>
+
+                                {/* Technical Features Checklist */}
+                                <div className="grid grid-cols-2 gap-y-3 mb-8 bg-slate-50/50 p-6 rounded-3xl border border-dashed border-slate-200">
+                                    {[
+                                        "Anti-Reflective Coating",
+                                        "Ultra-Light Frame (18g)",
+                                        "Impact Resistant",
+                                        "100% UV400 Filter"
+                                    ].map(feature => (
+                                        <div key={feature} className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-tighter italic text-slate-600">
+                                            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                                                <CheckCircle className="w-3 h-3 text-primary" />
+                                            </div>
+                                            {feature}
+                                        </div>
+                                    ))}
+                                </div>
                             </section>
 
-                            <div className="flex flex-col gap-4">
+                            <VariationSelector />
+
+                            <div className="space-y-3 pt-6">
+                                {isPrescriptionProduct && (
+                                    <Button
+                                        onClick={() => setIsLensModalOpen(true)}
+                                        size="lg"
+                                        className="w-full h-16 rounded-2xl font-black bg-primary text-white hover:bg-primary/90 transition-all flex flex-col items-center justify-center gap-0 border-none shadow-xl shadow-primary/10 italic animate-pulse-subtle"
+                                    >
+                                        <span className="text-sm md:text-xl uppercase tracking-tighter">Select Lenses</span>
+                                    </Button>
+                                )}
+
                                 <Button
                                     onClick={handleAddToCart}
                                     size="lg"
-                                    className="h-auto py-3 md:py-4 rounded-xl font-black bg-[#b22234] text-white hover:bg-[#901c2a] transition-all flex flex-col items-center justify-center gap-0 border-none shadow-lg italic"
+                                    className="w-full h-16 rounded-2xl btn-text bg-slate-100 hover:bg-slate-200 text-slate-900 transition-all flex flex-col items-center justify-center gap-0 border border-slate-200 shadow-sm"
                                 >
-                                    <span className="text-sm md:text-lg uppercase tracking-tighter">Buy Now</span>
-                                    <span className="text-[9px] md:text-[11px] opacity-80 font-medium normal-case">frame with box & cloth</span>
+                                    <span className="text-sm md:text-lg uppercase tracking-tighter font-bold">Add to Cart</span>
                                 </Button>
 
-                                <Button
-                                    onClick={() => router.push(`/products/${product._id}/prescription`)}
-                                    size="lg"
-                                    variant="outline"
-                                    className="h-auto py-3 md:py-4 rounded-xl font-black border-2 border-[#b22234] text-[#b22234] hover:bg-[#b22234]/5 transition-all flex flex-col items-center justify-center gap-0 italic"
-                                >
-                                    <span className="text-sm md:text-lg uppercase tracking-tighter">Select Lenses</span>
-                                    <span className="text-[9px] md:text-[11px] opacity-80 font-medium normal-case text-center px-4">
-                                        with or without eyesight glasses <br className="hidden md:block" /> choose blue light glasses
-                                    </span>
-                                </Button>
-
-                                <div className="grid grid-cols-2 gap-2 md:gap-3 mt-2">
+                                <div className="grid grid-cols-2 gap-3">
                                     <Button
                                         onClick={() => setIsVTOModalOpen(true)}
                                         size="lg"
                                         variant="outline"
-                                        className="h-11 md:h-12 rounded-xl font-black text-sm md:text-base border-2 border-primary/20 hover:bg-primary/5 transition-all group italic"
+                                        className="h-16 rounded-2xl btn-text border-2 border-primary/20 hover:bg-primary/5 transition-all group tracking-tighter"
                                     >
                                         <motion.span
                                             animate={{ opacity: [1, 0.5, 1] }}
                                             transition={{ duration: 2, repeat: Infinity }}
-                                            className="inline-block w-2.5 h-2.5 rounded-full bg-primary mr-2"
+                                            className="inline-block w-2 md:w-3 h-2 md:h-3 rounded-full bg-primary mr-2"
                                         />
                                         Try on
                                     </Button>
@@ -199,32 +235,27 @@ export default function ProductPage() {
                                         onClick={() => router.push("/cart")}
                                         size="lg"
                                         variant="outline"
-                                        className="h-11 md:h-12 rounded-xl font-black text-sm md:text-base border-2 border-primary/20 hover:bg-primary/5 transition-all group italic"
+                                        className="h-16 rounded-2xl btn-text border-2 border-primary/20 hover:bg-primary/5 transition-all group tracking-tighter"
                                     >
-                                        <ShoppingCart className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                                        <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 mr-2 group-hover:scale-110 transition-transform" />
                                         Cart
                                     </Button>
                                 </div>
                             </div>
                         </div>
-
-                        <div className="grid grid-cols-3 gap-2 md:gap-4 py-3 md:py-5 border-y border-border/50 mb-5 md:mb-8">
-                            <div className="flex flex-col items-center text-center">
-                                <Truck className="w-4 h-4 md:w-6 md:h-6 text-primary mb-1 md:mb-2" />
-                                <span className="text-[7px] md:text-[10px] uppercase font-bold tracking-tighter">Fast Delivery</span>
-                            </div>
-                            <div className="flex flex-col items-center text-center">
-                                <ShieldCheck className="w-4 h-4 md:w-6 md:h-6 text-primary mb-1 md:mb-2" />
-                                <span className="text-[7px] md:text-[10px] uppercase font-bold tracking-tighter">2-Year Warranty</span>
-                            </div>
-                            <div className="flex flex-col items-center text-center">
-                                <Ruler className="w-4 h-4 md:w-6 md:h-6 text-primary mb-1 md:mb-2" />
-                                <span className="text-[7px] md:text-[10px] uppercase font-bold tracking-tighter">Perfect Fit</span>
-                            </div>
-                        </div>
-
                     </motion.div>
                 </div>
+
+                {/* Move ProductSpecs here for full width */}
+                <ProductSpecs
+                    measurements={product.measurements}
+                    description={product.description}
+                />
+
+                <RelatedProducts
+                    currentProductId={product._id}
+                    category={product.category}
+                />
             </div>
 
             <VirtualTryOn
@@ -232,6 +263,11 @@ export default function ProductPage() {
                 onClose={() => setIsVTOModalOpen(false)}
                 productImage={product.vtoImage || product.image}
                 productName={product.name}
+            />
+            <LensConfigurator
+                isOpen={isLensModalOpen}
+                onClose={() => setIsLensModalOpen(false)}
+                product={product}
             />
         </main>
     );

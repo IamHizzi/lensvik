@@ -11,15 +11,15 @@ export default function TrackOrderPage() {
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <section className="pt-24 pb-12 container mx-auto px-6">
+            <section className="pt-28 md:pt-36 pb-8 container mx-auto px-6">
                 <div className="max-w-2xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center mb-12"
+                        className="text-center mb-10 md:mb-16"
                     >
-                        <h1 className="text-3xl md:text-5xl font-bold tracking-tighter mb-3">Track Your Order</h1>
-                        <p className="text-lg text-muted-foreground">
+                        <h1 className="text-3xl md:text-5xl font-black tracking-tighter mb-4 italic uppercase">Track Your Order</h1>
+                        <p className="text-sm md:text-base text-muted-foreground font-medium">
                             Enter your order details below to see the current status of your shipment.
                         </p>
                     </motion.div>

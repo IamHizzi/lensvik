@@ -19,11 +19,11 @@ interface ProductStripProps {
 export function ProductStrip({ title, subtitle, products, viewAllHref, lightBg = false, loading = false }: ProductStripProps) {
     return (
         <section className={`py-8 md:py-14 ${lightBg ? 'bg-primary/5' : 'bg-background'}`}>
-            <div className="container mx-auto px-4 md:px-6">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-5 md:mb-8 gap-3">
+            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-3">
                     <div>
-                        <h2 className="text-xl md:text-3xl font-bold tracking-tighter mb-1 md:mb-2">{title}</h2>
-                        {subtitle && <p className="text-sm md:text-base text-muted-foreground max-w-xl">{subtitle}</p>}
+                        <h2 className="text-2xl md:text-5xl font-black tracking-tighter mb-2 md:mb-3 uppercase italic leading-none">{title}</h2>
+                        {subtitle && <p className="text-xs md:text-lg text-muted-foreground font-medium max-w-xl leading-relaxed">{subtitle}</p>}
                     </div>
                     <Link href={viewAllHref} className="flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest text-primary hover:gap-4 transition-all group">
                         View All <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

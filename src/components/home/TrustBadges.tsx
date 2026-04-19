@@ -29,7 +29,7 @@ export function TrustBadges() {
 
     return (
         <section className="bg-primary/5 py-8 md:py-10 border-y border-primary/10">
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6">
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
                     {badges.map((badge, index) => (
                         <motion.div

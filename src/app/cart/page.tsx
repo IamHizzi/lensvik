@@ -63,7 +63,7 @@ export default function CartPage() {
     }
 
     return (
-        <main className="min-h-screen bg-background pt-24 pb-16">
+        <main className="min-h-screen bg-background pt-28 md:pt-36 pb-16">
             <Navbar />
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col mb-6 md:mb-8">
@@ -184,7 +184,13 @@ export default function CartPage() {
                                             className="flex gap-3 items-center p-3 bg-white rounded-2xl border border-border shadow-sm group"
                                         >
                                             <div className="w-16 h-16 relative rounded-xl overflow-hidden bg-slate-100 border border-border shrink-0">
-                                                <Image src={item.image} alt={item.name} fill className="object-contain p-1.5" />
+                                                <Image 
+                                                    src={item.image} 
+                                                    alt={item.name} 
+                                                    fill 
+                                                    className="object-contain p-1.5" 
+                                                    sizes="64px"
+                                                />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h3 className="text-xs font-bold truncate group-hover:text-primary transition-colors">{item.name}</h3>

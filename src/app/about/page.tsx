@@ -3,27 +3,30 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function AboutPage() {
     return (
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <section className="pt-24 pb-12 container mx-auto px-6">
+            <section className="pt-28 md:pt-36 pb-12 container mx-auto px-6">
                 <div className="max-w-4xl mx-auto">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-3xl md:text-5xl font-bold tracking-tighter mb-8 text-center"
+                        className="text-3xl md:text-5xl font-black tracking-tighter mb-10 md:mb-16 text-center uppercase italic"
                     >
                         Our Story
                     </motion.h1>
 
                     <div className="aspect-video rounded-2xl overflow-hidden mb-12 shadow-xl relative">
-                        <img
+                        <Image
                             src="/images/WhatsApp-Image-2025-11-22-at-3.17.43-PM-1.jpeg"
                             alt="Lensvik Team"
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 1024px"
                         />
                         <div className="absolute inset-0 bg-primary/20 mix-blend-multiply" />
                     </div>

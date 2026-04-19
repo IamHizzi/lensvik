@@ -6,8 +6,11 @@ import { Hero } from "@/components/home/Hero";
 import { TrustBadges } from "@/components/home/TrustBadges";
 import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { ProductStrip } from "@/components/home/ProductStrip";
+import { WhyChooseUs } from "@/components/home/WhyChooseUs";
+import { Testimonials } from "@/components/home/Testimonials";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { getProducts, Product } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 
@@ -64,26 +67,34 @@ export default function Home() {
         loading={loading}
       />
 
+      <WhyChooseUs />
+
       <TrustBadges />
 
+      <Testimonials />
+
       {/* Mid-Page Banner (Call to Action) */}
-      <section className="container mx-auto px-4 md:px-6 py-6 md:py-8">
-        <div className="rounded-xl md:rounded-2xl p-5 md:p-10 text-center relative overflow-hidden shadow-xl h-[240px] md:h-[280px] flex flex-col items-center justify-center">
-          <img
+      <section className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        <div className="rounded-2xl md:rounded-3xl p-6 md:p-12 text-center relative overflow-hidden shadow-2xl h-[280px] md:h-[350px] flex flex-col items-center justify-center group overflow-hidden">
+          <Image
             src="/images/WhatsApp-Image-2026-01-24-at-2.52.35-PM.jpeg"
             alt="Fit Guarantee"
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-primary/60 mix-blend-multiply" />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent" />
 
-          <div className="relative z-10 px-4">
-            <h2 className="text-xl md:text-3xl font-bold tracking-tighter mb-3 md:mb-4 text-white">Find Your Perfect Fit <br /> in Seconds.</h2>
-            <p className="text-xs md:text-sm text-white/80 mb-5 md:mb-8 max-w-xl mx-auto font-medium">
+          <div className="relative z-10 px-2 max-w-2xl mx-auto">
+            <h2 className="text-2xl md:text-5xl font-black tracking-tighter mb-4 text-white uppercase italic leading-none">
+              Find Your <br /> Perfect Fit.
+            </h2>
+            <p className="text-xs md:text-lg text-white/90 mb-6 md:mb-10 max-w-lg mx-auto font-medium leading-relaxed">
               Stop guessing your size. Use our AI-powered biometric scanner to find the frame that actually fits your face.
             </p>
             <Link href="/products/1">
-              <button className="h-11 md:h-12 px-6 md:px-10 rounded-full bg-white text-primary font-bold text-sm hover:scale-105 transition-transform shadow-xl">
+              <button className="h-12 md:h-14 px-8 md:px-12 rounded-full bg-white text-primary font-black uppercase text-xs md:text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl italic tracking-widest">
                 Launch Size Finder
               </button>
             </Link>
@@ -92,7 +103,7 @@ export default function Home() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="container mx-auto px-4 md:px-6 py-8 md:py-10 mb-4 md:mb-6 border-t border-border">
+      <section className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 py-8 md:py-10 mb-4 md:mb-6 border-t border-border">
         <div className="glass rounded-xl md:rounded-2xl p-5 md:p-10 text-center relative overflow-hidden border border-primary/10">
           <div className="absolute top-0 left-0 w-full h-full bg-primary/5 -z-10" />
           <h2 className="text-xl md:text-3xl font-bold tracking-tighter mb-2 md:mb-3">Join the Lensvik Vision</h2>

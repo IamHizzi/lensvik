@@ -33,12 +33,12 @@ export default function ReturnPolicyPage() {
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <section className="pt-24 pb-12 container mx-auto px-6">
+            <section className="pt-28 md:pt-36 pb-12 container mx-auto px-6">
                 <div className="max-w-4xl mx-auto">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-3xl md:text-5xl font-bold tracking-tighter mb-4 text-center"
+                        className="text-3xl md:text-5xl font-black tracking-tighter mb-4 text-center uppercase italic"
                     >
                         Return Policy
                     </motion.h1>

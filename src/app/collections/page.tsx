@@ -26,10 +26,10 @@ export default function CollectionsPage() {
     }, []);
 
     return (
-        <main className="min-h-screen bg-background pt-20 md:pt-24 pb-16">
+        <main className="min-h-screen bg-background pt-28 md:pt-36 pb-16">
             <Navbar />
             <div className="container mx-auto px-6">
-                <header className="mb-6 md:mb-10 text-center">
+                <header className="mb-10 md:mb-16 text-center">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

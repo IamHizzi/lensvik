@@ -2,13 +2,18 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, User, Menu, X } from "lucide-react";
+import Image from "next/image";
+import { ShoppingCart, User, Menu, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { SearchIcon } from "lucide-react";
+import { SearchOverlay } from "./SearchOverlay";
+import { AnimatePresence } from "framer-motion";
 
 export function Navbar() {
     const { cartCount } = useCart();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     const menuItems = [
         { name: "Home", href: "/" },
@@ -34,21 +39,28 @@ export function Navbar() {
             </div>
 
             {/* Main Navbar - Condensed Single Level */}
-            <nav className="glass border-b border-white/20 px-4 md:px-8 py-1.5 md:py-2">
-                <div className="flex items-center justify-between w-full max-w-screen-2xl mx-auto">
+            <nav className="glass border-b border-white/20 py-1.5 md:py-2">
+                <div className="w-full max-w-[1400px] mx-auto px-3 md:px-8 flex items-center justify-between gap-2">
                     {/* Brand & Desktop Logo */}
-                    <div className="flex items-center gap-12">
-                        <Link href="/" className="text-xl md:text-2xl font-black text-primary tracking-tighter italic uppercase">
-                            LENSVIK
+                    <div className="flex items-center gap-8 md:gap-12 shrink-0">
+                        <Link href="/" className="relative flex items-center">
+                            <Image
+                                src="/logo-1.png"
+                                alt="Lensvik"
+                                width={220}
+                                height={75}
+                                className="h-12 md:h-16 w-auto object-contain"
+                                priority={true}
+                            />
                         </Link>
 
                         {/* Integrated Navigation Menu (Desktop Only) */}
-                        <div className="hidden lg:flex items-center gap-6">
+                        <div className="hidden lg:flex items-center gap-7">
                             {menuItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="text-[10px] xl:text-[11px] font-black uppercase tracking-widest hover:text-primary transition-all relative group italic"
+                                    className="btn-text hover:text-primary transition-all relative group"
                                 >
                                     {item.name}
                                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
@@ -59,6 +71,7 @@ export function Navbar() {
 
                     {/* Right-side Actions */}
                     <div className="flex items-center gap-1 md:gap-3">
+
                         {/* Secondary Links - Hidden on Mobile, Small on Desktop */}
                         <div className="hidden xl:flex items-center gap-4 text-[9px] uppercase font-bold tracking-widest text-muted-foreground/50 mr-4">
                             {secondaryItems.map((item) => (
@@ -67,6 +80,15 @@ export function Navbar() {
                                 </Link>
                             ))}
                         </div>
+
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="w-9 h-9 md:w-10 md:h-10 text-slate-800"
+                            onClick={() => setIsSearchOpen(true)}
+                        >
+                            <SearchIcon className="w-5 h-5 md:w-[22px] md:h-[22px]" />
+                        </Button>
 
                         <Button variant="ghost" size="icon" className="w-9 h-9 md:w-10 md:h-10 text-slate-800">
                             <User className="w-5 h-5 md:w-[22px] md:h-[22px]" />
@@ -97,8 +119,8 @@ export function Navbar() {
             <div className={`lg:hidden fixed inset-0 z-50 bg-white/98 backdrop-blur-2xl transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) ${isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}>
                 <div className="flex flex-col h-full p-6 pb-12">
                     <div className="flex items-center justify-between mb-12">
-                        <Link href="/" className="text-2xl font-black text-primary tracking-tighter italic uppercase" onClick={() => setIsMenuOpen(false)}>
-                            LENSVIK
+                        <Link href="/" className="flex items-center" onClick={() => setIsMenuOpen(false)}>
+                            <Image src="/logo-1.png" alt="Lensvik" width={180} height={60} className="h-14 w-auto object-contain" />
                         </Link>
                         <Button variant="ghost" size="icon" className="text-slate-900" onClick={() => setIsMenuOpen(false)}>
                             <X className="w-8 h-8" />
@@ -136,15 +158,27 @@ export function Navbar() {
                         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Customer Support</p>
-                                <p className="text-xl font-black text-primary italic">+92 300 0000000</p>
+                                <p className="text-xl font-black text-primary italic">0370 9573005</p>
                             </div>
-                            <Button className="w-full bg-slate-900 text-white font-black italic uppercase tracking-widest h-12 rounded-xl">
-                                Live Chat Now
-                            </Button>
+                            <Link href="https://wa.me/923709573005" target="_blank" rel="noopener noreferrer">
+                                <Button className="w-full bg-green-500 hover:bg-green-600 text-white font-black italic uppercase tracking-widest h-12 rounded-xl">
+                                    <MessageCircle className="w-5 h-5 mr-2" />
+                                    WhatsApp Us
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {isSearchOpen && (
+                    <SearchOverlay 
+                        isOpen={isSearchOpen} 
+                        onClose={() => setIsSearchOpen(false)} 
+                    />
+                )}
+            </AnimatePresence>
         </header>
     );
 }
