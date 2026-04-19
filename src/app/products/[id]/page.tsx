@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import dynamic from "next/dynamic";
 import { getProductById, Product } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Heart, Share2, Ruler, ShieldCheck, Truck, CheckCircle, CheckCircle2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { ShoppingCart, Heart, Share2, CheckCircle2, Star, Eye, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -18,15 +19,21 @@ import { VariationSelector } from "@/components/products/VariationSelector";
 import { ProductSpecs } from "@/components/products/ProductSpecs";
 import { RelatedProducts } from "@/components/products/RelatedProducts";
 
-// Dynamic imports for heavy VTO/Size components
+// Dynamic imports
 const VirtualTryOn = dynamic(() => import("@/components/vto/VirtualTryOn").then(mod => mod.VirtualTryOn), {
     ssr: false,
-    loading: () => <Skeleton className="w-full h-full rounded-3xl" />
+    loading: () => <Skeleton className="w-full h-full rounded-3xl" />,
+});
+const SizeFinder = dynamic(() => import("@/components/size-finder/SizeFinder").then(mod => mod.SizeFinder), {
+    ssr: false,
 });
 
-const SizeFinder = dynamic(() => import("@/components/size-finder/SizeFinder").then(mod => mod.SizeFinder), {
-    ssr: false
-});
+const FEATURES = [
+    "Anti-Reflective Coating",
+    "Ultra-Light Frame (18g)",
+    "Impact Resistant",
+    "100% UV400 Filter",
+];
 
 export default function ProductPage() {
     const { id } = useParams();
@@ -36,6 +43,8 @@ export default function ProductPage() {
     const [loading, setLoading] = useState(true);
     const [isVTOModalOpen, setIsVTOModalOpen] = useState(false);
     const [isLensModalOpen, setIsLensModalOpen] = useState(false);
+    const [activeThumb, setActiveThumb] = useState(0);
+    const [isWishlisted, setIsWishlisted] = useState(false);
     const { addToCart } = useCart();
 
     useEffect(() => {
@@ -53,19 +62,12 @@ export default function ProductPage() {
     }, [id]);
 
     useEffect(() => {
-        if (searchParams.get('tryon') === 'true') {
-            setIsVTOModalOpen(true);
-        }
+        if (searchParams.get("tryon") === "true") setIsVTOModalOpen(true);
     }, [searchParams]);
 
     const handleAddToCart = () => {
         if (product) {
-            addToCart({
-                productId: product._id,
-                name: product.name,
-                price: product.price,
-                image: product.image
-            });
+            addToCart({ productId: product._id, name: product.name, price: product.price, image: product.image });
             toast.success(`${product.name} added to cart!`);
         }
     };
@@ -94,42 +96,77 @@ export default function ProductPage() {
         );
     }
 
-    const isPrescriptionProduct = product.category.toLowerCase() === "eyeglasses" || product.category.toLowerCase() === "prescription";
+    const isPrescriptionProduct =
+        product.category.toLowerCase() === "eyeglasses" ||
+        product.category.toLowerCase() === "prescription";
+
+    const discount = product.originalPrice
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+        : null;
 
     return (
-        <main className="min-h-screen bg-background pb-16">
+        <main className="min-h-screen bg-background">
             <Navbar />
 
-            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pt-28 md:pt-36">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
-                    {/* Left: Gallery Section */}
+            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pt-24 md:pt-32 pb-20 md:pb-32">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
+
+                    {/* ── Left: Image Gallery ── */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="space-y-4 md:space-y-6"
+                        className="space-y-3 md:space-y-4"
                     >
-                        <div className="relative aspect-square rounded-3xl md:rounded-[3rem] overflow-hidden glass border border-white/20 group">
+                        {/* Main Image */}
+                        <div className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-[#f5f6f8] border border-slate-100 group shadow-xl shadow-slate-100/50">
                             <Image
                                 src={product.image}
                                 alt={product.name}
                                 fill
-                                className="object-contain p-4 md:p-8 group-hover:scale-110 transition-transform duration-700"
+                                className="object-contain p-6 md:p-10 group-hover:scale-105 transition-transform duration-700"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
                             />
-                            <div className="absolute top-6 right-6 flex flex-col gap-3">
-                                <Button size="icon" variant="secondary" className="rounded-full shadow-lg">
-                                    <Heart className="w-5 h-5" />
-                                </Button>
-                                <Button size="icon" variant="secondary" className="rounded-full shadow-lg">
-                                    <Share2 className="w-5 h-5" />
-                                </Button>
+
+                            {/* Discount badge */}
+                            {discount && (
+                                <div className="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                                    -{discount}%
+                                </div>
+                            )}
+
+                            {/* Action buttons */}
+                            <div className="absolute top-4 right-4 flex flex-col gap-2">
+                                <button
+                                    onClick={() => setIsWishlisted(!isWishlisted)}
+                                    className={`w-9 h-9 md:w-10 md:h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all hover:scale-110 ${isWishlisted ? "text-red-500" : "text-slate-400"}`}
+                                >
+                                    <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500" : ""}`} />
+                                </button>
+                                <button className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white shadow-md flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all hover:scale-110">
+                                    <Share2 className="w-4 h-4" />
+                                </button>
                             </div>
+
+                            {/* VTO overlay button */}
+                            <button
+                                onClick={() => setIsVTOModalOpen(true)}
+                                className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md hover:bg-primary hover:text-white transition-all border border-white/50"
+                            >
+                                <Eye className="w-3 h-3" /> Try On
+                            </button>
                         </div>
 
-                        <div className="grid grid-cols-4 md:grid-cols-4 gap-3 md:gap-4">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="aspect-square rounded-xl md:rounded-2xl glass border border-white/10 overflow-hidden opacity-60 hover:opacity-100 cursor-pointer transition-opacity relative">
+                        {/* Thumbnail Strip */}
+                        <div className="grid grid-cols-4 gap-2 md:gap-3">
+                            {[0, 1, 2, 3].map((i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setActiveThumb(i)}
+                                    className={`aspect-square rounded-xl md:rounded-2xl overflow-hidden bg-[#f5f6f8] border-2 transition-all relative ${
+                                        activeThumb === i ? "border-primary shadow-md shadow-primary/10" : "border-slate-100 opacity-60 hover:opacity-100"
+                                    }`}
+                                >
                                     <Image
                                         src={product.image}
                                         alt={product.name}
@@ -137,127 +174,136 @@ export default function ProductPage() {
                                         className="object-contain p-2 md:p-3"
                                         sizes="(max-width: 768px) 25vw, 100px"
                                     />
-                                </div>
+                                </button>
                             ))}
                         </div>
                     </motion.div>
 
-                    {/* Right: Info Section */}
+                    {/* ── Right: Product Info ── */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="flex flex-col"
                     >
-                        <header className="mb-4 md:mb-6">
-                            <Badge variant="outline" className="mb-2 md:mb-3 text-primary border-primary/20 bg-primary/5 uppercase tracking-widest text-[8px] md:text-[9px] py-0.5 px-2 font-black">
-                                {isPrescriptionProduct ? "Customizable Frame" : "Premium Collection"}
-                            </Badge>
-                            <h1 className="text-xl md:text-3xl font-black tracking-tighter mb-1.5 md:mb-2 italic line-clamp-2 md:line-clamp-none uppercase">{product.name}</h1>
-                            <div className="flex items-center gap-2 md:gap-3">
-                                <div>
-                                    {product.originalPrice && (
-                                        <p className="text-small text-muted-foreground line-through decoration-primary/20">Rs {product.originalPrice.toLocaleString()}</p>
-                                    )}
-                                    <p className="price-tag text-primary">Rs {product.price.toLocaleString()}</p>
-                                </div>
-                                <div className="h-10 md:h-12 w-[1px] bg-border mx-2 md:mx-4" />
-                                <div className="flex flex-wrap gap-2">
-                                    <Badge className="bg-primary/5 text-primary border-primary/20 label-tag px-3 py-1 animate-pulse">
-                                        High-Index Available
-                                    </Badge>
-                                    <Badge className="bg-slate-50 text-slate-400 border-slate-200 label-tag px-3 py-1">
-                                        RX Ready
-                                    </Badge>
-                                </div>
+                        {/* Breadcrumb badge */}
+                        <Badge variant="outline" className="mb-3 w-fit text-primary border-primary/20 bg-primary/5 uppercase tracking-widest text-[8px] py-0.5 px-2 font-black">
+                            {isPrescriptionProduct ? "Customizable Frame" : "Premium Collection"}
+                        </Badge>
+
+                        <h1 className="text-xl md:text-3xl font-black tracking-tighter mb-3 italic uppercase leading-tight">
+                            {product.name}
+                        </h1>
+
+                        {/* Rating row */}
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="flex gap-0.5">
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                    <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                                ))}
                             </div>
-                        </header>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">(128 reviews)</span>
+                        </div>
 
-                        <div className="space-y-3 md:space-y-5 mb-5 md:mb-8">
-                            <section>
-                                <p className="text-sm md:text-lg leading-relaxed text-muted-foreground font-medium italic mb-6">
-                                    {product.description || "Experimental architecture meets optical precision. Hand-assembled from surgical-grade titanium for a weightless experience."}
-                                </p>
+                        {/* Price */}
+                        <div className="flex items-baseline gap-3 mb-5 md:mb-6">
+                            <span className="text-2xl md:text-3xl font-black text-primary">
+                                Rs {product.price.toLocaleString()}
+                            </span>
+                            {product.originalPrice && (
+                                <span className="text-sm text-slate-400 line-through font-medium">
+                                    Rs {product.originalPrice.toLocaleString()}
+                                </span>
+                            )}
+                            {discount && (
+                                <span className="text-xs font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                                    Save {discount}%
+                                </span>
+                            )}
+                        </div>
 
-                                {/* Technical Features Checklist */}
-                                <div className="grid grid-cols-2 gap-y-3 mb-8 bg-slate-50/50 p-6 rounded-3xl border border-dashed border-slate-200">
-                                    {[
-                                        "Anti-Reflective Coating",
-                                        "Ultra-Light Frame (18g)",
-                                        "Impact Resistant",
-                                        "100% UV400 Filter"
-                                    ].map(feature => (
-                                        <div key={feature} className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-tighter italic text-slate-600">
-                                            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <CheckCircle2 className="w-3 h-3 text-primary" />
-                                            </div>
-                                            {feature}
-                                        </div>
-                                    ))}
+                        {/* Description */}
+                        <p className="text-sm md:text-base leading-relaxed text-slate-500 font-medium italic mb-5 md:mb-6">
+                            {product.description || "Experimental architecture meets optical precision. Hand-assembled from surgical-grade titanium for a weightless experience that adapts to your every movement."}
+                        </p>
+
+                        {/* Feature checklist */}
+                        <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 mb-5 md:mb-7 bg-slate-50 px-4 py-4 rounded-2xl border border-slate-100">
+                            {FEATURES.map((feat) => (
+                                <div key={feat} className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-tight text-slate-600">
+                                    <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                        <CheckCircle2 className="w-2.5 h-2.5 text-primary" />
+                                    </div>
+                                    {feat}
                                 </div>
-                            </section>
+                            ))}
+                        </div>
 
-                            <VariationSelector />
+                        <VariationSelector />
 
-                            <div className="space-y-3 pt-6">
-                                {isPrescriptionProduct && (
-                                    <Button
-                                        onClick={() => setIsLensModalOpen(true)}
-                                        size="lg"
-                                        className="w-full h-16 rounded-2xl font-black bg-primary text-white hover:bg-primary/90 transition-all flex flex-col items-center justify-center gap-0 border-none shadow-xl shadow-primary/10 italic animate-pulse-subtle"
-                                    >
-                                        <span className="text-sm md:text-xl uppercase tracking-tighter">Select Lenses</span>
-                                    </Button>
-                                )}
-
+                        {/* ── CTA Buttons (Desktop only — mobile has sticky bar) ── */}
+                        <div className="hidden md:flex flex-col gap-3 pt-5">
+                            {isPrescriptionProduct && (
                                 <Button
-                                    onClick={handleAddToCart}
+                                    onClick={() => setIsLensModalOpen(true)}
                                     size="lg"
-                                    className="w-full h-16 rounded-2xl btn-text bg-slate-100 hover:bg-slate-200 text-slate-900 transition-all flex flex-col items-center justify-center gap-0 border border-slate-200 shadow-sm"
+                                    className="w-full h-14 rounded-2xl font-black bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 italic tracking-wide text-base group"
                                 >
-                                    <span className="text-sm md:text-lg uppercase tracking-tighter font-bold">Add to Cart</span>
+                                    Select Lenses
+                                    <ChevronRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
                                 </Button>
-
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Button
-                                        onClick={() => setIsVTOModalOpen(true)}
-                                        size="lg"
-                                        variant="outline"
-                                        className="h-16 rounded-2xl btn-text border-2 border-primary/20 hover:bg-primary/5 transition-all group tracking-tighter"
-                                    >
-                                        <motion.span
-                                            animate={{ opacity: [1, 0.5, 1] }}
-                                            transition={{ duration: 2, repeat: Infinity }}
-                                            className="inline-block w-2 md:w-3 h-2 md:h-3 rounded-full bg-primary mr-2"
-                                        />
-                                        Try on
-                                    </Button>
-                                    <Button
-                                        onClick={() => router.push("/cart")}
-                                        size="lg"
-                                        variant="outline"
-                                        className="h-16 rounded-2xl btn-text border-2 border-primary/20 hover:bg-primary/5 transition-all group tracking-tighter"
-                                    >
-                                        <ShoppingCart className="w-5 h-5 md:w-6 md:h-6 mr-2 group-hover:scale-110 transition-transform" />
-                                        Cart
-                                    </Button>
-                                </div>
-                            </div>
+                            )}
+                            <Button
+                                onClick={handleAddToCart}
+                                size="lg"
+                                className="w-full h-14 rounded-2xl bg-slate-900 hover:bg-black text-white font-black tracking-wide shadow-lg"
+                            >
+                                <ShoppingCart className="w-5 h-5 mr-2" />
+                                Add to Cart
+                            </Button>
+                            <Button
+                                onClick={() => setIsVTOModalOpen(true)}
+                                size="lg"
+                                variant="outline"
+                                className="w-full h-12 rounded-2xl border-2 border-slate-200 hover:border-primary/30 hover:bg-primary/5 font-black tracking-wide"
+                            >
+                                <Eye className="w-4 h-4 mr-2" />
+                                Virtual Try-On
+                            </Button>
                         </div>
                     </motion.div>
                 </div>
 
-                {/* Move ProductSpecs here for full width */}
-                <ProductSpecs
-                    measurements={product.measurements}
-                    description={product.description}
-                />
-
-                <RelatedProducts
-                    currentProductId={product._id}
-                    category={product.category}
-                />
+                {/* Full-width sections */}
+                <ProductSpecs measurements={product.measurements} description={product.description} />
+                <RelatedProducts currentProductId={product._id} category={product.category} />
             </div>
 
+            {/* ── Sticky Mobile Bottom Bar ── */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-100 px-4 py-3 safe-area-pb">
+                <div className="flex gap-2 items-center">
+                    <div className="flex-1 min-w-0">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 truncate">{product.name}</p>
+                        <p className="text-base font-black text-primary leading-tight">Rs {product.price.toLocaleString()}</p>
+                    </div>
+                    {isPrescriptionProduct && (
+                        <Button
+                            onClick={() => setIsLensModalOpen(true)}
+                            className="h-11 px-4 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-wide shadow-lg shadow-primary/20 shrink-0"
+                        >
+                            Select Lens
+                        </Button>
+                    )}
+                    <Button
+                        onClick={handleAddToCart}
+                        className="h-11 px-4 rounded-xl bg-slate-900 text-white font-black text-xs uppercase tracking-wide shrink-0"
+                    >
+                        <ShoppingCart className="w-4 h-4 mr-1.5" />
+                        Add
+                    </Button>
+                </div>
+            </div>
+
+            {/* Modals */}
             <VirtualTryOn
                 isOpen={isVTOModalOpen}
                 onClose={() => setIsVTOModalOpen(false)}
@@ -269,6 +315,10 @@ export default function ProductPage() {
                 onClose={() => setIsLensModalOpen(false)}
                 product={product}
             />
+
+            {/* Mobile spacing for sticky bar */}
+            <div className="h-24 md:hidden" />
+            <Footer />
         </main>
     );
 }

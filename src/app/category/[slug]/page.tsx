@@ -92,16 +92,16 @@ export default function CategoryPage() {
     const categoryDisplayName = slug ? (slug as string).replace(/-/g, ' ').toUpperCase() : "COLLECTION";
 
     return (
-        <main className="min-h-screen bg-background pt-28 md:pt-36 pb-16">
+        <main className="min-h-screen bg-background pt-28 md:pt-36">
             <Navbar />
-            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6">
+            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pb-20 md:pb-32">
                 <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                     {/* Desktop Sidebar */}
                     <aside className="hidden lg:block lg:w-72 shrink-0 border-r border-slate-100 pr-8">
-                        <SidebarFilters 
-                            filters={configFilters} 
-                            onFilterChange={handleFilterChange} 
-                            activeFilters={{...activeFilters, totalCount: filteredAndSortedProducts.length}} 
+                        <SidebarFilters
+                            filters={configFilters}
+                            onFilterChange={handleFilterChange}
+                            activeFilters={{ ...activeFilters, totalCount: filteredAndSortedProducts.length }}
                         />
                     </aside>
 
@@ -129,10 +129,10 @@ export default function CategoryPage() {
                                     </SheetTrigger>
                                     <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                                         <div className="py-6">
-                                            <SidebarFilters 
-                                                filters={configFilters} 
-                                                onFilterChange={handleFilterChange} 
-                                                activeFilters={{...activeFilters, totalCount: filteredAndSortedProducts.length}} 
+                                            <SidebarFilters
+                                                filters={configFilters}
+                                                onFilterChange={handleFilterChange}
+                                                activeFilters={{ ...activeFilters, totalCount: filteredAndSortedProducts.length }}
                                             />
                                         </div>
                                     </SheetContent>
@@ -175,7 +175,7 @@ export default function CategoryPage() {
                             <div className="text-center py-32 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-100">
                                 <h3 className="text-2xl font-black uppercase italic italic mb-4">No vision found</h3>
                                 <p className="text-small text-slate-400 mb-8">Adjust your filters to discover more possibilities.</p>
-                                <Button onClick={() => setActiveFilters({categories: [], priceRange: [0, 15000], coatings: [], features: []})} variant="link" className="btn-text text-primary">Reset all filters</Button>
+                                <Button onClick={() => setActiveFilters({ categories: [], priceRange: [0, 15000], coatings: [], features: [] })} variant="link" className="btn-text text-primary">Reset all filters</Button>
                             </div>
                         )}
                     </div>

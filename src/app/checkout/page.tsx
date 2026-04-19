@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Trash2, Plus, Minus, CreditCard, ShieldCheck, MapPin, Phone, User, Truck, Info, ArrowRight } from "lucide-react";
@@ -60,42 +61,43 @@ export default function CheckoutPage() {
                         <Button className="rounded-full h-11 px-8 font-black text-base bg-primary hover:scale-105 transition-transform italic">Start Shopping</Button>
                     </Link>
                 </div>
+                <Footer />
             </main>
         );
     }
 
     return (
-        <main className="min-h-screen bg-background pt-24 pb-16">
+        <main className="min-h-screen bg-background pt-24">
             <Navbar />
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col mb-6 md:mb-8">
-                    <h1 className="text-2xl md:text-5xl font-black tracking-tighter italic uppercase">Checkout</h1>
+                    <h1 className="text-2xl md:text-5xl font-black tracking-tighter italic uppercase text-slate-900">Checkout</h1>
                     <div className="w-12 md:w-20 h-1 md:h-1.5 bg-primary mt-1.5 md:mt-3 rounded-full" />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-start">
                     {/* LEFT: Shipping Details Form */}
                     <div className="space-y-6 md:space-y-8">
-                        <section className="glass p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-primary/10 relative overflow-hidden">
+                        <section className="bg-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-4 opacity-5">
                                 <Truck className="w-24 h-24 text-primary" />
                             </div>
 
-                            <h2 className="text-xl md:text-2xl font-black tracking-tight mb-5 md:mb-6 flex items-center gap-2 italic uppercase">
+                            <h2 className="text-xl md:text-2xl font-black tracking-tight mb-5 md:mb-6 flex items-center gap-2 italic uppercase text-slate-800">
                                 <MapPin className="text-primary w-5 h-5 md:w-6 md:h-6" />
                                 Shipping Details
                             </h2>
 
                             <form className="space-y-4" onSubmit={handleCheckout}>
                                 <div className="space-y-1.5">
-                                    <label className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground ml-2">Full Name</label>
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-2">Full Name</label>
                                     <div className="relative">
-                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                         <input
                                             type="text"
                                             placeholder="John Doe"
                                             required
-                                            className="w-full h-11 rounded-xl bg-white border border-border pl-12 pr-6 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-sm"
+                                            className="w-full h-11 rounded-xl bg-slate-50 border border-slate-100 pl-12 pr-6 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-sm text-slate-800"
                                             value={formData.fullName}
                                             onChange={e => setFormData({ ...formData, fullName: e.target.value })}
                                         />
@@ -104,28 +106,28 @@ export default function CheckoutPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground ml-2">Phone Number</label>
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-2">Phone Number</label>
                                         <div className="relative">
-                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                             <input
                                                 type="tel"
                                                 placeholder="03XX XXXXXXX"
                                                 required
-                                                className="w-full h-11 rounded-xl bg-white border border-border pl-12 pr-6 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-sm"
+                                                className="w-full h-11 rounded-xl bg-slate-50 border border-slate-100 pl-12 pr-6 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-sm text-slate-800"
                                                 value={formData.phone}
                                                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                             />
                                         </div>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground ml-2">City</label>
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-2">City</label>
                                         <div className="relative">
-                                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                             <input
                                                 list="pk-cities"
                                                 placeholder="Select City"
                                                 required
-                                                className="w-full h-11 rounded-xl bg-white border border-border pl-12 pr-6 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-sm"
+                                                className="w-full h-11 rounded-xl bg-slate-50 border border-slate-100 pl-12 pr-6 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-sm text-slate-800"
                                                 value={formData.city}
                                                 onChange={e => setFormData({ ...formData, city: e.target.value })}
                                             />
@@ -137,27 +139,27 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground ml-2">Full Shipping Address</label>
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-2">Full Shipping Address</label>
                                     <textarea
                                         placeholder="House number, Street, Area..."
                                         required
                                         rows={3}
-                                        className="w-full rounded-xl bg-white border border-border p-4 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium resize-none text-sm"
+                                        className="w-full rounded-xl bg-slate-50 border border-slate-100 p-4 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium resize-none text-sm text-slate-800"
                                         value={formData.address}
                                         onChange={e => setFormData({ ...formData, address: e.target.value })}
                                     />
                                 </div>
 
                                 <div className="pt-4">
-                                    <h3 className="text-[9px] uppercase font-bold tracking-[0.2em] text-muted-foreground mb-3">Payment Method</h3>
+                                    <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Payment Method</h3>
                                     <div className="p-4 rounded-xl md:rounded-2xl border-2 border-primary bg-primary/5 flex items-center justify-between group cursor-pointer active:scale-[0.98] transition-all">
                                         <div className="flex items-center gap-3 md:gap-4">
                                             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
                                                 <Info className="w-4 h-4" />
                                             </div>
                                             <div>
-                                                <p className="font-black text-sm md:text-base italic">Cash on Delivery (COD)</p>
-                                                <p className="text-[9px] md:text-[10px] text-muted-foreground font-medium">Pay when you receive your package</p>
+                                                <p className="font-black text-sm md:text-base italic text-slate-800">Cash on Delivery (COD)</p>
+                                                <p className="text-[9px] md:text-[10px] text-slate-400 font-medium">Pay when you receive your package</p>
                                             </div>
                                         </div>
                                         <div className="w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0">
@@ -171,8 +173,8 @@ export default function CheckoutPage() {
 
                     {/* RIGHT: Order Summary */}
                     <div className="space-y-6 md:space-y-8">
-                        <section className="bg-slate-50 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-border relative">
-                            <h2 className="text-xl md:text-2xl font-black tracking-tight mb-5 md:mb-6 italic uppercase">Order Summary</h2>
+                        <section className="bg-slate-50 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-slate-100 relative">
+                            <h2 className="text-xl md:text-2xl font-black tracking-tight mb-5 md:mb-6 italic uppercase text-slate-800">Order Summary</h2>
 
                             <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 mb-6 custom-scrollbar">
                                 <AnimatePresence>
@@ -183,17 +185,17 @@ export default function CheckoutPage() {
                                             initial={{ opacity: 0, x: 20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: -50 }}
-                                            className="flex gap-3 items-center p-3 bg-white rounded-2xl border border-border shadow-sm group"
+                                            className="flex gap-3 items-center p-3 bg-white rounded-2xl border border-slate-100 shadow-sm group"
                                         >
-                                            <div className="w-16 h-16 relative rounded-xl overflow-hidden bg-slate-100 border border-border shrink-0">
+                                            <div className="w-16 h-16 relative rounded-xl overflow-hidden bg-slate-100 border border-slate-100 shrink-0">
                                                 <Image src={item.image} alt={item.name} fill className="object-contain p-2" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="text-xs font-bold truncate group-hover:text-primary transition-colors">{item.name}</h3>
+                                                <h3 className="text-xs font-black uppercase text-slate-800 truncate group-hover:text-primary transition-colors">{item.name}</h3>
                                                 {item.prescription && (
                                                     <div className="flex flex-wrap gap-1 mt-0.5">
                                                         <span className="text-[7px] bg-primary/10 text-primary px-1 py-0.5 rounded font-black uppercase">{item.prescription.lensCategory.name}</span>
-                                                        <span className="text-[7px] bg-slate-100 text-muted-foreground px-1 py-0.5 rounded font-black uppercase">{item.prescription.lensType.name}</span>
+                                                        <span className="text-[7px] bg-slate-100 text-slate-400 px-1 py-0.5 rounded font-black uppercase">{item.prescription.lensType.name}</span>
                                                     </div>
                                                 )}
                                                 <div className="flex items-center justify-between mt-1.5">
@@ -217,7 +219,7 @@ export default function CheckoutPage() {
                                             </div>
                                             <Button
                                                 variant="ghost" size="icon"
-                                                className="text-destructive hover:bg-destructive/10 rounded-full shrink-0 w-8 h-8"
+                                                className="text-red-400 hover:bg-red-50 rounded-full shrink-0 w-8 h-8"
                                                 onClick={() => removeFromCart(item.id)}
                                             >
                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -227,18 +229,18 @@ export default function CheckoutPage() {
                                 </AnimatePresence>
                             </div>
 
-                            <div className="space-y-3 pt-6 border-t border-border">
-                                <div className="flex justify-between text-muted-foreground font-bold text-[10px] uppercase tracking-widest">
+                            <div className="space-y-3 pt-6 border-t border-slate-100">
+                                <div className="flex justify-between text-slate-400 font-black text-[10px] uppercase tracking-widest">
                                     <span>Subtotal</span>
-                                    <span className="text-foreground">Rs {cartTotal.toLocaleString()}</span>
+                                    <span className="text-slate-800">Rs {cartTotal.toLocaleString()}</span>
                                 </div>
-                                <div className="flex justify-between text-muted-foreground font-bold text-[10px] uppercase tracking-widest">
+                                <div className="flex justify-between text-slate-400 font-black text-[10px] uppercase tracking-widest">
                                     <span>Shipping</span>
-                                    <span className="text-green-500">FREE</span>
+                                    <span className="text-emerald-500">FREE</span>
                                 </div>
-                                <div className="h-[1px] bg-primary/10 my-4" />
+                                <div className="h-[1px] bg-slate-100 my-4" />
                                 <div className="flex justify-between items-end">
-                                    <span className="text-sm md:text-base font-black italic tracking-tighter uppercase text-muted-foreground">Net Total</span>
+                                    <span className="text-sm md:text-base font-black italic tracking-tighter uppercase text-slate-400">Net Total</span>
                                     <div className="text-right">
                                         <p className="text-2xl md:text-3xl font-black text-primary font-sans italic tracking-tighter">Rs {cartTotal.toLocaleString()}</p>
                                     </div>
@@ -249,7 +251,7 @@ export default function CheckoutPage() {
                                 type="submit"
                                 onClick={handleCheckout}
                                 disabled={isProcessing}
-                                className="w-full h-12 md:h-14 rounded-full font-black text-base md:text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 mt-6 md:mt-8 hover:scale-[1.02] transition-all italic active:scale-95 group relative overflow-hidden"
+                                className="w-full h-12 md:h-14 rounded-full font-black text-base md:text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 mt-6 md:mt-8 hover:scale-[1.02] transition-all italic active:scale-95 group relative overflow-hidden text-white"
                             >
                                 <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                                 {isProcessing ? "Processing..." : "Place Order (COD)"}
@@ -257,18 +259,18 @@ export default function CheckoutPage() {
                             </Button>
 
                             <div className="mt-6 flex items-center justify-center gap-4 p-3 bg-white/50 rounded-xl border border-white/50">
-                                <div className="flex items-center gap-1.5 text-[7px] md:text-[8px] uppercase font-bold tracking-widest text-muted-foreground">
-                                    <ShieldCheck className="w-3 h-3 text-green-500" />
+                                <div className="flex items-center gap-1.5 text-[7px] md:text-[8px] uppercase font-bold tracking-widest text-slate-400">
+                                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
                                     Authentic
                                 </div>
-                                <div className="w-[1px] h-3 bg-border" />
-                                <div className="flex items-center gap-1.5 text-[7px] md:text-[8px] uppercase font-bold tracking-widest text-muted-foreground">
-                                    <ShieldCheck className="w-3 h-3 text-green-500" />
+                                <div className="w-[1px] h-3 bg-slate-100" />
+                                <div className="flex items-center gap-1.5 text-[7px] md:text-[8px] uppercase font-bold tracking-widest text-slate-400">
+                                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
                                     Returns
                                 </div>
-                                <div className="w-[1px] h-3 bg-border" />
-                                <div className="flex items-center gap-1.5 text-[7px] md:text-[8px] uppercase font-bold tracking-widest text-muted-foreground">
-                                    <Truck className="w-3 h-3 text-green-500" />
+                                <div className="w-[1px] h-3 bg-slate-100" />
+                                <div className="flex items-center gap-1.5 text-[7px] md:text-[8px] uppercase font-bold tracking-widest text-slate-400">
+                                    <Truck className="w-3 h-3 text-emerald-500" />
                                     Fast Delivery
                                 </div>
                             </div>
@@ -276,6 +278,7 @@ export default function CheckoutPage() {
                     </div>
                 </div>
             </div>
+            <Footer />
         </main>
     );
 }

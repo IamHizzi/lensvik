@@ -1,209 +1,312 @@
 "use client";
 
 import React, { useState } from "react";
-import { Ruler, ShieldCheck, Heart, Star, Package, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Ruler, ShieldCheck, Heart, Star, Package, RefreshCw, CheckCircle2, ChevronDown, ChevronUp, Zap, Eye, Monitor, Droplets, Sparkles, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductSpecsProps {
-    measurements?: {
-        lensWidth: number;
-        bridgeWidth: number;
-        templeLength: number;
-    };
+    measurements?: { lensWidth: number; bridgeWidth: number; templeLength: number };
     description?: string;
 }
 
-export function ProductSpecs({ measurements, description }: ProductSpecsProps) {
-    const [activeTab, setActiveTab] = useState("details");
+const TABS = [
+    { id: "features",    label: "Features" },
+    { id: "how-it-works", label: "How It Works" },
+    { id: "specs",       label: "Tech Specs" },
+    { id: "faq",         label: "FAQ" },
+    { id: "reviews",     label: "Reviews" },
+];
 
-    const tabs = [
-        { id: "details", label: "The Vision" },
-        { id: "specs", label: "Technical Specs" },
-        { id: "reviews", label: "Client Voice" },
-    ];
+const FEATURES_LIST = [
+    { icon: ShieldCheck, color: "text-blue-600", bg: "bg-blue-50",    title: "UV400 Protection",       desc: "Blocks 100% of harmful UVA & UVB rays for all-day outdoor safety." },
+    { icon: Sparkles,    color: "text-violet-600", bg: "bg-violet-50", title: "Scratch-Resistant",      desc: "Diamond hard-coat multi-layer film that survives daily wear and tear." },
+    { icon: Droplets,    color: "text-emerald-600", bg: "bg-emerald-50", title: "Hydrophilic Coating", desc: "Water, oil and smudge-repellent surface — easy to wipe clean in seconds." },
+    { icon: Monitor,     color: "text-sky-600",    bg: "bg-sky-50",    title: "Blue Light Blocking",   desc: "Filters harmful HEV blue light from screens to reduce digital eye strain." },
+    { icon: Zap,         color: "text-amber-600",  bg: "bg-amber-50",  title: "Ultra-Light Frame",     desc: "Engineered from surgical-grade acetate or titanium alloy — weighs under 18g." },
+    { icon: Eye,         color: "text-primary",    bg: "bg-primary/10", title: "RX Compatible",        desc: "Every frame is precision-calibrated for single vision, bifocal and progressive lenses." },
+];
+
+const HOW_IT_WORKS = [
+    { step: "01", title: "Choose Your Frame",   desc: "Browse our catalog and pick the frame that matches your face shape and style. Use Virtual Try-On to see it on your face live.",   icon: Eye },
+    { step: "02", title: "Select Your Lenses",  desc: "Use our Lens Configurator to choose from Standard, Antiglare, Blu-Screen, Photochromic or Progressive — we guide you every step.", icon: Monitor },
+    { step: "03", title: "Enter Prescription",  desc: "Fill in your SPH, CYL, AXIS and ADD values. No prescription? Choose Zero Power lenses. Our opticians verify every order manually.", icon: ShieldCheck },
+    { step: "04", title: "Fast Delivery",        desc: "Your custom eyewear is crafted, quality-tested and shipped nationwide within 2–5 business days via a tracked courier.",             icon: Clock },
+];
+
+const FAQ_LIST = [
+    {
+        q: "Can I use my doctor's prescription directly?",
+        a: "Yes. Simply enter the values from your prescription slip (SPH, CYL, AXIS, ADD, PD) into our Lens Configurator. Our opticians double-check every prescription before production.",
+    },
+    {
+        q: "How accurate is the Virtual Try-On?",
+        a: "Our VTO uses your device's front camera and face-detection AI to overlay the frame in real-time at scale. It's best used in good lighting for maximum accuracy.",
+    },
+    {
+        q: "What if the frame doesn't fit me?",
+        a: "We offer a 30-day hassle-free return policy on unused frames. If there's a prescription issue, we'll re-make the lenses free of charge within our quality guarantee window.",
+    },
+    {
+        q: "How long does delivery take?",
+        a: "Standard delivery across Pakistan takes 2–5 business days from the day your order is confirmed. You'll receive a tracking number via WhatsApp or SMS.",
+    },
+    {
+        q: "Do you offer anti-reflective and blue-light lenses?",
+        a: "Absolutely. We carry Antiglare, Lensvik Blu Screen, Lensvik Blu Pro, and Smart Transition lenses. You can configure your choice directly on the product page.",
+    },
+    {
+        q: "Is Cash on Delivery available everywhere in Pakistan?",
+        a: "Yes — we ship COD to all major cities and many smaller towns nationwide. Online payment options are coming soon.",
+    },
+];
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <div className="border border-slate-100 rounded-2xl overflow-hidden bg-white">
+            <button
+                onClick={() => setOpen(!open)}
+                className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+            >
+                <span className="text-sm font-black text-slate-800 uppercase tracking-tight leading-snug pr-2">{q}</span>
+                {open
+                    ? <ChevronUp className="w-4 h-4 text-primary shrink-0" />
+                    : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
+            </button>
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="overflow-hidden"
+                    >
+                        <p className="px-5 pb-4 text-sm text-slate-500 font-medium leading-relaxed border-t border-slate-50 pt-3">
+                            {a}
+                        </p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+export function ProductSpecs({ measurements, description }: ProductSpecsProps) {
+    const [activeTab, setActiveTab] = useState("features");
 
     return (
-        <div className="mt-12 md:mt-20">
-            {/* Tab Navigation */}
-            <div className="flex flex-wrap gap-4 md:gap-8 mb-8 md:mb-12 border-b border-slate-100 italic font-black uppercase tracking-tighter">
-                <button 
-                    onClick={() => setActiveTab("details")}
-                    className={`pb-4 text-sm md:text-lg transition-all relative ${activeTab === "details" ? "text-primary" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                    The Vision
-                    {activeTab === "details" && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 w-full h-1 bg-primary" />}
-                </button>
-                <button 
-                    onClick={() => setActiveTab("specs")}
-                    className={`pb-4 text-sm md:text-lg transition-all relative ${activeTab === "specs" ? "text-primary" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                    Technical Specs
-                    {activeTab === "specs" && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 w-full h-1 bg-primary" />}
-                </button>
-                <button 
-                    onClick={() => setActiveTab("how-it-works")}
-                    className={`pb-4 text-sm md:text-lg transition-all relative ${activeTab === "how-it-works" ? "text-primary" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                    How It Works
-                    {activeTab === "how-it-works" && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 w-full h-1 bg-primary" />}
-                </button>
-                <button 
-                    onClick={() => setActiveTab("faq")}
-                    className={`pb-4 text-sm md:text-lg transition-all relative ${activeTab === "faq" ? "text-primary" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                    FAQ
-                    {activeTab === "faq" && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 w-full h-1 bg-primary" />}
-                </button>
-                <button 
-                    onClick={() => setActiveTab("reviews")}
-                    className={`pb-4 text-sm md:text-lg transition-all relative ${activeTab === "reviews" ? "text-primary" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                    Client Voice
-                    {activeTab === "reviews" && <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 w-full h-1 bg-primary" />}
-                </button>
+        <div className="mt-10 md:mt-16">
+            {/* ── Tab Navigation (horizontally scrollable on mobile) ── */}
+            <div className="flex gap-0 border-b border-slate-100 overflow-x-auto no-scrollbar mb-7 md:mb-10">
+                {TABS.map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`relative shrink-0 pb-3 px-4 md:px-6 text-xs md:text-sm font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+                            activeTab === tab.id ? "text-primary" : "text-slate-400 hover:text-slate-700"
+                        }`}
+                    >
+                        {tab.label}
+                        {activeTab === tab.id && (
+                            <motion.div layoutId="tab-line" className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full" />
+                        )}
+                    </button>
+                ))}
             </div>
 
-            {/* Tab Content */}
-            <div className="min-h-[250px]">
+            {/* ── Tab Content ── */}
+            <div className="min-h-[260px]">
                 <AnimatePresence mode="wait">
-                    {activeTab === "details" && (
-                        <motion.div
-                            key="details"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-20 items-center"
-                        >
-                            <div className="lg:col-span-3 space-y-8">
-                                <div className="space-y-4">
-                                    <h3 className="text-primary text-[10px] font-black uppercase tracking-[0.3em] italic">The Architectural Intent</h3>
-                                    <p className="text-xl md:text-4xl text-slate-800 font-black tracking-tighter leading-[1.1] italic uppercase">
-                                        {description || "A fusion of tectonic geometry and optical precision. hand-assembled using surgical-grade titanium."}
-                                    </p>
+
+                    {/* FEATURES */}
+                    {activeTab === "features" && (
+                        <motion.div key="features" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {FEATURES_LIST.map((f, i) => (
+                                    <div key={i} className="flex items-start gap-4 p-4 md:p-5 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all">
+                                        <div className={`w-10 h-10 md:w-11 md:h-11 rounded-xl ${f.bg} flex items-center justify-center shrink-0`}>
+                                            <f.icon className={`w-5 h-5 ${f.color}`} />
+                                        </div>
+                                        <div>
+                                            <p className={`text-[10px] font-black uppercase tracking-widest ${f.color} mb-1`}>{f.title}</p>
+                                            <p className="text-xs text-slate-500 font-medium leading-relaxed">{f.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
+                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">2-Year Warranty</span>
                                 </div>
-                                <p className="text-lg text-slate-500 font-medium leading-relaxed italic max-w-2xl">
-                                    Experience the future of eyewear with a frame that feels as light as air while maintaining structural integrity for decades. Every angle is calculated for optimal weight distribution.
+                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
+                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">30-Day Returns</span>
+                                </div>
+                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
+                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Free Nationwide Shipping</span>
+                                </div>
+                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
+                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Rx Verified</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* HOW IT WORKS */}
+                    {activeTab === "how-it-works" && (
+                        <motion.div key="how" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {HOW_IT_WORKS.map((step, i) => (
+                                    <div key={i} className="relative bg-white border border-slate-100 rounded-2xl p-5 md:p-6 hover:shadow-lg hover:border-primary/20 transition-all group">
+                                        {/* Step number */}
+                                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-3 block">{step.step}</span>
+                                        {/* Connector line */}
+                                        {i < HOW_IT_WORKS.length - 1 && (
+                                            <div className="hidden lg:block absolute top-10 right-0 w-4 h-0.5 bg-slate-100 translate-x-full" />
+                                        )}
+                                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-all">
+                                            <step.icon className="w-5 h-5 text-primary group-hover:text-white transition-colors" />
+                                        </div>
+                                        <h3 className="text-sm font-black uppercase tracking-tight text-slate-900 mb-2">{step.title}</h3>
+                                        <p className="text-xs text-slate-500 font-medium leading-relaxed">{step.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-5 bg-gradient-to-r from-primary/5 to-blue-500/5 border border-primary/10 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                <ShieldCheck className="w-8 h-8 text-primary shrink-0" />
+                                <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                                    <span className="font-black text-slate-900">Every prescription is verified by our in-house opticians</span> before your lenses go into production — guaranteeing optical accuracy and comfort.
                                 </p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                                    <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5 group hover:border-primary/20 transition-all">
-                                        <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0">
-                                            <ShieldCheck className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <span className="block text-[10px] font-black uppercase tracking-widest italic text-primary mb-1">Lifetime Care</span>
-                                            <span className="block text-xs font-black uppercase tracking-tighter italic">2-Year Structural Warranty</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex items-center gap-5 group hover:border-primary/20 transition-all">
-                                        <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0">
-                                            <Package className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <span className="block text-[10px] font-black uppercase tracking-widest italic text-primary mb-1">Sustainable</span>
-                                            <span className="block text-xs font-black uppercase tracking-tighter italic">Eco-Consious Recyclable Case</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="lg:col-span-2 relative aspect-square lg:aspect-[4/5] bg-slate-100 rounded-[3rem] overflow-hidden group">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/20 to-transparent z-10" />
-                                <img 
-                                    src="/images/front-banner.jpeg" 
-                                    alt="Craftsmanship" 
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                                />
-                                <div className="absolute bottom-8 left-8 z-20">
-                                    <span className="px-5 py-2 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em] italic shadow-xl">Artisan Craftsmanship</span>
-                                </div>
                             </div>
                         </motion.div>
                     )}
 
+                    {/* TECH SPECS */}
                     {activeTab === "specs" && (
-                        <motion.div
-                            key="specs"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="bg-slate-50 rounded-[3rem] p-8 md:p-12 overflow-hidden"
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
-                                <div className="space-y-6">
-                                    <h4 className="text-xs font-black uppercase italic tracking-widest text-primary">Frame Metrics</h4>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between border-b pb-2">
-                                            <span className="text-[10px] font-black uppercase text-slate-400">Temple Length</span>
-                                            <span className="text-xs font-bold italic font-sans">{measurements?.templeLength || 145}mm</span>
+                        <motion.div key="specs" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Ruler className="w-4 h-4 text-primary" />
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Frame Dimensions</h4>
+                                    </div>
+                                    {[
+                                        ["Lens Width", `${measurements?.lensWidth || 52}mm`],
+                                        ["Bridge Width", `${measurements?.bridgeWidth || 18}mm`],
+                                        ["Temple Length", `${measurements?.templeLength || 145}mm`],
+                                        ["Frame Weight", "≈ 18g"],
+                                    ].map(([k, v]) => (
+                                        <div key={k} className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{k}</span>
+                                            <span className="text-xs font-bold font-mono text-slate-800">{v}</span>
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
-
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-3">
-                                        <Heart className="w-5 h-5 text-primary" />
-                                        <h4 className="text-xs font-black uppercase italic tracking-widest">Material & Build</h4>
+                                <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Heart className="w-4 h-4 text-primary" />
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Material & Build</h4>
                                     </div>
-                                    <div className="space-y-4 text-[11px] font-semibold text-slate-600 leading-relaxed italic">
-                                        <p>• Hand-carved Surgical Acetate</p>
-                                        <p>• 7-Barrel Steel Hinges</p>
-                                        <p>• Integrated Wire Core</p>
-                                        <p>• Hypoallergenic Nose Pads</p>
-                                    </div>
+                                    {[
+                                        ["Frame Material", "Surgical Acetate"],
+                                        ["Hinge Type", "7-Barrel Steel"],
+                                        ["Nose Pads", "Hypoallergenic"],
+                                        ["Core Wire", "Integrated Steel"],
+                                    ].map(([k, v]) => (
+                                        <div key={k} className="flex justify-between items-center border-b border-slate-50 pb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{k}</span>
+                                            <span className="text-xs font-bold text-slate-800">{v}</span>
+                                        </div>
+                                    ))}
                                 </div>
-
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-3">
-                                        <RefreshCw className="w-5 h-5 text-primary" />
-                                        <h4 className="text-xs font-black uppercase italic tracking-widest">Returns & Care</h4>
+                                <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <RefreshCw className="w-4 h-4 text-primary" />
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Warranty & Care</h4>
                                     </div>
-                                    <p className="text-[11px] font-semibold text-slate-400 leading-relaxed italic">
-                                        Complimentary professional cleaning kit included. Clean only with provided microfiber cloth. 14-day hassle-free returns for unused frames.
+                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                                        Complimentary professional cleaning kit included. Clean only with the provided microfiber cloth — never paper or clothing.
                                     </p>
+                                    <div className="pt-2 space-y-2">
+                                        {["2-Year Structural Warranty", "14-Day Hassle-Free Returns", "Free Lens Adjustment (30 days)"].map(p => (
+                                            <div key={p} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-600">
+                                                <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />{p}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
                     )}
 
-                    {activeTab === "reviews" && (
-                        <motion.div
-                            key="reviews"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="space-y-6"
-                        >
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <h3 className="text-4xl font-black italic tracking-tight">4.9</h3>
-                                        <div className="flex text-yellow-400">
-                                            {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 fill-current" />)}
-                                        </div>
-                                    </div>
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest italic">Based on 48 verified purchases</p>
-                                </div>
-                                <button className="h-14 px-8 bg-slate-900 text-white rounded-2xl font-black italic uppercase tracking-widest text-xs hover:bg-black transition-all">Write A Review</button>
+                    {/* FAQ */}
+                    {activeTab === "faq" && (
+                        <motion.div key="faq" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div className="space-y-2 max-w-3xl">
+                                {FAQ_LIST.map((item, i) => <FaqItem key={i} q={item.q} a={item.a} />)}
                             </div>
+                            <div className="mt-6 bg-slate-900 rounded-2xl px-5 py-4 flex flex-col sm:flex-row items-center gap-4 justify-between max-w-3xl">
+                                <p className="text-sm font-medium text-white/70">Still have a question?</p>
+                                <a
+                                    href="https://wa.me/923709573005"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[10px] font-black uppercase tracking-widest text-white bg-primary hover:bg-primary/90 px-4 py-2 rounded-full transition-all shrink-0"
+                                >
+                                    WhatsApp Us →
+                                </a>
+                            </div>
+                        </motion.div>
+                    )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {[1, 2].map((i) => (
-                                    <div key={i} className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex text-yellow-500">
+                    {/* REVIEWS */}
+                    {activeTab === "reviews" && (
+                        <motion.div key="reviews" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                                <div className="flex items-baseline gap-3">
+                                    <span className="text-4xl font-black italic tracking-tight">4.9</span>
+                                    <div>
+                                        <div className="flex text-yellow-400 mb-0.5">
+                                            {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                                        </div>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">48 verified reviews</p>
+                                    </div>
+                                </div>
+                                <button className="h-10 px-6 bg-slate-900 text-white rounded-xl font-black italic uppercase tracking-widest text-xs hover:bg-black transition-all w-fit">
+                                    Write A Review
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {[
+                                    { name: "Sarah Ahmed", text: "Far superior quality to anything I've owned before. Extremely lightweight and fits like a dream.", ago: "2 weeks ago" },
+                                    { name: "Ali Raza", text: "The Blu Pro lenses are incredible — no more eye fatigue after long work sessions. Highly recommended!", ago: "1 month ago" },
+                                ].map((r, i) => (
+                                    <div key={i} className="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex text-yellow-400">
                                                 {[...Array(5)].map((_, j) => <Star key={j} className="w-3 h-3 fill-current" />)}
                                             </div>
-                                            <span className="text-[9px] font-black uppercase text-slate-300 italic">2 weeks ago</span>
+                                            <span className="text-[9px] font-black uppercase text-slate-300">{r.ago}</span>
                                         </div>
-                                        <p className="text-sm font-semibold text-slate-700 italic leading-relaxed mb-6 italic">&quot;The frame quality is far superior to anything I&apos;ve owned before. Extremely lightweight and fits like a dream.&quot;</p>
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-slate-100" />
-                                            <span className="text-[11px] font-black uppercase tracking-tighter italic">Sarah Ahmed <span className="text-primary italic">Verified</span></span>
+                                        <p className="text-sm text-slate-600 font-medium italic leading-relaxed mb-4">"{r.text}"</p>
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-[10px]">
+                                                {r.name.split(" ").map(n => n[0]).join("")}
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-tight text-slate-700">
+                                                {r.name} <span className="text-emerald-500">· Verified</span>
+                                            </span>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </motion.div>
                     )}
+
                 </AnimatePresence>
             </div>
         </div>

@@ -25,7 +25,7 @@ export function SidebarFilters({ filters, onFilterChange, activeFilters }: Sideb
                     Refine
                     <Badge variant="secondary" className="font-bold text-[10px] uppercase">{activeFilters.totalCount} Results</Badge>
                 </h3>
-                
+
                 <Accordion type="multiple" defaultValue={["category", "price", "coating", "features"]} className="w-full">
                     <AccordionItem value="category" className="border-slate-100">
                         <AccordionTrigger className="hover:no-underline py-4">
@@ -34,8 +34,8 @@ export function SidebarFilters({ filters, onFilterChange, activeFilters }: Sideb
                         <AccordionContent className="pb-6 space-y-3">
                             {filters.categories.map((cat) => (
                                 <div key={cat} className="flex items-center space-x-3 group cursor-pointer">
-                                    <Checkbox 
-                                        id={cat} 
+                                    <Checkbox
+                                        id={cat}
                                         checked={activeFilters.categories.includes(cat)}
                                         onCheckedChange={() => onFilterChange("categories", cat)}
                                         className="h-5 w-5 rounded-md data-[state=checked]:bg-primary"
@@ -74,8 +74,8 @@ export function SidebarFilters({ filters, onFilterChange, activeFilters }: Sideb
                         <AccordionContent className="pb-6 space-y-3">
                             {filters.coatings.map((coating) => (
                                 <div key={coating} className="flex items-center space-x-3 group cursor-pointer">
-                                    <Checkbox 
-                                        id={coating} 
+                                    <Checkbox
+                                        id={coating}
                                         checked={activeFilters.coatings.includes(coating)}
                                         onCheckedChange={() => onFilterChange("coatings", coating)}
                                         className="h-5 w-5 rounded-md data-[state=checked]:bg-primary"
@@ -95,8 +95,8 @@ export function SidebarFilters({ filters, onFilterChange, activeFilters }: Sideb
                         <AccordionContent className="pb-6 space-y-3">
                             {filters.features.map((feature) => (
                                 <div key={feature} className="flex items-center space-x-3 group cursor-pointer">
-                                    <Checkbox 
-                                        id={feature} 
+                                    <Checkbox
+                                        id={feature}
                                         checked={activeFilters.features.includes(feature)}
                                         onCheckedChange={() => onFilterChange("features", feature)}
                                         className="h-5 w-5 rounded-md data-[state=checked]:bg-primary"

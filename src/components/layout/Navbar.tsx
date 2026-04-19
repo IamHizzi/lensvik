@@ -47,9 +47,9 @@ export function Navbar() {
                             <Image
                                 src="/logo-1.png"
                                 alt="Lensvik"
-                                width={220}
-                                height={75}
-                                className="h-12 md:h-16 w-auto object-contain"
+                                width={260}
+                                height={85}
+                                className="h-16 md:h-22 w-auto object-contain transition-all duration-300"
                                 priority={true}
                             />
                         </Link>
@@ -120,7 +120,7 @@ export function Navbar() {
                 <div className="flex flex-col h-full p-6 pb-12">
                     <div className="flex items-center justify-between mb-12">
                         <Link href="/" className="flex items-center" onClick={() => setIsMenuOpen(false)}>
-                            <Image src="/logo-1.png" alt="Lensvik" width={180} height={60} className="h-14 w-auto object-contain" />
+                            <Image src="/logo-1.png" alt="Lensvik" width={220} height={80} className="h-20 w-auto object-contain" />
                         </Link>
                         <Button variant="ghost" size="icon" className="text-slate-900" onClick={() => setIsMenuOpen(false)}>
                             <X className="w-8 h-8" />

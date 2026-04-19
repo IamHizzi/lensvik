@@ -141,11 +141,9 @@ body {
   }
 }
 
-/* Improved touch targets for mobile */
-button,
-a {
+/* Improved touch targets for mobile - only min-height, not min-width (breaks price layout) */
+button {
   min-height: 44px;
-  min-width: 44px;
 }
 
 /* Premium text rendering */
@@ -165,19 +163,40 @@ h2 {
 
 h3 {
   @apply font-heading transition-all;
-  font-size: 20px;
+  font-size: 13px;
   font-weight: 500;
   line-height: 1.4;
 }
 
+@media (min-width: 768px) {
+  h3 {
+    font-size: 18px;
+  }
+}
+
 .text-small {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 400;
 }
 
+@media (min-width: 768px) {
+  .text-small {
+    font-size: 13px;
+  }
+}
+
 .price-tag {
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .price-tag {
+    font-size: 20px;
+    font-weight: 600;
+  }
 }
 
 .btn-text {

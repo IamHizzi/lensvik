@@ -43,9 +43,9 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                     />
                 </Link>
 
-                <CardContent className="p-3 md:p-4 flex flex-col flex-1">
+                <CardContent className="p-2 md:p-4 flex flex-col flex-1">
                     <Link href={`/products/${_id}`}>
-                        <h3 className="group-hover:text-primary transition-colors line-clamp-2 min-h-[34px] md:min-h-[40px] uppercase italic">
+                        <h3 className="group-hover:text-primary transition-colors line-clamp-2 leading-tight min-h-[32px] md:min-h-[40px] uppercase italic text-[11px] md:text-base font-bold">
                             {name}
                         </h3>
                     </Link>
@@ -59,9 +59,9 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                         ))}
                     </div>
 
-                    <div className="flex items-center gap-2 mb-1.5 md:mb-2">
+                    <div className="flex flex-col mb-1.5 md:mb-2">
                         {originalPrice && (
-                            <span className="text-small text-muted-foreground line-through">Rs {originalPrice.toLocaleString()}</span>
+                            <span className="text-small text-muted-foreground line-through leading-none">Rs {originalPrice.toLocaleString()}</span>
                         )}
                         <span className="price-tag text-[#e67e22]">Rs {price.toLocaleString()}</span>
                     </div>
@@ -72,9 +72,9 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                         </p>
                     )}
 
-                    <div className="mt-auto grid grid-cols-2 gap-2 md:gap-3">
+                    <div className="mt-auto flex flex-col gap-1.5 md:grid md:grid-cols-2 md:gap-3">
                         <Link href={`/products/${_id}?tryon=true`} className="w-full">
-                            <Button variant="secondary" className="w-full bg-[#f0f0f0] hover:bg-[#e0e0e0] text-foreground btn-text rounded-xl h-10 md:h-11 border-none tracking-widest">
+                            <Button variant="secondary" className="w-full bg-[#f0f0f0] hover:bg-[#e0e0e0] text-foreground btn-text rounded-xl h-8 md:h-11 border-none tracking-widest text-[10px] md:text-xs">
                                 Try On
                             </Button>
                         </Link>
@@ -85,9 +85,9 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
                                 addToCart({ productId: _id, name, price, image });
                                 toast.success("Added to cart!");
                             }}
-                            className="w-full bg-primary text-white btn-text rounded-xl h-10 md:h-11 shadow-lg shadow-primary/20 tracking-widest"
+                            className="w-full bg-primary text-white btn-text rounded-xl h-8 md:h-11 shadow-lg shadow-primary/20 tracking-widest text-[10px] md:text-xs"
                         >
-                            <ShoppingCart className="w-4 h-4 mr-1 md:mr-1.5" />
+                            <ShoppingCart className="w-3 h-3 mr-1 md:w-4 md:h-4 md:mr-1.5" />
                             Add
                         </Button>
                     </div>
