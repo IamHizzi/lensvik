@@ -8,7 +8,7 @@ import { getProductById, Product } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Heart, Share2, Ruler, ShieldCheck, Truck } from "lucide-react";
+import { ShoppingCart, Heart, Share2, Ruler, ShieldCheck, Truck, CheckCircle, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
@@ -188,7 +188,7 @@ export default function ProductPage() {
                                     ].map(feature => (
                                         <div key={feature} className="flex items-center gap-2 text-[10px] md:text-xs font-black uppercase tracking-tighter italic text-slate-600">
                                             <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <CheckCircle className="w-3 h-3 text-primary" />
+                                                <CheckCircle2 className="w-3 h-3 text-primary" />
                                             </div>
                                             {feature}
                                         </div>
