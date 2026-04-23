@@ -10,7 +10,7 @@ export default function AboutPage() {
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <section className="pt-28 md:pt-36 pb-20 md:pb-32 container mx-auto px-6">
+            <section className="pt-36 md:pt-44 pb-20 md:pb-32 container mx-auto px-6">
                 <div className="max-w-4xl mx-auto">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}

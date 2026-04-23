@@ -120,7 +120,7 @@ export default function FaqPage() {
             <Navbar />
 
             {/* ── Hero section ── */}
-            <section className="relative pt-28 md:pt-36 pb-12 overflow-hidden">
+            <section className="relative pt-36 md:pt-44 pb-12 overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-b from-primary/5 to-transparent -z-10" />
                 <div className="container mx-auto px-4 md:px-6">
                     <div className="max-w-3xl mx-auto text-center">

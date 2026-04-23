@@ -11,31 +11,31 @@ import {
 const FOOTER_NAV = {
     Shop: [
         { name: "All Eyewear", href: "/collections" },
-        { name: "Eyeglasses",  href: "/category/eyeglasses" },
-        { name: "Sunglasses",  href: "/category/sunglasses" },
-        { name: "Blue Light",  href: "/category/eyeglasses" },
+        { name: "Eyeglasses", href: "/category/eyeglasses" },
+        { name: "Sunglasses", href: "/category/sunglasses" },
+        { name: "Blue Light", href: "/category/eyeglasses" },
         { name: "NextGen Collection", href: "/category/nextgen" },
     ],
     Support: [
-        { name: "Track My Order",  href: "/track-order" },
-        { name: "Return Policy",   href: "/return-policy" },
-        { name: "FAQs",            href: "/faqs" },
-        { name: "About Lensvik",   href: "/about" },
-        { name: "Contact Us",      href: "/contact" },
+        { name: "Track My Order", href: "/track-order" },
+        { name: "Return Policy", href: "/return-policy" },
+        { name: "FAQs", href: "/faqs" },
+        { name: "About Lensvik", href: "/about" },
+        { name: "Contact Us", href: "/contact" },
     ],
 };
 
 const SOCIALS = [
-    { icon: Facebook,       href: "#",                          label: "Facebook",  ring: "hover:bg-[#1877F2]" },
-    { icon: Instagram,      href: "#",                          label: "Instagram", ring: "hover:bg-gradient-to-tr hover:from-yellow-500 hover:via-pink-500 hover:to-purple-600" },
-    { icon: Twitter,        href: "#",                          label: "Twitter",   ring: "hover:bg-[#1DA1F2]" },
-    { icon: MessageCircle,  href: "https://wa.me/923709573005", label: "WhatsApp",  ring: "hover:bg-[#25D366]", external: true },
+    { icon: Facebook, href: "#", label: "Facebook", ring: "hover:bg-[#1877F2]" },
+    { icon: Instagram, href: "#", label: "Instagram", ring: "hover:bg-gradient-to-tr hover:from-yellow-500 hover:via-pink-500 hover:to-purple-600" },
+    { icon: Twitter, href: "#", label: "Twitter", ring: "hover:bg-[#1DA1F2]" },
+    { icon: MessageCircle, href: "https://wa.me/923709573005", label: "WhatsApp", ring: "hover:bg-[#25D366]", external: true },
 ];
 
 const CERTS = ["UV400 Verified", "ISO Certified", "CE Compliant"];
 
 export function Footer() {
-    const [email, setEmail]       = useState("");
+    const [email, setEmail] = useState("");
     const [subscribed, setSubscribed] = useState(false);
 
     const handleSubscribe = (e: React.FormEvent) => {
@@ -198,16 +198,7 @@ export function Footer() {
                     </p>
 
                     {/* Payment icons */}
-                    <div className="flex items-center gap-4 order-1 sm:order-2 opacity-40 hover:opacity-100 transition-opacity duration-500">
-                        {[
-                            { src: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg",         alt: "Visa",       h: "h-3.5" },
-                            { src: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg",        alt: "Mastercard", h: "h-5" },
-                            { src: "https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg",                 alt: "PayPal",     h: "h-4" },
-                            { src: "https://upload.wikimedia.org/wikipedia/commons/b/b7/Apple_Pay_logo.svg",         alt: "Apple Pay",  h: "h-5" },
-                        ].map(p => (
-                            <img key={p.alt} src={p.src} alt={p.alt} className={`${p.h}`} />
-                        ))}
-                    </div>
+
                 </div>
             </div>
         </footer>

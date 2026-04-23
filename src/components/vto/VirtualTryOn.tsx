@@ -515,6 +515,16 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
 
                     {isLoaded && (
                         <>
+                            {/* Disclaimer Overlay */}
+                            <div className="absolute top-16 md:top-20 left-1/2 -translate-x-1/2 z-40 w-[85%] max-w-md">
+                                <div className="bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-xl text-center">
+                                    <p className="text-[10px] md:text-xs text-white/90 font-medium tracking-tight leading-relaxed">
+                                        <span className="text-blue-400 font-bold mr-1">NOTE:</span>
+                                        This feature is for trial purposes only and does not represent the actual size.
+                                    </p>
+                                </div>
+                            </div>
+
                             <div className="absolute top-4 left-4 z-40">
                                 <div className="flex items-center gap-1.5 md:gap-3 bg-black/70 backdrop-blur-md px-3 py-2 rounded-full border border-white/10">
                                     <div className={`w-2 h-2 rounded-full ${isTracking ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-red-500 animate-pulse'}`} />

@@ -24,6 +24,8 @@ interface ProductCardProps {
 export function ProductCard({ _id, name, price, originalPrice, size, rating = 5, image, category, index }: ProductCardProps) {
     const { addToCart } = useCart();
 
+    const isSale = originalPrice && originalPrice > price;
+
     return (
         <motion.div
             variants={{
@@ -32,67 +34,48 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
             }}
             className="group"
         >
-            <Card className="overflow-hidden border border-border/50 shadow-sm bg-white hover:shadow-xl transition-all duration-300 rounded-2xl flex flex-col h-full">
-                <Link href={`/products/${_id}`} className="relative aspect-square overflow-hidden bg-[#f5f5f5]">
+            <div className="flex flex-col h-full bg-white transition-all duration-300">
+                <Link href={`/products/${_id}`} className="relative aspect-[4/3] overflow-hidden bg-white mb-2 md:mb-4">
                     <Image
                         src={image}
                         alt={name}
                         fill
-                        className="object-contain p-2 transition-transform duration-700 group-hover:scale-110"
+                        className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
                 </Link>
 
-                <CardContent className="p-2 md:p-4 flex flex-col flex-1">
+                <div className="flex flex-col flex-1 px-1">
+                    <Link href={`/products/${_id}`} className="w-full mb-3 md:mb-4">
+                        <Button variant="outline" className="w-full border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white rounded-none h-10 md:h-12 uppercase tracking-widest text-[10px] md:text-xs font-bold transition-all duration-300">
+                            Quick View
+                        </Button>
+                    </Link>
+
                     <Link href={`/products/${_id}`}>
-                        <h3 className="group-hover:text-primary transition-colors line-clamp-2 leading-tight min-h-[32px] md:min-h-[40px] uppercase italic text-[11px] md:text-base font-bold">
+                        <h3 className="text-slate-900 hover:text-primary transition-colors line-clamp-2 leading-tight min-h-[32px] md:min-h-[44px] text-sm md:text-base font-semibold mb-1">
                             {name}
                         </h3>
                     </Link>
 
-                    <div className="flex gap-0.5 mb-1.5 md:mb-2">
-                        {[...Array(5)].map((_, i) => (
-                            <Star
-                                key={i}
-                                className={`w-3 h-3 md:w-3.5 md:h-3.5 ${i < (rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                            />
-                        ))}
-                    </div>
-
-                    <div className="flex flex-col mb-1.5 md:mb-2">
-                        {originalPrice && (
-                            <span className="text-small text-muted-foreground line-through leading-none">Rs {originalPrice.toLocaleString()}</span>
-                        )}
-                        <span className="price-tag text-[#e67e22]">Rs {price.toLocaleString()}</span>
-                    </div>
-
-                    {size && (
-                        <p className="text-[10px] md:text-xs text-muted-foreground mb-2 md:mb-3">
-                            Size: <span className="text-foreground font-medium">{size}</span>
-                        </p>
+                    {isSale && (
+                        <span className="text-red-600 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-0.5">
+                            SALE
+                        </span>
                     )}
 
-                    <div className="mt-auto flex flex-col gap-1.5 md:grid md:grid-cols-2 md:gap-3">
-                        <Link href={`/products/${_id}?tryon=true`} className="w-full">
-                            <Button variant="secondary" className="w-full bg-[#f0f0f0] hover:bg-[#e0e0e0] text-foreground btn-text rounded-xl h-8 md:h-11 border-none tracking-widest text-[10px] md:text-xs">
-                                Try On
-                            </Button>
-                        </Link>
-                        <Button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                addToCart({ productId: _id, name, price, image });
-                                toast.success("Added to cart!");
-                            }}
-                            className="w-full bg-primary text-white btn-text rounded-xl h-8 md:h-11 shadow-lg shadow-primary/20 tracking-widest text-[10px] md:text-xs"
-                        >
-                            <ShoppingCart className="w-3 h-3 mr-1 md:w-4 md:h-4 md:mr-1.5" />
-                            Add
-                        </Button>
+                    <div className="flex items-baseline gap-2 mb-4">
+                        <span className="text-slate-900 font-bold text-sm md:text-base">
+                            Rs.{price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        {originalPrice && (
+                            <span className="text-slate-400 line-through text-[11px] md:text-sm">
+                                Rs.{originalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </span>
+                        )}
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </motion.div>
     );
 }

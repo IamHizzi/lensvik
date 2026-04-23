@@ -35,7 +35,7 @@ export default function TrackOrderPage() {
             <Navbar />
 
             {/* Hero */}
-            <section className="relative pt-28 md:pt-36 pb-14 md:pb-20 overflow-hidden">
+            <section className="relative pt-36 md:pt-44 pb-14 md:pb-20 overflow-hidden">
                 <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-transparent" />
                 <div className="absolute top-24 right-[-100px] w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] -z-10" />
 

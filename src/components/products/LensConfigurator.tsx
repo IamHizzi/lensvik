@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     X, ChevronRight, ChevronLeft, Check, Info,
     ShieldCheck, Eye, Monitor, Star, Zap, Layers,
+    MessageCircle, Volume2, VolumeX, Upload, ImageIcon, Loader2, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
@@ -231,6 +232,10 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
         os_sph: "", os_cyl: "", os_axis: "", os_add: "",
         pd: "",
     });
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [uploadState, setUploadState] = useState<"idle" | "loading" | "done">("idle");
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const { addToCart } = useCart();
 
@@ -261,6 +266,96 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
     const handlePrescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPrescription({ ...prescription, [e.target.name]: e.target.value });
     };
+
+    const handleUrduVoiceGuide = () => {
+        if (isSpeaking) {
+            // Stop playback
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+            setIsSpeaking(false);
+            return;
+        }
+        // Start playback
+        if (!audioRef.current) {
+            audioRef.current = new Audio("/eyesight.mp3");
+            audioRef.current.onended = () => setIsSpeaking(false);
+            audioRef.current.onerror = () => {
+                setIsSpeaking(false);
+                toast.error("Could not load audio guide.");
+            };
+        }
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {
+            setIsSpeaking(false);
+            toast.error("Could not play audio guide.");
+        });
+        setIsSpeaking(true);
+    };
+
+    const handlePrescriptionImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please upload an image file.");
+            return;
+        }
+        setUploadState("loading");
+        try {
+            // Dynamically import Tesseract.js (avoids SSR issues)
+            const Tesseract = (await import("tesseract.js")).default;
+            const result = await Tesseract.recognize(file, "eng", {
+                logger: () => {}, // suppress console logs
+            });
+            const text = result.data.text;
+
+            // ── Prescription parser ──────────────────────────────────────
+            const getVal = (patterns: RegExp[]): string => {
+                for (const re of patterns) {
+                    const m = text.match(re);
+                    if (m) return m[1].trim();
+                }
+                return "";
+            };
+
+            // Generic matcher: "LABEL ... ±number"
+            const num = "([+-]?\\d+\\.?\\d*)";
+            const ws  = "[\\s:=]+";
+
+            const parsed = {
+                // Right Eye (OD)
+                od_sph:  getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}SPH${ws}${num}`, "i"), new RegExp(`SPH${ws}${num}`, "i")]),
+                od_cyl:  getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}CYL${ws}${num}`, "i"), new RegExp(`CYL${ws}${num}`, "i")]),
+                od_axis: getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}AXIS${ws}(\\d+)`, "i"), new RegExp(`AXIS${ws}(\\d+)`, "i")]),
+                od_add:  getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}ADD${ws}${num}`, "i"), new RegExp(`ADD${ws}${num}`, "i")]),
+                // Left Eye (OS)
+                os_sph:  getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}SPH${ws}${num}`, "i")]),
+                os_cyl:  getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}CYL${ws}${num}`, "i")]),
+                os_axis: getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}AXIS${ws}(\\d+)`, "i")]),
+                os_add:  getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}ADD${ws}${num}`, "i")]),
+                // PD
+                pd:      getVal([new RegExp(`PD${ws}(\\d+\\.?\\d*)`, "i"), new RegExp(`Pupillary[\\s\\S]{0,20}(\\d{2})`, "i")]),
+            };
+
+            const anyFound = Object.values(parsed).some(v => v !== "");
+            if (anyFound) {
+                setPrescription(parsed);
+                setUploadState("done");
+                toast.success("Prescription extracted! Please verify the values.");
+            } else {
+                setUploadState("idle");
+                toast.warning("Could not extract prescription values. Please enter them manually or try a clearer image.");
+            }
+        } catch (err) {
+            console.error("OCR error:", err);
+            setUploadState("idle");
+            toast.error("OCR failed. Please enter prescription values manually.");
+        }
+        // Reset file input so same file can be re-uploaded
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
 
     const handleAddToCart = () => {
         const total = product.price + (selectedLens?.price || 0);
@@ -566,6 +661,113 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                                         placeholder="64"
                                         className="w-20 h-11 text-center bg-slate-50 border border-slate-100 rounded-xl focus:border-primary/40 focus:ring-2 focus:ring-primary/10 font-bold text-base text-slate-800 outline-none transition-all"
                                     />
+                                </div>
+
+                                {/* ── 3 Helper Tools ── */}
+                                <div className="space-y-3">
+
+                                    {/* 1. WhatsApp Button */}
+                                    <a
+                                        href={`https://wa.me/923709573005?text=${encodeURIComponent(`Hi! I need help selecting lenses for: ${product.name} (Rs ${product.price.toLocaleString()}). Lens selected: ${selectedLens?.name || 'Not yet selected'}. Can you assist?`)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-3 w-full bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 rounded-2xl px-4 py-3.5 transition-all group"
+                                    >
+                                        <div className="w-10 h-10 bg-[#25D366] rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                                            <MessageCircle className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-black uppercase tracking-wide text-slate-800">Need Help? Chat on WhatsApp</p>
+                                            <p className="text-[10px] text-slate-400 font-medium">Our optician will guide you through your prescription</p>
+                                        </div>
+                                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#25D366] transition-colors shrink-0" />
+                                    </a>
+
+                                    {/* 2. Urdu Voice Guide */}
+                                    <button
+                                        onClick={handleUrduVoiceGuide}
+                                        className={`flex items-center gap-3 w-full border rounded-2xl px-4 py-3.5 transition-all group text-left ${
+                                            isSpeaking
+                                                ? "bg-primary/10 border-primary/30"
+                                                : "bg-slate-50 border-slate-200 hover:border-primary/30 hover:bg-primary/5"
+                                        }`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-colors ${
+                                            isSpeaking ? "bg-primary" : "bg-slate-200 group-hover:bg-primary/20"
+                                        }`}>
+                                            {isSpeaking
+                                                ? <VolumeX className="w-5 h-5 text-white" />
+                                                : <Volume2 className="w-5 h-5 text-slate-600 group-hover:text-primary" />
+                                            }
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`text-xs font-black uppercase tracking-wide ${
+                                                isSpeaking ? "text-primary" : "text-slate-800"
+                                            }`}>
+                                                {isSpeaking ? "Stop Voice Guide" : "اردو آواز رہنما — Urdu Voice Guide"}
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 font-medium">Press to hear prescription field explanations in Urdu</p>
+                                        </div>
+                                        {isSpeaking && (
+                                            <div className="flex gap-0.5 items-end shrink-0">
+                                                {[...Array(4)].map((_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="w-1 bg-primary rounded-full animate-bounce"
+                                                        style={{ height: `${8 + i * 4}px`, animationDelay: `${i * 0.1}s` }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </button>
+
+                                    {/* 3. Upload Prescription Image */}
+                                    <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
+                                        <div className="px-4 py-3.5 flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-colors ${
+                                                uploadState === "done" ? "bg-emerald-500" : "bg-slate-200"
+                                            }`}>
+                                                {uploadState === "loading"
+                                                    ? <Loader2 className="w-5 h-5 text-slate-600 animate-spin" />
+                                                    : uploadState === "done"
+                                                    ? <Sparkles className="w-5 h-5 text-white" />
+                                                    : <ImageIcon className="w-5 h-5 text-slate-600" />
+                                                }
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-black uppercase tracking-wide text-slate-800">
+                                                    {uploadState === "loading" ? "Extracting prescription…" : uploadState === "done" ? "Prescription Extracted ✓" : "Upload Prescription Image"}
+                                                </p>
+                                                <p className="text-[10px] text-slate-400 font-medium">
+                                                    {uploadState === "done" ? "Values filled — please verify before continuing" : "We'll auto-fill your prescription from the photo"}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                disabled={uploadState === "loading"}
+                                                className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-900 hover:bg-primary disabled:opacity-50 text-white text-[10px] font-black uppercase tracking-wider transition-colors shrink-0"
+                                            >
+                                                <Upload className="w-3.5 h-3.5" />
+                                                {uploadState === "done" ? "Re-upload" : "Upload"}
+                                            </button>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handlePrescriptionImageUpload}
+                                            />
+                                        </div>
+                                        {uploadState === "loading" && (
+                                            <div className="h-1 w-full bg-slate-100">
+                                                <motion.div
+                                                    className="h-full bg-gradient-to-r from-primary to-blue-400"
+                                                    animate={{ width: ["0%", "90%"] }}
+                                                    transition={{ duration: 2.5, ease: "easeOut" }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Info banner */}
