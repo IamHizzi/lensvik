@@ -20,13 +20,10 @@ export function Navbar() {
         { name: "Shop", href: "/collections" },
         { name: "Eyeglasses", href: "/category/eyeglasses" },
         { name: "Sunglasses", href: "/category/sunglasses" },
-        { name: "NextGen", href: "/category/nextgen" },
-        { name: "Contact Lenses", href: "/category/contact-lenses" },
-        { name: "Accessories", href: "/category/accessories" },
+        { name: "Lensvik Collection", href: "/collections" },
     ];
 
     const secondaryItems = [
-        { name: "About Us", href: "/about" },
         { name: "Track Order", href: "/track-order" },
         { name: "Returns", href: "/return-policy" },
     ];
@@ -39,7 +36,7 @@ export function Navbar() {
             </div>
 
             {/* Main Navbar - Condensed Single Level */}
-            <nav className="glass border-b border-white/20 py-1.5 md:py-2">
+            <nav className="glass border-b border-white/20 py-1 md:py-1">
                 <div className="w-full max-w-[1400px] mx-auto px-3 md:px-8 flex items-center justify-between gap-2">
                     {/* Brand & Desktop Logo */}
                     <div className="flex items-center gap-8 md:gap-12 shrink-0">
@@ -47,9 +44,9 @@ export function Navbar() {
                             <Image
                                 src="/logo-1.png"
                                 alt="Lensvik"
-                                width={260}
-                                height={85}
-                                className="h-16 md:h-22 w-auto object-contain transition-all duration-300"
+                                width={400}
+                                height={250}
+                                className="h-26 md:h-[120px] w-auto object-contain transition-all duration-300"
                                 priority={true}
                             />
                         </Link>
@@ -60,30 +57,34 @@ export function Navbar() {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="btn-text hover:text-primary transition-all relative group"
+                                    className="btn-text hover:text-primary transition-all duration-300 relative group hover:-translate-y-0.5"
                                 >
                                     {item.name}
-                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full" />
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
                                 </Link>
                             ))}
                         </div>
                     </div>
 
                     {/* Right-side Actions */}
-                    <div className="flex items-center gap-1 md:gap-3">
+                    <div className="flex items-center gap-2 md:gap-4">
 
-                        {/* Secondary Links - Hidden on Mobile, Small on Desktop */}
-                        <div className="hidden xl:flex items-center gap-4 text-[9px] uppercase font-bold tracking-widest text-muted-foreground/50 mr-4">
+                        {/* Secondary Links - Hidden on Mobile, Enhanced on Desktop */}
+                        <div className="hidden xl:flex items-center gap-2 mr-4">
                             {secondaryItems.map((item) => (
-                                <Link key={item.name} href={item.href} className="hover:text-primary transition-colors italic">
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className="px-3 py-1.5 bg-slate-100/80 hover:bg-primary hover:text-white transition-all rounded-full text-[11px] font-black uppercase tracking-wider text-slate-900 italic"
+                                >
                                     {item.name}
                                 </Link>
                             ))}
                         </div>
 
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             className="w-9 h-9 md:w-10 md:h-10 text-slate-800"
                             onClick={() => setIsSearchOpen(true)}
                         >
@@ -120,7 +121,7 @@ export function Navbar() {
                 <div className="flex flex-col h-full p-6 pb-12">
                     <div className="flex items-center justify-between mb-12">
                         <Link href="/" className="flex items-center" onClick={() => setIsMenuOpen(false)}>
-                            <Image src="/logo-1.png" alt="Lensvik" width={220} height={80} className="h-20 w-auto object-contain" />
+                            <Image src="/logo-1.png" alt="Lensvik" width={280} height={100} className="h-28 w-auto object-contain" />
                         </Link>
                         <Button variant="ghost" size="icon" className="text-slate-900" onClick={() => setIsMenuOpen(false)}>
                             <X className="w-8 h-8" />
@@ -140,15 +141,16 @@ export function Navbar() {
                             </Link>
                         ))}
 
-                        <div className="mt-8 pt-8 grid grid-cols-1 gap-4">
+                        <div className="mt-8 pt-8 grid grid-cols-1 gap-3">
                             {secondaryItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.href}
                                     onClick={() => setIsMenuOpen(false)}
-                                    className="text-xs font-black uppercase tracking-widest text-slate-400 italic"
+                                    className="px-5 py-3 bg-slate-50 rounded-2xl text-[11px] font-black uppercase tracking-widest text-slate-900 italic flex items-center justify-between group"
                                 >
                                     {item.name}
+                                    <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                                 </Link>
                             ))}
                         </div>
@@ -173,9 +175,9 @@ export function Navbar() {
 
             <AnimatePresence>
                 {isSearchOpen && (
-                    <SearchOverlay 
-                        isOpen={isSearchOpen} 
-                        onClose={() => setIsSearchOpen(false)} 
+                    <SearchOverlay
+                        isOpen={isSearchOpen}
+                        onClose={() => setIsSearchOpen(false)}
                     />
                 )}
             </AnimatePresence>

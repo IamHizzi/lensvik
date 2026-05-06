@@ -12,7 +12,7 @@ const REVIEWS = [
         rating: 5,
         location: "Islamabad, F7",
         initials: "HH",
-        color: "bg-blue-600",
+        color: "bg-primary",
     },
     {
         name: "Sanya Khan",
@@ -100,7 +100,7 @@ export function Testimonials() {
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
                             viewport={{ once: true }}
-                            className="text-3xl md:text-5xl font-black tracking-tighter uppercase italic leading-none text-slate-900"
+                            className="text-3xl md:text-6xl font-black tracking-tighter uppercase italic leading-none text-slate-900"
                         >
                             Client Perspectives
                         </motion.h2>

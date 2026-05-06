@@ -76,7 +76,7 @@ export default function ProductPage() {
         return (
             <div className="min-h-screen bg-background">
                 <Navbar />
-                <div className="container mx-auto px-4 md:px-6 pt-20 md:pt-24 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
+                <div className="container mx-auto px-4 md:px-6 pt-28 md:pt-36 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10">
                     <Skeleton className="aspect-square rounded-3xl md:rounded-[3rem]" />
                     <div className="space-y-4 md:space-y-6">
                         <Skeleton className="h-10 md:h-12 w-3/4" />
@@ -108,7 +108,7 @@ export default function ProductPage() {
         <main className="min-h-screen bg-background">
             <Navbar />
 
-            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pt-32 md:pt-40 pb-20 md:pb-32">
+            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pt-40 md:pt-52 pb-20 md:pb-32">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12">
 
                     {/* ── Left: Image Gallery ── */}

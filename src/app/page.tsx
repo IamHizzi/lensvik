@@ -6,8 +6,9 @@ import { Hero } from "@/components/home/Hero";
 import { TrustBadges } from "@/components/home/TrustBadges";
 import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { ProductStrip } from "@/components/home/ProductStrip";
-import { WhyChooseUs } from "@/components/home/WhyChooseUs";
+
 import { Testimonials } from "@/components/home/Testimonials";
+import { LensShowcase } from "@/components/home/LensShowcase";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -32,48 +33,56 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  const FEATURED_PRODUCTS = products.slice(0, 4);
-  const TRENDING_PRODUCTS = [...products].reverse().slice(0, 4);
-  const NEW_ARRIVALS = products.slice(-4).reverse();
+
+  const NEW_ARRIVALS = products.slice(-8).reverse();
 
   return (
     <main className="min-h-screen bg-background selection:bg-primary selection:text-white">
       <Navbar />
       <Hero />
-      <CategoryGrid />
+      
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: [0.21, 1.11, 0.81, 0.99] }}
+      >
+        <CategoryGrid />
+      </motion.div>
 
-      <ProductStrip
-        title="Featured Selection"
-        subtitle="Handpicked eyewear for the modern visionary. Discover our most loved styles."
-        products={FEATURED_PRODUCTS}
-        viewAllHref="/collections/featured"
-        loading={loading}
-      />
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, delay: 0.1, ease: [0.21, 1.11, 0.81, 0.99] }}
+      >
+        <ProductStrip
+          title="New Arrivals"
+          subtitle="Fresh from the workshop. Explore our newest materials and color palettes."
+          products={NEW_ARRIVALS}
+          viewAllHref="/collections/new-arrivals"
+          loading={loading}
+          scrollable={true}
+        />
+      </motion.div>
 
-      <ProductStrip
-        title="Trending Collections"
-        subtitle="Stay ahead of the curve with our latest designer-inspired frames."
-        products={TRENDING_PRODUCTS}
-        viewAllHref="/collections/trending"
-        lightBg
-        loading={loading}
-      />
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, delay: 0.2, ease: [0.21, 1.11, 0.81, 0.99] }}
+      >
+        <LensShowcase />
+      </motion.div>
 
-      <ProductStrip
-        title="New Arrivals"
-        subtitle="Fresh from the workshop. Explore our newest materials and color palettes."
-        products={NEW_ARRIVALS}
-        viewAllHref="/collections/new-arrivals"
-        loading={loading}
-      />
-
-      <WhyChooseUs />
-
-      <TrustBadges />
-
-      <Testimonials />
-
-
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1 }}
+      >
+        <Testimonials />
+      </motion.div>
 
       <Footer />
     </main>

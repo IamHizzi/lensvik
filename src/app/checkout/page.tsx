@@ -49,7 +49,7 @@ export default function CheckoutPage() {
 
     if (cart.length === 0) {
         return (
-            <main className="min-h-screen bg-background pt-32">
+            <main className="min-h-screen bg-background pt-44">
                 <Navbar />
                 <div className="container mx-auto px-6 text-center py-16">
                     <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -67,7 +67,7 @@ export default function CheckoutPage() {
     }
 
     return (
-        <main className="min-h-screen bg-background pt-32">
+        <main className="min-h-screen bg-background pt-44 pb-24">
             <Navbar />
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex flex-col mb-6 md:mb-8">

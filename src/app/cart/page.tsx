@@ -182,7 +182,7 @@ export default function CartPage() {
                                 <Button
                                     type="submit"
                                     disabled={isProcessing}
-                                    className="w-full h-13 rounded-2xl font-black uppercase tracking-widest text-sm bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90 text-white shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] group relative overflow-hidden"
+                                    className="w-full h-13 rounded-2xl font-black uppercase tracking-widest text-sm bg-gradient-to-r from-primary to-slate-900 hover:from-primary/90 hover:to-slate-900/90 text-white shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] group relative overflow-hidden"
                                 >
                                     <span className="relative z-10 flex items-center justify-center gap-2">
                                         {isProcessing ? (
@@ -331,7 +331,7 @@ export default function CartPage() {
                     <Button
                         onClick={handleCheckout}
                         disabled={isProcessing}
-                        className="h-12 px-6 rounded-2xl bg-gradient-to-r from-primary to-blue-500 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 shrink-0"
+                        className="h-12 px-6 rounded-2xl bg-gradient-to-r from-primary to-slate-900 text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 shrink-0"
                     >
                         {isProcessing ? (
                             <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

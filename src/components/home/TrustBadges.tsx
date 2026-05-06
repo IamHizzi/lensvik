@@ -8,8 +8,8 @@ const badges = [
         icon: Truck,
         title: "Free Shipping",
         description: "On all orders over Rs 15,000",
-        color: "text-blue-600",
-        bg: "bg-blue-50",
+        color: "text-primary",
+        bg: "bg-slate-100",
     },
     {
         icon: ShieldCheck,

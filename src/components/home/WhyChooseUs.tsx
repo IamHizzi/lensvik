@@ -11,9 +11,9 @@ const FEATURES = [
         title: "UV Protection",
         label: "Blocks 100% UVA/UVB",
         description: "Industrial-grade UV400 filters integrated into every lens set for all-day protection.",
-        gradient: "from-blue-500 to-indigo-600",
-        lightBg: "bg-blue-50",
-        iconColor: "text-blue-600",
+        gradient: "from-slate-800 to-slate-950",
+        lightBg: "bg-slate-100",
+        iconColor: "text-primary",
     },
     {
         icon: Sparkles,
@@ -74,7 +74,7 @@ export function WhyChooseUs() {
                         whileInView={{ scaleX: 1 }}
                         transition={{ delay: 0.2, duration: 0.5 }}
                         viewport={{ once: true }}
-                        className="h-1 w-16 bg-gradient-to-r from-primary to-blue-400 mx-auto rounded-full"
+                        className="h-1 w-16 bg-gradient-to-r from-primary to-slate-700 mx-auto rounded-full"
                     />
                 </div>
 

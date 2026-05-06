@@ -46,56 +46,16 @@ export function Footer() {
     };
 
     return (
-        <footer className="bg-white border-t border-slate-100 relative z-10">
+        <footer className="bg-primary text-white relative z-10 overflow-hidden">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-0 left-[-10%] w-[50%] h-[50%] bg-blue-500/20 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 right-[-10%] w-[50%] h-[50%] bg-purple-500/20 rounded-full blur-[120px] pointer-events-none" />
 
-            {/* ── Newsletter Banner ── */}
-            <div className="border-b border-slate-100 bg-white">
-                <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 py-8 md:py-10">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
-                        <div className="text-center md:text-left">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-1">
-                                Exclusive Access
-                            </p>
-                            <h3 className="text-lg md:text-2xl font-black italic uppercase tracking-tight text-slate-900 leading-tight">
-                                Get 10% off your first order
-                            </h3>
-                            <p className="text-xs text-slate-500 mt-1 font-medium hidden md:block">
-                                Join 12,000+ Lensvik subscribers for drops, offers and lens tips.
-                            </p>
-                        </div>
 
-                        {subscribed ? (
-                            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-3">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                                <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">
-                                    You're subscribed!
-                                </span>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleSubscribe} className="flex gap-2 w-full md:w-auto max-w-sm">
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    placeholder="your@email.com"
-                                    className="flex-1 h-11 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-primary/50 transition-all min-w-0"
-                                />
-                                <button
-                                    type="submit"
-                                    className="h-11 px-5 rounded-xl bg-primary hover:bg-primary/90 text-white text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5 shrink-0 hover:scale-105 active:scale-95"
-                                >
-                                    Join <ArrowRight className="w-3.5 h-3.5" />
-                                </button>
-                            </form>
-                        )}
-                    </div>
-                </div>
-            </div>
 
             {/* ── Main Grid ── */}
-            <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pt-10 md:pt-14 pb-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10 mb-10 md:mb-14">
+            <div className="relative z-10 w-full max-w-screen-2xl mx-auto px-4 md:px-6 pt-8 md:pt-10 pb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10 mb-8 md:mb-10">
 
                     {/* Brand column — spans full width on mobile */}
                     <div className="col-span-2 md:col-span-1 space-y-5">
@@ -103,12 +63,12 @@ export function Footer() {
                             <Image
                                 src="/logo-1.png"
                                 alt="Lensvik"
-                                width={300}
-                                height={100}
-                                className="h-20 md:h-28 w-auto object-contain opacity-100"
+                                width={400}
+                                height={150}
+                                className="h-36 md:h-48 w-auto object-contain brightness-0 invert"
                             />
                         </Link>
-                        <p className="text-xs text-slate-500 leading-relaxed font-medium max-w-[220px]">
+                        <p className="text-sm text-white leading-relaxed font-medium max-w-[250px]">
                             Redefining eyewear with AI precision — from prescription to doorstep.
                         </p>
 
@@ -121,7 +81,7 @@ export function Footer() {
                                     aria-label={label}
                                     target={external ? "_blank" : undefined}
                                     rel={external ? "noopener noreferrer" : undefined}
-                                    className={`w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-white ${ring} hover:border-transparent transition-all hover:scale-110`}
+                                    className={`w-8 h-8 rounded-lg border border-white/20 flex items-center justify-center text-white hover:text-primary ${ring} hover:border-transparent transition-all hover:scale-110`}
                                 >
                                     <Icon className="w-3.5 h-3.5" />
                                 </Link>
@@ -129,19 +89,13 @@ export function Footer() {
                         </div>
 
                         {/* Certs */}
-                        <div className="flex flex-wrap gap-2">
-                            {CERTS.map(c => (
-                                <span key={c} className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-slate-500 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full">
-                                    <CheckCircle2 className="w-2.5 h-2.5 text-primary/60" />{c}
-                                </span>
-                            ))}
-                        </div>
+
                     </div>
 
                     {/* Nav columns */}
                     {Object.entries(FOOTER_NAV).map(([heading, links]) => (
                         <div key={heading}>
-                            <h4 className="text-[9px] font-black uppercase tracking-[0.25em] text-primary mb-4 md:mb-5">
+                            <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-white mb-4 md:mb-5">
                                 {heading}
                             </h4>
                             <ul className="space-y-2.5 md:space-y-3">
@@ -149,7 +103,7 @@ export function Footer() {
                                     <li key={link.name}>
                                         <Link
                                             href={link.href}
-                                            className="text-xs text-slate-500 hover:text-primary transition-colors font-medium leading-none"
+                                            className="text-sm text-white hover:text-white/80 transition-colors font-medium leading-none"
                                         >
                                             {link.name}
                                         </Link>
@@ -166,24 +120,24 @@ export function Footer() {
                         </h4>
                         <div className="space-y-3">
                             <a href="tel:+923709573005" className="flex items-start gap-2.5 group">
-                                <Phone className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                                <span className="text-xs text-slate-500 group-hover:text-primary transition-colors font-medium">0370 9573005</span>
+                                <Phone className="w-4 h-4 text-white/60 mt-0.5 shrink-0 group-hover:text-white" />
+                                <span className="text-sm text-white/60 group-hover:text-white transition-colors font-medium">0370 9573005</span>
                             </a>
                             <a href="mailto:Lensvikoptics@gmail.com" className="flex items-start gap-2.5 group">
-                                <Mail className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                                <span className="text-xs text-slate-500 group-hover:text-primary transition-colors font-medium break-all">Lensvikoptics@gmail.com</span>
+                                <Mail className="w-4 h-4 text-white/60 mt-0.5 shrink-0 group-hover:text-white" />
+                                <span className="text-sm text-white/60 group-hover:text-white transition-colors font-medium break-all">Lensvikoptics@gmail.com</span>
                             </a>
                             <Link
                                 href="https://wa.me/923709573005"
                                 target="_blank" rel="noopener noreferrer"
                                 className="flex items-start gap-2.5 group"
                             >
-                                <MessageCircle className="w-3.5 h-3.5 text-[#25D366] mt-0.5 shrink-0" />
-                                <span className="text-xs text-[#25D366]/70 group-hover:text-[#25D366] transition-colors font-medium">WhatsApp Us</span>
+                                <MessageCircle className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+                                <span className="text-sm text-emerald-400/70 group-hover:text-emerald-400 transition-colors font-medium">WhatsApp Us</span>
                             </Link>
                             <div className="flex items-start gap-2.5">
-                                <MapPin className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
-                                <span className="text-xs text-slate-400 font-medium leading-relaxed">
+                                <MapPin className="w-4 h-4 text-white/40 mt-0.5 shrink-0" />
+                                <span className="text-sm text-white/40 font-medium leading-relaxed">
                                     Shop 1, Ground Floor,<br />Umar Centre, F-8 Markaz,<br />Islamabad
                                 </span>
                             </div>
@@ -192,14 +146,16 @@ export function Footer() {
                 </div>
 
                 {/* ── Bottom Bar ── */}
-                <div className="border-t border-slate-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-[10px] text-slate-400 font-medium order-2 sm:order-1">
+                <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-[10px] text-white font-medium order-2 sm:order-1">
                         © {new Date().getFullYear()} LENSVIK Eyewear · All rights reserved.
                     </p>
 
-                    {/* Payment icons */}
-
-                </div>
+                    <div className="flex items-center gap-4 text-[10px] font-medium text-white/60 order-1 sm:order-2 uppercase tracking-widest">
+                        <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <span>·</span>
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
+                    </div>                </div>
             </div>
         </footer>
     );

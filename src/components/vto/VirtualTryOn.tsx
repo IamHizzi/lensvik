@@ -490,7 +490,7 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                 <div className="relative flex-1 w-full bg-black overflow-hidden sm:min-h-[500px]">
                     {!isLoaded && !error && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-30">
-                            <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
+                            <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
                             <p className="text-sm md:text-lg font-bold text-white uppercase tracking-widest">{loadingStatus}</p>
                         </div>
                     )}
@@ -519,7 +519,7 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                             <div className="absolute top-16 md:top-20 left-1/2 -translate-x-1/2 z-40 w-[85%] max-w-md">
                                 <div className="bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-xl text-center">
                                     <p className="text-[10px] md:text-xs text-white/90 font-medium tracking-tight leading-relaxed">
-                                        <span className="text-blue-400 font-bold mr-1">NOTE:</span>
+                                        <span className="text-primary font-bold mr-1">NOTE:</span>
                                         This feature is for trial purposes only and does not represent the actual size.
                                     </p>
                                 </div>

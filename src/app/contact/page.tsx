@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 
 export default function ContactPage() {
     return (
-        <main className="min-h-screen bg-background pt-32 md:pt-40">
+        <main className="min-h-screen bg-background pt-36 md:pt-44">
             <Navbar />
 
-            <section className="pt-32 md:pt-40 pb-20 md:pb-32 container mx-auto px-6">
+            <section className="pt-36 md:pt-44 pb-20 md:pb-32 container mx-auto px-6">
                 <div className="max-w-5xl mx-auto">
                     <div className="text-center mb-16 md:mb-24">
                         <motion.h1

@@ -92,7 +92,7 @@ export default function CategoryPage() {
     const categoryDisplayName = slug ? (slug as string).replace(/-/g, ' ').toUpperCase() : "COLLECTION";
 
     return (
-        <main className="min-h-screen bg-background pt-36 md:pt-44">
+        <main className="min-h-screen bg-background pt-44 md:pt-56">
             <Navbar />
             <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pb-20 md:pb-32">
                 <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">

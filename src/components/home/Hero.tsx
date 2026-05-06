@@ -73,7 +73,7 @@ export function Hero() {
 
     return (
         <section
-            className="relative w-full overflow-hidden bg-[#f0f1f3] mt-[56px] md:mt-[76px]"
+            className="relative w-full overflow-hidden bg-[#f0f1f3] mt-[85px] md:mt-[115px]"
             style={{ aspectRatio: "21/9", minHeight: "200px", maxHeight: "600px" }}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
@@ -134,7 +134,7 @@ export function Hero() {
 
                         <Link
                             href={banner.ctaHref}
-                            className="inline-flex items-center gap-1 md:gap-2 bg-white text-[#1a1550] font-black uppercase text-[9px] sm:text-[10px] md:text-xs tracking-widest italic px-3 py-1.5 md:px-5 md:py-2.5 rounded-full hover:bg-primary hover:text-white transition-all duration-300 shadow-lg hover:shadow-primary/30 hover:scale-105 active:scale-95"
+                            className="inline-flex items-center gap-1 md:gap-2 bg-white text-primary font-black uppercase text-[9px] sm:text-[10px] md:text-xs tracking-widest italic px-3 py-1.5 md:px-5 md:py-2.5 rounded-full hover:bg-primary hover:text-white transition-all duration-300 shadow-lg hover:shadow-primary/30 hover:scale-105 active:scale-95"
                         >
                             {banner.cta}
                             <ArrowRight className="w-2.5 h-2.5 md:w-3.5 md:h-3.5" />

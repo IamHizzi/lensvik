@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const STEPS = [
-    { icon: CheckCircle2, label: "Order Confirmed", desc: "Expertly crafted & quality checked", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+    { icon: CheckCircle2, label: "Order Confirmed", desc: "Expertly crafted & quality checked", color: "text-primary", bg: "bg-slate-50", border: "border-slate-100" },
     { icon: Sparkles, label: "Processing", desc: "Your lenses are being fitted", color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100" },
     { icon: Truck, label: "In Transit", desc: "On its way to your doorstep", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
     { icon: MapPin, label: "Delivered", desc: "Seeing the world in clarity", color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
@@ -116,7 +116,7 @@ export default function TrackOrderPage() {
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90 text-white font-black uppercase tracking-widest text-sm shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] group"
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-slate-900 hover:from-primary/90 hover:to-slate-900/90 text-white font-black uppercase tracking-widest text-sm shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] group"
                             >
                                 {loading ? (
                                     <span className="flex items-center gap-2">

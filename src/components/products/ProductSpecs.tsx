@@ -18,10 +18,10 @@ const TABS = [
 ];
 
 const FEATURES_LIST = [
-    { icon: ShieldCheck, color: "text-blue-600", bg: "bg-blue-50",    title: "UV400 Protection",       desc: "Blocks 100% of harmful UVA & UVB rays for all-day outdoor safety." },
+    { icon: ShieldCheck, color: "text-primary", bg: "bg-slate-50",    title: "UV400 Protection",       desc: "Blocks 100% of harmful UVA & UVB rays for all-day outdoor safety." },
     { icon: Sparkles,    color: "text-violet-600", bg: "bg-violet-50", title: "Scratch-Resistant",      desc: "Diamond hard-coat multi-layer film that survives daily wear and tear." },
     { icon: Droplets,    color: "text-emerald-600", bg: "bg-emerald-50", title: "Hydrophilic Coating", desc: "Water, oil and smudge-repellent surface — easy to wipe clean in seconds." },
-    { icon: Monitor,     color: "text-sky-600",    bg: "bg-sky-50",    title: "Blue Light Blocking",   desc: "Filters harmful HEV blue light from screens to reduce digital eye strain." },
+    { icon: Monitor,     color: "text-primary",    bg: "bg-slate-50",    title: "Blue Light Blocking",   desc: "Filters harmful HEV blue light from screens to reduce digital eye strain." },
     { icon: Zap,         color: "text-amber-600",  bg: "bg-amber-50",  title: "Ultra-Light Frame",     desc: "Engineered from surgical-grade acetate or titanium alloy — weighs under 18g." },
     { icon: Eye,         color: "text-primary",    bg: "bg-primary/10", title: "RX Compatible",        desc: "Every frame is precision-calibrated for single vision, bifocal and progressive lenses." },
 ];
@@ -176,7 +176,7 @@ export function ProductSpecs({ measurements, description }: ProductSpecsProps) {
                                     </div>
                                 ))}
                             </div>
-                            <div className="mt-5 bg-gradient-to-r from-primary/5 to-blue-500/5 border border-primary/10 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            <div className="mt-5 bg-gradient-to-r from-primary/5 to-slate-900/5 border border-primary/10 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                 <ShieldCheck className="w-8 h-8 text-primary shrink-0" />
                                 <p className="text-sm text-slate-600 font-medium leading-relaxed">
                                     <span className="font-black text-slate-900">Every prescription is verified by our in-house opticians</span> before your lenses go into production — guaranteeing optical accuracy and comfort.

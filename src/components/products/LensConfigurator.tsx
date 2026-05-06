@@ -31,9 +31,9 @@ const MAIN_CATEGORIES = [
         subtitle: "Single vision · +ve, -ve, or Cylindrical",
         tag: "Most common",
         icon: Eye,
-        color: "from-blue-500/10 to-indigo-500/10",
-        iconColor: "text-blue-600",
-        dotColor: "bg-blue-500",
+        color: "from-primary/10 to-slate-500/10",
+        iconColor: "text-primary",
+        dotColor: "bg-primary",
     },
     {
         id: "zero",
@@ -92,7 +92,7 @@ const LENS_OPTIONS: Record<string, any[]> = {
             description: "Screen protection · Minimise eye strain",
             features: ["Screen protection", "Minimise eyestrain", "Scratch resistant"],
             badge: "Screen",
-            accent: "#0ea5e9",
+            accent: "var(--primary)",
         },
         {
             name: "Lensvik Blu Pro",
@@ -100,7 +100,7 @@ const LENS_OPTIONS: Record<string, any[]> = {
             description: "Advanced screen protection · Hydrophilic coat",
             features: ["Advanced screen protection", "Scratch & smudge resistant", "Hydrophilic coated"],
             badge: "Pro",
-            accent: "#6366f1",
+            accent: "var(--primary)",
         },
         {
             name: "Smart Lens (Transition + Blu)",
@@ -438,7 +438,7 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                     {/* Thin progress bar */}
                     <div className="h-0.5 w-full bg-slate-100 rounded-full overflow-hidden -mb-1">
                         <motion.div
-                            className="h-full bg-gradient-to-r from-primary to-blue-400 rounded-full"
+                            className="h-full bg-gradient-to-r from-primary to-slate-700 rounded-full"
                             animate={{ width: `${(step / 4) * 100}%` }}
                             transition={{ duration: 0.4, ease: "easeOut" }}
                         />
@@ -534,7 +534,7 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                                         }`}
                                     >
                                         {lens.recommended && (
-                                            <div className="bg-gradient-to-r from-primary to-blue-500 px-4 py-1.5 flex items-center gap-1.5">
+                                            <div className="bg-gradient-to-r from-primary to-slate-900 px-4 py-1.5 flex items-center gap-1.5">
                                                 <Star className="w-3 h-3 fill-white text-white" />
                                                 <span className="text-[10px] font-black text-white uppercase tracking-widest">
                                                     Most Popular Choice
@@ -761,7 +761,7 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                                         {uploadState === "loading" && (
                                             <div className="h-1 w-full bg-slate-100">
                                                 <motion.div
-                                                    className="h-full bg-gradient-to-r from-primary to-blue-400"
+                                                    className="h-full bg-gradient-to-r from-primary to-slate-700"
                                                     animate={{ width: ["0%", "90%"] }}
                                                     transition={{ duration: 2.5, ease: "easeOut" }}
                                                 />
@@ -771,11 +771,11 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                                 </div>
 
                                 {/* Info banner */}
-                                <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-start gap-3">
                                     <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                                        <Info className="w-4 h-4 text-blue-500" />
+                                        <Info className="w-4 h-4 text-primary" />
                                     </div>
-                                    <p className="text-[11px] font-semibold text-blue-600/90 leading-relaxed">
+                                    <p className="text-[11px] font-semibold text-primary/90 leading-relaxed">
                                         Every prescription is manually verified by our opticians before production to ensure perfect optical comfort.
                                     </p>
                                 </div>
@@ -798,7 +798,7 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                                 <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-5 md:p-6 relative overflow-hidden shadow-2xl">
                                     {/* Decorative blobs */}
                                     <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-[60px] -mr-16 -mt-16 pointer-events-none" />
-                                    <div className="absolute bottom-0 left-0 w-28 h-28 bg-blue-500/10 rounded-full blur-[40px] -ml-12 -mb-12 pointer-events-none" />
+                                    <div className="absolute bottom-0 left-0 w-28 h-28 bg-primary/10 rounded-full blur-[40px] -ml-12 -mb-12 pointer-events-none" />
 
                                     {/* Product row */}
                                     <div className="flex items-center gap-4 mb-6 relative z-10">
@@ -884,7 +884,7 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                     {step === 4 ? (
                         <Button
                             onClick={handleAddToCart}
-                            className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90 text-white font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                            className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-slate-900 hover:from-primary/90 hover:to-slate-900/90 text-white font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/25 transition-all hover:scale-[1.01] active:scale-[0.99]"
                         >
                             Confirm & Add to Cart — Rs {(product.price + (selectedLens?.price || 0)).toLocaleString()}
                         </Button>

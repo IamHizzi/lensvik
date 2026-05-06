@@ -43,7 +43,7 @@ export default function CollectionSubPage() {
     ).join(' ') : "";
 
     return (
-        <main className="min-h-screen bg-background pt-32 pb-24">
+        <main className="min-h-screen bg-background pt-44 pb-24">
             <Navbar />
             <div className="container mx-auto px-6">
                 <header className="mb-10 md:mb-16 text-center">

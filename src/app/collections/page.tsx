@@ -238,7 +238,7 @@ export default function CollectionsPage() {
     const count = activeCount(filters);
 
     return (
-        <main className="min-h-screen bg-[#fafafa] pt-32 md:pt-40">
+        <main className="min-h-screen bg-[#fafafa] pt-36 md:pt-44">
             <Navbar />
 
             <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 pb-20 md:pb-32">
