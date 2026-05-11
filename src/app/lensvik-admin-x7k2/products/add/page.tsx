@@ -1,0 +1,371 @@
+'use client';
+
+import { useState, useRef } from 'react';
+import { Upload, X, Plus, Sparkles, Eye, Save, ArrowLeft, Glasses, Tag, Package, Globe } from 'lucide-react';
+import Link from 'next/link';
+
+const CATEGORIES = ['Sunglasses', 'Eyeglasses', 'Prescription Glasses', 'Blue Light Glasses', 'Contact Lenses', 'Accessories'];
+const FRAME_COLORS = ['Black', 'Tortoise', 'Gold', 'Silver', 'Gunmetal', 'Rose Gold', 'Brown', 'Navy', 'Clear', 'Red'];
+const LENS_TYPES = ['Clear', 'UV400', 'Polarized', 'Anti-Reflective', 'Blue Light Filter', 'Photochromic', 'Mirrored'];
+const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
+const MATERIALS = ['Acetate', 'Metal', 'Titanium', 'TR-90', 'Stainless Steel', 'Wood', 'Carbon Fiber'];
+
+export default function AddProductPage() {
+  const [images, setImages] = useState<string[]>([]);
+  const [dragging, setDragging] = useState(false);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedLensTypes, setSelectedLensTypes] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [tab, setTab] = useState<'basic' | 'variants' | 'eyewear' | 'seo'>('basic');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [description, setDescription] = useState('');
+  const [form, setForm] = useState({
+    name: '', category: '', price: '', comparePrice: '', sku: '', barcode: '',
+    gender: 'Unisex', material: '', status: 'Draft', collection: '',
+    pdMin: '', pdMax: '', bridgeWidth: '', templeLength: '', lensWidth: '', frameHeight: '',
+    metaTitle: '', metaDesc: '', tags: '',
+  });
+
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    files.forEach(f => {
+      const url = URL.createObjectURL(f);
+      setImages(prev => [...prev, url]);
+    });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(f => {
+      const url = URL.createObjectURL(f);
+      setImages(prev => [...prev, url]);
+    });
+  };
+
+  const handleAiDescription = async () => {
+    if (!form.name) return;
+    setAiLoading(true);
+    await new Promise(r => setTimeout(r, 1500));
+    setDescription(`Experience luxury vision with the ${form.name}. Crafted with precision engineering and premium ${form.material || 'acetate'} materials, these frames offer the perfect fusion of style and functionality. Designed for ${form.gender?.toLowerCase() || 'everyone'}, they feature UV400 protection, lightweight construction, and timeless aesthetics that complement any lifestyle. Whether you're in a boardroom or on the beach, these frames deliver unmatched comfort and sophistication. Available in multiple sizes and lens options to suit your personal vision needs.`);
+    setAiLoading(false);
+  };
+
+  const toggle = (arr: string[], setArr: (v: string[]) => void, val: string) => {
+    setArr(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
+  };
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: Package },
+    { id: 'variants', label: 'Variants', icon: Tag },
+    { id: 'eyewear', label: 'Eyewear Specs', icon: Glasses },
+    { id: 'seo', label: 'SEO', icon: Globe },
+  ] as const;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <Link href="/lensvik-admin-x7k2/products" className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all shadow-sm">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 leading-tight">Add Product</h1>
+            <p className="text-slate-500 text-xs font-medium">Create a new eyewear product listing</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm">
+            <Eye className="w-4 h-4" /> Preview
+          </button>
+          <button className="flex items-center gap-2 text-xs font-bold bg-blue-600 text-white rounded-xl px-5 py-2.5 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
+            <Save className="w-4 h-4" /> Publish
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm">
+        {tabs.map(t => {
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold py-2.5 rounded-xl transition-all ${tab === t.id ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="hidden sm:inline uppercase tracking-tight">{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main form */}
+        <div className="lg:col-span-2 space-y-5">
+          {tab === 'basic' && (
+            <>
+              {/* Image uploader */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-900 mb-5 border-b border-slate-50 pb-4 uppercase tracking-tight">Product Images</h3>
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onClick={() => fileRef.current?.click()}
+                  className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${dragging ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}
+                >
+                  <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                  <p className="text-sm text-slate-600 font-bold tracking-tight">Drop images here or <span className="text-blue-600">browse</span></p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">PNG, JPG, WebP up to 10MB · Recommended 1200×1200px</p>
+                  <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                </div>
+                {images.length > 0 && (
+                  <div className="flex gap-4 mt-6 flex-wrap">
+                    {images.map((img, i) => (
+                      <div key={i} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-slate-200 group shadow-sm">
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button onClick={(e) => { e.stopPropagation(); setImages(images.filter((_, j) => j !== i)); }} className="w-8 h-8 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {i === 0 && <span className="absolute bottom-2 left-2 text-[8px] bg-blue-600 text-white rounded-md px-2 py-0.5 font-bold uppercase">Main</span>}
+                      </div>
+                    ))}
+                    <button onClick={() => fileRef.current?.click()} className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/30 flex items-center justify-center text-slate-400 hover:border-slate-300 hover:text-slate-600 transition-all shadow-sm">
+                      <Plus className="w-6 h-6" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Basic fields */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
+                <h3 className="text-sm font-bold text-slate-900 border-b border-slate-50 pb-4 uppercase tracking-tight">Product Details</h3>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Product Name *</label>
+                  <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Ray-Ban Aviator Classic" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-medium" />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Description</label>
+                    <button onClick={handleAiDescription} disabled={!form.name || aiLoading} className="flex items-center gap-1.5 text-[10px] text-purple-600 bg-purple-50 border border-purple-100 rounded-lg px-2.5 py-1.5 hover:bg-purple-100 transition-all disabled:opacity-40 font-bold uppercase tracking-tight">
+                      {aiLoading ? <div className="w-3 h-3 border-2 border-purple-400 border-t-purple-600 rounded-full animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                      AI Generate
+                    </button>
+                  </div>
+                  <textarea value={description} onChange={e => setDescription(e.target.value)} rows={5} placeholder="Describe the product in detail..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all resize-none font-medium leading-relaxed" />
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Category *</label>
+                    <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      <option value="">Select category</option>
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Gender</label>
+                    <select value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      {['Unisex', 'Male', 'Female', 'Kids'].map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Price (PKR) *</label>
+                    <input value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} type="number" placeholder="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Compare Price</label>
+                    <input value={form.comparePrice} onChange={e => setForm({ ...form, comparePrice: e.target.value })} type="number" placeholder="0" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">SKU</label>
+                    <input value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} placeholder="Auto-generated" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-mono font-bold" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Barcode</label>
+                    <input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} placeholder="ISBN, UPC, GTIN..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-mono font-bold" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tags</label>
+                  <input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="sunglasses, polarized, summer (comma separated)" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-medium" />
+                </div>
+              </div>
+            </>
+          )}
+
+          {tab === 'variants' && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-8 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 border-b border-slate-50 pb-4 uppercase tracking-tight">Product Variants</h3>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Frame Colors</label>
+                <div className="flex flex-wrap gap-3">
+                  {FRAME_COLORS.map(c => (
+                    <button key={c} onClick={() => toggle(selectedColors, setSelectedColors, c)} className={`text-xs px-4 py-2.5 rounded-xl border transition-all font-bold ${selectedColors.includes(c) ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20' : 'border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 bg-white'}`}>{c}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Lens Types</label>
+                <div className="flex flex-wrap gap-3">
+                  {LENS_TYPES.map(l => (
+                    <button key={l} onClick={() => toggle(selectedLensTypes, setSelectedLensTypes, l)} className={`text-xs px-4 py-2.5 rounded-xl border transition-all font-bold ${selectedLensTypes.includes(l) ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 bg-white'}`}>{l}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Frame Sizes</label>
+                <div className="flex flex-wrap gap-4">
+                  {FRAME_SIZES.map(s => (
+                    <button key={s} onClick={() => toggle(selectedSizes, setSelectedSizes, s)} className={`w-14 h-14 rounded-2xl border text-sm font-bold transition-all ${selectedSizes.includes(s) ? 'bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-900/10' : 'border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 bg-white'}`}>{s}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Frame Material</label>
+                <select value={form.material} onChange={e => setForm({ ...form, material: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                  <option value="">Select material</option>
+                  {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {tab === 'eyewear' && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 border-b border-slate-50 pb-4 uppercase tracking-tight">Eyewear-Specific Specs</h3>
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">PD Min (mm)</label>
+                  <input value={form.pdMin} onChange={e => setForm({ ...form, pdMin: e.target.value })} placeholder="58" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">PD Max (mm)</label>
+                  <input value={form.pdMax} onChange={e => setForm({ ...form, pdMax: e.target.value })} placeholder="72" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Lens Width (mm)</label>
+                  <input value={form.lensWidth} onChange={e => setForm({ ...form, lensWidth: e.target.value })} placeholder="52" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Frame Height (mm)</label>
+                  <input value={form.frameHeight} onChange={e => setForm({ ...form, frameHeight: e.target.value })} placeholder="40" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Bridge Width (mm)</label>
+                  <input value={form.bridgeWidth} onChange={e => setForm({ ...form, bridgeWidth: e.target.value })} placeholder="18" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Temple Length (mm)</label>
+                  <input value={form.templeLength} onChange={e => setForm({ ...form, templeLength: e.target.value })} placeholder="140" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
+                </div>
+              </div>
+              {/* Checkboxes */}
+              <div className="pt-4 space-y-4">
+                {['Prescription Compatible', 'Blue Light Filter Available', 'Virtual Try-On Ready', 'Lens Customization Available'].map(opt => (
+                  <label key={opt} className="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" className="w-5 h-5 rounded-lg border-slate-300 bg-slate-50 accent-blue-600 cursor-pointer" />
+                    <span className="text-sm text-slate-600 font-bold group-hover:text-slate-900 transition-colors uppercase tracking-tight">{opt}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {tab === 'seo' && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 border-b border-slate-50 pb-4 uppercase tracking-tight">SEO Settings</h3>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Meta Title</label>
+                <input value={form.metaTitle} onChange={e => setForm({ ...form, metaTitle: e.target.value })} placeholder="Product name | Lensvik" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-medium" />
+                <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-tight">{form.metaTitle.length}/60 characters</p>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Meta Description</label>
+                <textarea value={form.metaDesc} onChange={e => setForm({ ...form, metaDesc: e.target.value })} rows={3} placeholder="Brief product description for search engines..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all resize-none font-medium leading-relaxed" />
+                <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-tight">{form.metaDesc.length}/160 characters</p>
+              </div>
+              {/* Preview */}
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 shadow-inner">
+                <p className="text-[10px] text-slate-400 mb-3 uppercase tracking-widest font-bold">Search Preview</p>
+                <p className="text-sm text-blue-600 font-bold leading-tight underline underline-offset-2">{form.metaTitle || 'Product Title | Lensvik'}</p>
+                <p className="text-[11px] text-emerald-600 font-medium mt-1">lensvik.com/products/{form.name?.toLowerCase().replace(/\s+/g, '-') || 'product-slug'}</p>
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed font-medium">{form.metaDesc || 'Your meta description will appear here...'}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Status */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Publish Status</label>
+            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
+              <option value="Draft">Draft</option>
+              <option value="Active">Active (Published)</option>
+              <option value="Archived">Archived</option>
+            </select>
+          </div>
+          {/* Collection */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Collection</label>
+            <select value={form.collection} onChange={e => setForm({ ...form, collection: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
+              <option value="">None</option>
+              <option value="bestsellers">Best Sellers</option>
+              <option value="new-arrivals">New Arrivals</option>
+              <option value="summer-2025">Summer 2025</option>
+              <option value="luxury">Luxury Edit</option>
+            </select>
+          </div>
+          {/* Selected variants summary */}
+          {(selectedColors.length > 0 || selectedSizes.length > 0) && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Variant Summary</p>
+              <div className="space-y-3">
+                {selectedColors.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Colors</p>
+                    <p className="text-xs text-slate-900 font-bold">{selectedColors.join(', ')}</p>
+                  </div>
+                )}
+                {selectedSizes.length > 0 && (
+                  <div>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">Sizes</p>
+                    <p className="text-xs text-slate-900 font-bold">{selectedSizes.join(', ')}</p>
+                  </div>
+                )}
+                <div className="pt-3 border-t border-slate-50">
+                  <p className="text-xs text-blue-600 font-bold">
+                    {selectedColors.length * (selectedSizes.length || 1)} total variants generated
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Save buttons */}
+          <div className="space-y-3">
+            <button className="w-full bg-blue-600 text-white text-sm font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 uppercase tracking-tight">
+              <Save className="w-4 h-4" />
+              Publish Product
+            </button>
+            <button className="w-full bg-white border border-slate-200 text-slate-600 text-sm font-bold py-3.5 rounded-xl hover:bg-slate-50 transition-all shadow-sm uppercase tracking-tight">
+              Save as Draft
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

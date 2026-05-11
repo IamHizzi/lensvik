@@ -148,7 +148,7 @@ export function Footer() {
                 {/* ── Bottom Bar ── */}
                 <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-[10px] text-white font-medium order-2 sm:order-1">
-                        © {new Date().getFullYear()} LENSVIK Eyewear · All rights reserved.
+                        © {new Date().getFullYear()} <Link href="/lensvik-admin-x7k2" className="hover:opacity-80 transition-opacity">LENSVIK</Link> Eyewear · All rights reserved.
                     </p>
 
                     <div className="flex items-center gap-4 text-[10px] font-medium text-white/60 order-1 sm:order-2 uppercase tracking-widest">
