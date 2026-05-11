@@ -24,9 +24,7 @@ const VirtualTryOn = dynamic(() => import("@/components/vto/VirtualTryOn").then(
     ssr: false,
     loading: () => <Skeleton className="w-full h-full rounded-3xl" />,
 });
-const SizeFinder = dynamic(() => import("@/components/size-finder/SizeFinder").then(mod => mod.SizeFinder), {
-    ssr: false,
-});
+
 
 const FEATURES = [
     "Anti-Reflective Coating",
