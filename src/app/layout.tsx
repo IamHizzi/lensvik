@@ -19,6 +19,10 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "LENSVIK | Premium Eyewear & Virtual Try-On",
   description: "Experience the future of eyewear with our AI-powered virtual try-on and size-finding platform.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

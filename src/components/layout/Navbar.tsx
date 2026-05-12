@@ -31,12 +31,12 @@ export function Navbar() {
     return (
         <header className="fixed top-0 w-full z-50">
             {/* Top Bar - Slimmed down */}
-            <div className="bg-primary text-white py-1 md:py-1.5 px-6 hidden md:block text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-center border-b border-white/5">
+            <div className="bg-primary text-white py-0.5 md:py-1 px-6 hidden md:block text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-center border-b border-white/5">
                 Free Shipping on All Orders Over Rs 15,000 | Code: <span className="text-white/100">LENSVIK10</span>
             </div>
 
             {/* Main Navbar - Condensed Single Level */}
-            <nav className="glass border-b border-white/20 py-1 md:py-1">
+            <nav className="glass border-b border-white/20 py-0.5 md:py-0.5">
                 <div className="w-full max-w-[1400px] mx-auto px-3 md:px-8 flex items-center justify-between gap-2">
                     {/* Brand & Desktop Logo */}
                     <div className="flex items-center gap-8 md:gap-12 shrink-0">
@@ -44,9 +44,9 @@ export function Navbar() {
                             <Image
                                 src="/logo-1.png"
                                 alt="Lensvik"
-                                width={400}
-                                height={250}
-                                className="h-26 md:h-[120px] w-auto object-contain transition-all duration-300"
+                                width={350}
+                                height={200}
+                                className="h-22 md:h-[122px] w-auto object-contain transition-all duration-300"
                                 priority={true}
                             />
                         </Link>
