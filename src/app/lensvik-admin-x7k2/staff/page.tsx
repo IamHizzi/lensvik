@@ -27,13 +27,16 @@ export default function StaffPage() {
   const [showInvite, setShowInvite] = useState(false);
   const [invite, setInvite] = useState({ name: '', email: '', role: 'Order Fulfillment' });
 
+  const activeStaff = STAFF.filter(s => s.status === 'Active').length;
+
   return (
     <div className="space-y-6 max-w-screen-2xl mx-auto pb-10">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Staff & Roles</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{STAFF.length} team members · {STAFF.filter(s => s.status === 'Active').length} active</p>
+          <p className="text-slate-500 text-sm mt-0.5">{STAFF.length} team members · {activeStaff} active</p>
         </div>
+
         <button onClick={() => setShowInvite(true)} className="flex items-center gap-2 text-xs font-bold bg-blue-600 text-white rounded-xl px-4 py-2.5 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
           <Plus className="w-3.5 h-3.5" /> Invite Member
         </button>

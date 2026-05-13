@@ -4,19 +4,44 @@ const ProductSchema = new Schema({
     _id: { type: String, required: true },
     name: { type: String, required: true },
     price: { type: Number, required: true },
-    originalPrice: Number,
-    size: String,
-    rating: Number,
-    image: { type: String, required: true },
-    vtoImage: String,
+    comparePrice: Number,
+    sku: String,
+    barcode: String,
+    gender: { type: String, default: 'Unisex' },
+    material: String,
+    status: { type: String, default: 'Draft' },
+    collection: String,
     category: { type: String, required: true },
-    frameType: String,
     description: String,
+    images: [String],
+    tags: [String],
     measurements: {
+        pdMin: Number,
+        pdMax: Number,
         lensWidth: Number,
+        frameHeight: Number,
         bridgeWidth: Number,
         templeLength: Number
-    }
+    },
+    variants: [{
+        color: String,
+        size: String,
+        lensType: String,
+        price: Number,
+        stock: Number
+    }],
+    options: {
+        prescriptionCompatible: Boolean,
+        blueLightFilter: Boolean,
+        virtualTryOn: Boolean,
+        lensCustomization: Boolean
+    },
+    seo: {
+        metaTitle: String,
+        metaDesc: String
+    },
+    rating: { type: Number, default: 0 },
+    reviews: { type: Number, default: 0 }
 }, { timestamps: true });
 
 // Check if model exists before defining to avoid OverwriteModelError in Next.js hot-reloading

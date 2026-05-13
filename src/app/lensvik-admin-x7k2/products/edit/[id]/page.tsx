@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Upload, X, Plus, Sparkles, Eye, Save, ArrowLeft, Glasses, Tag, Package, Globe } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+
+import { Upload, X, Plus, Sparkles, Eye, Save, ArrowLeft, Glasses, Tag, Package, Globe, RefreshCcw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -12,7 +13,9 @@ const LENS_TYPES = ['Clear', 'UV400', 'Polarized', 'Anti-Reflective', 'Blue Ligh
 const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 const MATERIALS = ['Acetate', 'Metal', 'Titanium', 'TR-90', 'Stainless Steel', 'Wood', 'Carbon Fiber'];
 
-export default function AddProductPage() {
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
+
   const [images, setImages] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -20,6 +23,7 @@ export default function AddProductPage() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [tab, setTab] = useState<'basic' | 'variants' | 'eyewear' | 'seo'>('basic');
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
   const [description, setDescription] = useState('');
   const [form, setForm] = useState({
@@ -37,7 +41,65 @@ export default function AddProductPage() {
 
   const router = useRouter();
 
-  const handlePublish = async (statusOverride?: string) => {
+  useEffect(() => {
+    fetchProduct();
+  }, [id]);
+
+  const fetchProduct = async () => {
+    try {
+      const res = await fetch(`/api/products/${id}`);
+      if (!res.ok) throw new Error('Product not found');
+      const data = await res.json();
+      
+      setForm({
+        name: data.name || '',
+        category: data.category || '',
+        price: data.price?.toString() || '',
+        comparePrice: data.comparePrice?.toString() || '',
+        sku: data.sku || '',
+        barcode: data.barcode || '',
+        gender: data.gender || 'Unisex',
+        material: data.material || '',
+        status: data.status || 'Draft',
+        collection: data.collection || '',
+        pdMin: data.measurements?.pdMin?.toString() || '',
+        pdMax: data.measurements?.pdMax?.toString() || '',
+        bridgeWidth: data.measurements?.bridgeWidth?.toString() || '',
+        templeLength: data.measurements?.templeLength?.toString() || '',
+        lensWidth: data.measurements?.lensWidth?.toString() || '',
+        frameHeight: data.measurements?.frameHeight?.toString() || '',
+        metaTitle: data.seo?.metaTitle || '',
+        metaDesc: data.seo?.metaDesc || '',
+        tags: data.tags?.join(', ') || '',
+      });
+      
+      setDescription(data.description || '');
+      setImages(data.images || []);
+      setOptions(data.options || {
+        prescriptionCompatible: true,
+        blueLightFilter: true,
+        virtualTryOn: false,
+        lensCustomization: true,
+      });
+      
+      // Extract selected variants
+      const colors = Array.from(new Set(data.variants?.map((v: any) => v.color).filter(Boolean)));
+      const sizes = Array.from(new Set(data.variants?.map((v: any) => v.size).filter(Boolean)));
+      const lenses = Array.from(new Set(data.variants?.map((v: any) => v.lensType).filter(Boolean)));
+      
+      setSelectedColors(colors as string[]);
+      setSelectedSizes(sizes as string[]);
+      setSelectedLensTypes(lenses as string[]);
+      
+    } catch (error: any) {
+      toast.error(error.message);
+      router.push('/lensvik-admin-x7k2/products');
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  const handleUpdate = async (statusOverride?: string) => {
     if (!form.name || !form.category || !form.price) {
       toast.error('Please fill in all required fields (Name, Category, Price)');
       return;
@@ -49,6 +111,7 @@ export default function AddProductPage() {
         ...form,
         description,
         images,
+        ...(images.length > 0 ? { image: images[0] } : {}),
         status: statusOverride || form.status,
         tags: (form.tags || '').split(',').map(t => t.trim()).filter(Boolean),
         measurements: {
@@ -64,7 +127,6 @@ export default function AddProductPage() {
           metaTitle: form.metaTitle,
           metaDesc: form.metaDesc,
         },
-        // Generate variants
         variants: selectedColors.flatMap(color =>
           (selectedSizes.length > 0 ? selectedSizes : ['M']).map(size => ({
             color,
@@ -76,15 +138,15 @@ export default function AddProductPage() {
         )
       };
 
-      const res = await fetch('/api/products', {
-        method: 'POST',
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error('Failed to publish product');
+      if (!res.ok) throw new Error('Failed to update product');
 
-      toast.success(statusOverride === 'Active' ? 'Product published successfully!' : 'Product saved as draft!');
+      toast.success('Product updated successfully!');
       router.push('/lensvik-admin-x7k2/products');
     } catch (error: any) {
       toast.error(error.message);
@@ -138,6 +200,15 @@ export default function AddProductPage() {
     { id: 'seo', label: 'SEO', icon: Globe },
   ] as const;
 
+  if (fetching) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <RefreshCcw className="w-10 h-10 text-blue-600 animate-spin" />
+        <p className="text-slate-500 font-medium">Loading product data...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -147,20 +218,24 @@ export default function AddProductPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 leading-tight">Add Product</h1>
-            <p className="text-slate-500 text-xs font-medium">Create a new eyewear product listing</p>
+            <h1 className="text-xl font-bold text-slate-900 leading-tight">Edit Product</h1>
+            <p className="text-slate-500 text-xs font-medium">Modify existing eyewear listing</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm">
+          <Link 
+            href={`/products/${id}`}
+            target="_blank"
+            className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm"
+          >
             <Eye className="w-4 h-4" /> Preview
-          </button>
+          </Link>
           <button
-            onClick={() => handlePublish('Active')}
+            onClick={() => handleUpdate()}
             disabled={loading}
             className="flex items-center gap-2 text-xs font-bold bg-blue-600 text-white rounded-xl px-5 py-2.5 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
           >
-            {loading ? 'Publishing...' : <><Save className="w-4 h-4" /> Publish</>}
+            {loading ? 'Saving...' : <><Save className="w-4 h-4" /> Save Changes</>}
           </button>
         </div>
       </div>
@@ -183,11 +258,9 @@ export default function AddProductPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main form */}
         <div className="lg:col-span-2 space-y-5">
           {tab === 'basic' && (
             <>
-              {/* Image uploader */}
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-sm font-bold text-slate-900 mb-5 border-b border-slate-50 pb-4 uppercase tracking-tight">Product Images</h3>
                 <div
@@ -222,7 +295,6 @@ export default function AddProductPage() {
                 )}
               </div>
 
-              {/* Basic fields */}
               <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
                 <h3 className="text-sm font-bold text-slate-900 border-b border-slate-50 pb-4 uppercase tracking-tight">Product Details</h3>
                 <div>
@@ -348,7 +420,6 @@ export default function AddProductPage() {
                   <input value={form.templeLength} onChange={e => setForm({ ...form, templeLength: e.target.value })} placeholder="140" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-bold" />
                 </div>
               </div>
-              {/* Checkboxes */}
               <div className="pt-4 space-y-4">
                 {[
                   { id: 'prescriptionCompatible', label: 'Prescription Compatible' },
@@ -383,7 +454,6 @@ export default function AddProductPage() {
                 <textarea value={form.metaDesc} onChange={e => setForm({ ...form, metaDesc: e.target.value })} rows={3} placeholder="Brief product description for search engines..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all resize-none font-medium leading-relaxed" />
                 <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-tight">{form.metaDesc.length}/160 characters</p>
               </div>
-              {/* Preview */}
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 shadow-inner">
                 <p className="text-[10px] text-slate-400 mb-3 uppercase tracking-widest font-bold">Search Preview</p>
                 <p className="text-sm text-blue-600 font-bold leading-tight underline underline-offset-2">{form.metaTitle || 'Product Title | Lensvik'}</p>
@@ -394,9 +464,7 @@ export default function AddProductPage() {
           )}
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Status */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Publish Status</label>
             <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
@@ -405,7 +473,6 @@ export default function AddProductPage() {
               <option value="Archived">Archived</option>
             </select>
           </div>
-          {/* Collection */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Collection</label>
             <select value={form.collection} onChange={e => setForm({ ...form, collection: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
@@ -416,7 +483,6 @@ export default function AddProductPage() {
               <option value="luxury">Luxury Edit</option>
             </select>
           </div>
-          {/* Selected variants summary */}
           {(selectedColors.length > 0 || selectedSizes.length > 0) && (
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Variant Summary</p>
@@ -441,22 +507,20 @@ export default function AddProductPage() {
               </div>
             </div>
           )}
-          {/* Save buttons */}
           <div className="space-y-3">
             <button
-              onClick={() => handlePublish('Active')}
+              onClick={() => handleUpdate()}
               disabled={loading}
               className="w-full bg-blue-600 text-white text-sm font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 uppercase tracking-tight disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {loading ? 'Publishing...' : 'Publish Product'}
+              {loading ? 'Saving...' : 'Save Changes'}
             </button>
             <button
-              onClick={() => handlePublish('Draft')}
-              disabled={loading}
-              className="w-full bg-white border border-slate-200 text-slate-600 text-sm font-bold py-3.5 rounded-xl hover:bg-slate-50 transition-all shadow-sm uppercase tracking-tight disabled:opacity-50"
+              onClick={() => router.push('/lensvik-admin-x7k2/products')}
+              className="w-full bg-white border border-slate-200 text-slate-600 text-sm font-bold py-3.5 rounded-xl hover:bg-slate-50 transition-all shadow-sm uppercase tracking-tight"
             >
-              Save as Draft
+              Cancel
             </button>
           </div>
         </div>

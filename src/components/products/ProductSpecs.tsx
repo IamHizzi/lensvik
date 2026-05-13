@@ -5,9 +5,17 @@ import { Ruler, ShieldCheck, Heart, Star, Package, RefreshCw, CheckCircle2, Chev
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductSpecsProps {
-    measurements?: { lensWidth: number; bridgeWidth: number; templeLength: number };
+    measurements?: { 
+        lensWidth?: number; 
+        bridgeWidth?: number; 
+        templeLength?: number;
+        pdMin?: number;
+        pdMax?: number;
+        frameHeight?: number;
+    };
     description?: string;
 }
+
 
 const TABS = [
     { id: "features",    label: "Features" },

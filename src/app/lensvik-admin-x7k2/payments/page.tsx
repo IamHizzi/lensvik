@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DollarSign, TrendingUp, CreditCard, AlertCircle, CheckCircle2, XCircle, Search, Download } from 'lucide-react';
-
-const TRANSACTIONS: any[] = [];
+import { toast } from 'sonner';
 
 const statusStyle: Record<string, string> = {
   Completed: 'bg-emerald-50 text-emerald-600 border-emerald-200',
@@ -27,28 +26,117 @@ const methodColor: Record<string, string> = {
 };
 
 export default function PaymentsPage() {
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [methodFilter, setMethodFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  const filtered = TRANSACTIONS.filter(t => {
-    const m = t.id.includes(search) || t.customer.toLowerCase().includes(search.toLowerCase()) || t.order.includes(search);
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const fetchPayments = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/orders');
+      const orders = await res.json();
+      
+      const txns = orders.map((o: any) => ({
+        id: o._id.substring(o._id.length - 8).toUpperCase(),
+        order: o._id.substring(0, 8),
+        customer: o.customerName,
+        amount: o.totalAmount || 0,
+        tax: Math.round((o.totalAmount || 0) * 0.05), // Estimated tax
+        method: o.paymentMethod || 'COD',
+        ref: o.paymentDetails?.transactionId || 'N/A',
+        status: o.paymentStatus === 'Paid' ? 'Completed' : o.paymentStatus || 'Pending',
+        date: new Date(o.createdAt).toLocaleDateString(),
+        fullOrderId: o._id
+      }));
+      
+      setTransactions(txns);
+    } catch (error) {
+      toast.error('Failed to load transactions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = transactions.filter(t => {
+    const m = t.id.toLowerCase().includes(search.toLowerCase()) || t.customer.toLowerCase().includes(search.toLowerCase()) || t.order.toLowerCase().includes(search.toLowerCase());
     const mm = methodFilter === 'All' || t.method === methodFilter;
     const ms = statusFilter === 'All' || t.status === statusFilter;
     return m && mm && ms;
   });
 
-  const totalRevenue = TRANSACTIONS.filter(t => t.status === 'Completed').reduce((a, t) => a + t.amount, 0);
-  const totalTax = TRANSACTIONS.filter(t => t.status === 'Completed').reduce((a, t) => a + t.tax, 0);
-  const totalRefunded = TRANSACTIONS.filter(t => t.status === 'Refunded').reduce((a, t) => a + t.amount, 0);
-  const failed = TRANSACTIONS.filter(t => t.status === 'Failed').length;
+  const totalRevenue = transactions.filter(t => t.status === 'Completed').reduce((a, t) => a + t.amount, 0);
+  const totalTax = transactions.filter(t => t.status === 'Completed').reduce((a, t) => a + t.tax, 0);
+  const totalRefunded = transactions.filter(t => t.status === 'Refunded').reduce((a, t) => a + t.amount, 0);
+  const failed = transactions.filter(t => t.status === 'Failed').length;
+
+  const methods = ['JazzCash', 'EasyPaisa', 'COD', 'Bank Transfer'];
+  const methodStats = methods.map(m => {
+    const amt = transactions.filter(t => t.method === m).reduce((a, t) => a + t.amount, 0);
+    const pct = totalRevenue > 0 ? Math.round((amt / transactions.reduce((a, t) => a + t.amount, 0)) * 100) : 0;
+    return { method: m, amount: amt, pct };
+  });
+
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editAmount, setEditAmount] = useState<number>(0);
+  const [editMethod, setEditMethod] = useState<string>('');
+  const [editStatus, setEditStatus] = useState<string>('');
+
+  const handleUpdateTransaction = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          totalAmount: editAmount,
+          paymentMethod: editMethod,
+          paymentStatus: editStatus === 'Completed' ? 'Paid' : editStatus
+        })
+      });
+      
+      if (res.ok) {
+        toast.success('Transaction updated');
+        setEditingId(null);
+        fetchPayments();
+      } else {
+        throw new Error('Failed to update');
+      }
+    } catch (error) {
+      toast.error('Update failed');
+    }
+  };
+
+  const handleMarkAsPaid = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus: 'Paid' })
+      });
+      
+      if (res.ok) {
+        toast.success('Order marked as paid');
+        fetchPayments();
+      } else {
+        throw new Error('Failed to update');
+      }
+    } catch (error) {
+      toast.error('Update failed');
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-screen-2xl mx-auto pb-10">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Payments</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{TRANSACTIONS.length} transactions this month</p>
+          <p className="text-slate-500 text-sm mt-0.5">{transactions.length} transactions recorded</p>
         </div>
         <button className="flex items-center gap-2 text-xs text-slate-500 border border-slate-200 rounded-xl px-3 py-2 hover:bg-white transition-all shadow-sm">
           <Download className="w-3.5 h-3.5" /> Export Report
@@ -80,12 +168,7 @@ export default function PaymentsPage() {
 
       {/* Payment method breakdown */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { method: 'JazzCash', amount: 0, pct: 0, color: 'from-red-500 to-red-700' },
-          { method: 'EasyPaisa', amount: 0, pct: 0, color: 'from-green-500 to-green-700' },
-          { method: 'Cash on Delivery', amount: 0, pct: 0, color: 'from-amber-500 to-amber-700' },
-          { method: 'Bank Transfer', amount: 0, pct: 0, color: 'from-blue-500 to-blue-700' },
-        ].map(item => (
+        {methodStats.map(item => (
           <div key={item.method} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">{item.method}</p>
@@ -93,11 +176,12 @@ export default function PaymentsPage() {
             </div>
             <p className="text-sm font-bold text-slate-900 mb-2">PKR {item.amount.toLocaleString()}</p>
             <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div className={`h-full bg-gradient-to-r ${item.color} rounded-full`} style={{ width: `${item.pct}%` }} />
+              <div className="h-full bg-blue-600 rounded-full" style={{ width: `${item.pct}%` }} />
             </div>
           </div>
         ))}
       </div>
+
 
       {/* Filters */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 flex-wrap shadow-sm">
@@ -124,7 +208,7 @@ export default function PaymentsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-100">
-                {['TXN ID', 'Order', 'Customer', 'Amount', 'Tax', 'Method', 'Reference', 'Status', 'Date'].map(h => (
+                {['TXN ID', 'Order', 'Customer', 'Amount', 'Tax', 'Method', 'Reference', 'Status', 'Date', 'Action'].map(h => (
                   <th key={h} className="text-left px-5 py-4 text-[10px] text-slate-500 uppercase tracking-widest font-bold whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -132,21 +216,102 @@ export default function PaymentsPage() {
             <tbody className="divide-y divide-slate-50">
               {filtered.map((t, i) => {
                 const StatusIcon = statusIcon[t.status];
+                const isEditing = editingId === t.id;
+
                 return (
                   <tr key={i} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-5 py-4"><p className="text-[10px] font-mono text-slate-400">{t.id}</p></td>
                     <td className="px-5 py-4"><p className="text-xs font-bold text-blue-600">{t.order}</p></td>
                     <td className="px-5 py-4"><p className="text-xs text-slate-900 font-medium">{t.customer}</p></td>
-                    <td className="px-5 py-4"><p className="text-xs font-bold text-slate-900">PKR {t.amount.toLocaleString()}</p></td>
+                    <td className="px-5 py-4">
+                      {isEditing ? (
+                        <input 
+                          type="number" 
+                          value={editAmount} 
+                          onChange={e => setEditAmount(parseInt(e.target.value) || 0)}
+                          className="w-24 bg-white border border-blue-300 rounded px-2 py-1 text-xs font-bold focus:outline-none"
+                        />
+                      ) : (
+                        <p className="text-xs font-bold text-slate-900">PKR {t.amount.toLocaleString()}</p>
+                      )}
+                    </td>
                     <td className="px-5 py-4"><p className="text-xs text-slate-500 font-mono">PKR {t.tax.toLocaleString()}</p></td>
-                    <td className="px-5 py-4"><p className={`text-xs font-bold ${methodColor[t.method]}`}>{t.method}</p></td>
+                    <td className="px-5 py-4">
+                      {isEditing ? (
+                        <select 
+                          value={editMethod} 
+                          onChange={e => setEditMethod(e.target.value)}
+                          className="text-xs border border-blue-300 rounded px-2 py-1 outline-none"
+                        >
+                          {['JazzCash', 'EasyPaisa', 'COD', 'Bank Transfer'].map(m => (
+                            <option key={m} value={m}>{m}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <p className={`text-xs font-bold ${methodColor[t.method]}`}>{t.method}</p>
+                      )}
+                    </td>
                     <td className="px-5 py-4"><p className="text-[10px] font-mono text-slate-400">{t.ref}</p></td>
                     <td className="px-5 py-4">
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full border ${statusStyle[t.status]}`}>
-                        <StatusIcon className="w-2.5 h-2.5" />{t.status}
-                      </span>
+                      {isEditing ? (
+                        <select 
+                          value={editStatus} 
+                          onChange={e => setEditStatus(e.target.value)}
+                          className="text-xs border border-blue-300 rounded px-2 py-1 outline-none"
+                        >
+                          {['Completed', 'Pending', 'Refunded', 'Failed'].map(s => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full border ${statusStyle[t.status]}`}>
+                          <StatusIcon className="w-2.5 h-2.5" />{t.status}
+                        </span>
+                      )}
                     </td>
                     <td className="px-5 py-4"><p className="text-[10px] text-slate-500 font-mono">{t.date}</p></td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1.5">
+                        {isEditing ? (
+                          <>
+                            <button 
+                              onClick={() => handleUpdateTransaction(t.fullOrderId)}
+                              className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg px-2 py-1 hover:bg-emerald-100"
+                            >
+                              Save
+                            </button>
+                            <button 
+                              onClick={() => setEditingId(null)}
+                              className="text-[10px] font-bold text-slate-400 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 hover:bg-slate-100"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button 
+                              onClick={() => {
+                                setEditingId(t.id);
+                                setEditAmount(t.amount);
+                                setEditMethod(t.method);
+                                setEditStatus(t.status);
+                              }}
+                              className="text-[10px] font-bold text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all rounded-lg px-2 py-1"
+                            >
+                              Edit
+                            </button>
+                            {t.status === 'Pending' && (
+                              <button 
+                                onClick={() => handleMarkAsPaid(t.fullOrderId)}
+                                className="text-[10px] font-bold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg px-2 py-1 hover:bg-blue-100 transition-all"
+                              >
+                                Mark as Paid
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}

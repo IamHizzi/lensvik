@@ -5,9 +5,10 @@ import {
   ShoppingBag, DollarSign, Users, Package,
   RefreshCcw, AlertTriangle, Eye, ArrowUpRight,
   Clock, CheckCircle2, Truck, XCircle, Zap, Activity,
-  ChevronRight, MessageSquare, TrendingUp, Search
+  ChevronRight, MessageSquare, TrendingUp, Search, Glasses
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
 function StatCard({ label, value, change, icon: Icon, trend, color, prefix = '' }: {
@@ -34,10 +35,8 @@ function StatCard({ label, value, change, icon: Icon, trend, color, prefix = '' 
 
 // ─── Revenue Chart ────────────────────────────────────────────────────────────
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const revenueData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-const ordersData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-function RevenueChart() {
+function RevenueChart({ revenueData, ordersData }: { revenueData: number[], ordersData: number[] }) {
   const [activeMonth, setActiveMonth] = useState<number | null>(null);
   const max = Math.max(...revenueData) || 1;
 
@@ -83,11 +82,80 @@ function RevenueChart() {
 }
 
 export default function AdminDashboard() {
-  const [tick, setTick] = useState(0);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [revenueByMonth, setRevenueByMonth] = useState<number[]>(new Array(12).fill(0));
+  const [ordersByMonth, setOrdersByMonth] = useState<number[]>(new Array(12).fill(0));
+
   useEffect(() => {
-    const t = setInterval(() => setTick(p => p + 1), 5000);
-    return () => clearInterval(t);
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [ordersRes, productsRes] = await Promise.all([
+        fetch('/api/orders'),
+        fetch('/api/products')
+      ]);
+      
+      const ordersData = await ordersRes.json();
+      const productsData = await productsRes.json();
+      
+      setOrders(ordersData);
+      setProducts(productsData);
+
+      // Process monthly data
+      const rev = new Array(12).fill(0);
+      const ord = new Array(12).fill(0);
+      
+      ordersData.forEach((order: any) => {
+        const date = new Date(order.createdAt);
+        const month = date.getMonth();
+        rev[month] += order.totalAmount || 0;
+        ord[month] += 1;
+      });
+      
+      setRevenueByMonth(rev);
+      setOrdersByMonth(ord);
+
+    } catch (error) {
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalRevenue = orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0);
+  const ordersToday = orders.filter(o => {
+    const today = new Date().setHours(0,0,0,0);
+    return new Date(o.createdAt).getTime() >= today;
+  }).length;
+  const uniqueCustomers = new Set(orders.map(o => o.customerEmail)).size;
+  
+  // Calculate low stock items across all products and variants
+  const lowStockItems = products.reduce((acc, p) => {
+    const isLow = (stock: number) => stock > 0 && stock <= 5;
+    if (p.variants && p.variants.length > 0) {
+      return acc + p.variants.filter((v: any) => isLow(v.stock)).length;
+    }
+    return acc + (isLow(p.stock) ? 1 : 0);
+  }, 0);
+
+  const paymentBreakdown = orders.reduce((acc: any, o) => {
+    const method = o.paymentMethod || 'Other';
+    acc[method] = (acc[method] || 0) + 1;
+    return acc;
+  }, {});
+
+  const orderStatusBreakdown = [
+    { label: 'Delivered', status: 'Delivered', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Shipped', status: 'Shipped', color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Processing', status: 'Lens Processing', color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Pending', status: 'Pending', color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Cancelled', status: 'Cancelled', color: 'text-red-600', bg: 'bg-red-50' },
+  ];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
@@ -100,10 +168,14 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-2">
           <div className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 flex items-center gap-2 text-xs font-medium text-slate-600 shadow-sm">
             <Clock className="w-3.5 h-3.5 text-blue-600" />
-            Last Sync: Just now
+            Last Sync: {loading ? 'Syncing...' : 'Just now'}
           </div>
-          <button className="bg-blue-600 text-white rounded-xl px-4 py-2 text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2">
-            <RefreshCcw className="w-3.5 h-3.5" />
+          <button 
+            onClick={fetchData}
+            disabled={loading}
+            className="bg-blue-600 text-white rounded-xl px-4 py-2 text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 disabled:opacity-50"
+          >
+            <RefreshCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
         </div>
@@ -111,27 +183,70 @@ export default function AdminDashboard() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Revenue" value="0.0M" change="+0%" icon={DollarSign} trend="up" color="bg-blue-50 text-blue-600" prefix="PKR " />
-        <StatCard label="Orders Today" value="0" change="+0%" icon={ShoppingBag} trend="up" color="bg-indigo-50 text-indigo-600" />
-        <StatCard label="Active Customers" value="0" change="+0%" icon={Users} trend="up" color="bg-violet-50 text-violet-600" />
-        <StatCard label="Refund Requests" value="0" change="-0" icon={RefreshCcw} trend="down" color="bg-amber-50 text-amber-600" />
+        <StatCard 
+          label="Total Revenue" 
+          value={(totalRevenue / 1000).toFixed(1) + 'k'} 
+          change="+0%" 
+          icon={DollarSign} 
+          trend="up" 
+          color="bg-blue-50 text-blue-600" 
+          prefix="PKR " 
+        />
+        <StatCard 
+          label="Orders Today" 
+          value={ordersToday.toString()} 
+          change="+0%" 
+          icon={ShoppingBag} 
+          trend="up" 
+          color="bg-indigo-50 text-indigo-600" 
+        />
+        <StatCard 
+          label="Active Customers" 
+          value={uniqueCustomers.toString()} 
+          change="+0%" 
+          icon={Users} 
+          trend="up" 
+          color="bg-violet-50 text-violet-600" 
+        />
+        <StatCard 
+          label="Low Stock SKUs" 
+          value={lowStockItems.toString()} 
+          change="Alert" 
+          icon={AlertTriangle} 
+          trend="down" 
+          color="bg-amber-50 text-amber-600" 
+        />
       </div>
-
 
 
       {/* Revenue chart + Live feed */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2">
-          <RevenueChart />
+          <RevenueChart revenueData={revenueByMonth} ordersData={ordersByMonth} />
         </div>
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm overflow-y-auto max-h-[400px]">
           <div className="flex items-center gap-2 mb-5">
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
             <h3 className="text-slate-900 font-semibold text-sm">Live Activity</h3>
           </div>
-          <div className="text-center py-20">
-            <Zap className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-            <p className="text-xs text-slate-400 font-medium">Monitoring activity...</p>
+          <div className="space-y-4">
+            {orders.slice(0, 10).map((order, i) => (
+              <div key={i} className="flex items-start gap-3 border-l-2 border-slate-100 pl-4 py-1">
+                <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag className="w-4 h-4 text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-900">New order from {order.customerName}</p>
+                  <p className="text-[10px] text-slate-500 font-medium">PKR {order.totalAmount?.toLocaleString()} · {new Date(order.createdAt).toLocaleTimeString()}</p>
+                </div>
+              </div>
+            ))}
+            {orders.length === 0 && (
+              <div className="text-center py-20">
+                <Zap className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                <p className="text-xs text-slate-400 font-medium">Monitoring activity...</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -146,18 +261,65 @@ export default function AdminDashboard() {
               View All <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="text-center py-20 text-slate-400 text-xs">No orders to display</div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">ID</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Customer</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Amount</th>
+                  <th className="px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {orders.slice(0, 5).map((order, i) => (
+                  <tr key={i} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 text-xs font-mono font-bold text-blue-600">{order._id}</td>
+                    <td className="px-6 py-4 text-xs font-medium text-slate-900">{order.customerName}</td>
+                    <td className="px-6 py-4 text-xs font-bold text-slate-900">PKR {order.totalAmount?.toLocaleString()}</td>
+                    <td className="px-6 py-4">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 bg-white">
+                        {order.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {orders.length === 0 && (
+            <div className="text-center py-20 text-slate-400 text-xs">No orders to display</div>
+          )}
         </div>
 
         {/* Top Products */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-slate-900 font-semibold text-sm">Top Products</h3>
+            <h3 className="text-slate-900 font-semibold text-sm">Active Products</h3>
             <Link href="/lensvik-admin-x7k2/products" className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium">
               All <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="text-center py-20 text-slate-400 text-xs">No product data</div>
+          <div className="space-y-4">
+            {products.slice(0, 5).map((product, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-100 overflow-hidden flex-shrink-0">
+                  <img src={product.images?.[0] || '/images/dfd.png'} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-900 truncate">{product.name}</p>
+                  <p className="text-[10px] text-slate-500">{product.category}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold text-slate-900">PKR {product.price?.toLocaleString()}</p>
+                  <p className="text-[9px] text-emerald-600 font-bold">{product.status}</p>
+                </div>
+              </div>
+            ))}
+            {products.length === 0 && (
+              <div className="text-center py-20 text-slate-400 text-xs">No product data</div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -167,45 +329,31 @@ export default function AdminDashboard() {
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <h3 className="text-slate-900 font-semibold mb-5 text-sm">Payment Methods</h3>
           <div className="space-y-4">
-            {[
-              { label: 'JazzCash', pct: 0, color: 'bg-red-500' },
-              { label: 'EasyPaisa', pct: 0, color: 'bg-emerald-500' },
-              { label: 'COD', pct: 0, color: 'bg-amber-500' },
-              { label: 'Card', pct: 0, color: 'bg-blue-600' },
-            ].map(item => (
-              <div key={item.label}>
-                <div className="flex justify-between text-[10px] font-bold mb-1.5 uppercase tracking-widest text-slate-500">
-                  <span>{item.label}</span>
-                  <span className="text-slate-900">{item.pct}%</span>
+            {Object.keys(paymentBreakdown).map(method => {
+              const count = paymentBreakdown[method];
+              const pct = Math.round((count / orders.length) * 100) || 0;
+              return (
+                <div key={method}>
+                  <div className="flex justify-between text-[10px] font-bold mb-1.5 uppercase tracking-widest text-slate-500">
+                    <span>{method}</span>
+                    <span className="text-slate-900">{pct}%</span>
+                  </div>
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
                 </div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.pct}%` }} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
+            {orders.length === 0 && <p className="text-xs text-slate-400">No data</p>}
           </div>
         </div>
 
         {/* Traffic sources */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-slate-900 font-semibold mb-5 text-sm">Traffic Sources</h3>
-          <div className="space-y-4">
-            {[
-              { label: 'Instagram', pct: 0, color: 'bg-pink-500' },
-              { label: 'Direct', pct: 0, color: 'bg-slate-400' },
-              { label: 'Google Ads', pct: 0, color: 'bg-blue-500' },
-              { label: 'Referral', pct: 0, color: 'bg-indigo-500' },
-            ].map(item => (
-              <div key={item.label}>
-                <div className="flex justify-between text-[10px] font-bold mb-1.5 uppercase tracking-widest text-slate-500">
-                  <span>{item.label}</span>
-                  <span className="text-slate-900">{item.pct}%</span>
-                </div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.pct}%` }} />
-                </div>
-              </div>
-            ))}
+          <h3 className="text-slate-900 font-semibold mb-5 text-sm">Traffic Insights</h3>
+          <div className="text-center py-10">
+            <Activity className="w-8 h-8 text-slate-100 mx-auto mb-3" />
+            <p className="text-xs text-slate-400 font-medium">Tracking enabled. Data will appear as users interact with the site.</p>
           </div>
         </div>
 
@@ -213,21 +361,19 @@ export default function AdminDashboard() {
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <h3 className="text-slate-900 font-semibold mb-5 text-sm">Order Status</h3>
           <div className="space-y-3">
-            {[
-              { label: 'Delivered', count: 0, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-              { label: 'In Transit', count: 0, color: 'text-blue-600', bg: 'bg-blue-50' },
-              { label: 'Processing', count: 0, color: 'text-purple-600', bg: 'bg-purple-50' },
-              { label: 'Pending', count: 0, color: 'text-amber-600', bg: 'bg-amber-50' },
-              { label: 'Cancelled', count: 0, color: 'text-red-600', bg: 'bg-red-50' },
-            ].map(item => (
-              <div key={item.label} className={`flex items-center justify-between px-3 py-2 rounded-xl ${item.bg}`}>
-                <span className="text-xs font-medium text-slate-700">{item.label}</span>
-                <span className={`text-xs font-bold ${item.color}`}>{item.count}</span>
-              </div>
-            ))}
+            {orderStatusBreakdown.map(item => {
+              const count = orders.filter(o => o.status === item.status).length;
+              return (
+                <div key={item.label} className={`flex items-center justify-between px-3 py-2 rounded-xl ${item.bg}`}>
+                  <span className="text-xs font-medium text-slate-700">{item.label}</span>
+                  <span className={`text-xs font-bold ${item.color}`}>{count}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
     </div>
   );
 }
+

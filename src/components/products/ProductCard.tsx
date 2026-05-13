@@ -1,11 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Star, ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 
@@ -16,15 +13,21 @@ interface ProductCardProps {
     originalPrice?: number;
     size?: string;
     rating?: number;
-    image: string;
+    image?: string;
+    images?: string[];
     category: string;
     index: number;
 }
 
-export function ProductCard({ _id, name, price, originalPrice, size, rating = 5, image, category, index }: ProductCardProps) {
+export function ProductCard({ _id, name, price, originalPrice, image, images, category, index }: ProductCardProps) {
     const { addToCart } = useCart();
 
     const isSale = originalPrice && originalPrice > price;
+
+    // Resolve the best available image — prefer images[0], fallback to image prop, then placeholder
+    const rawImage = (images && images.length > 0) ? images[0] : (image || '/images/dfd.png');
+    const displayImage = rawImage || '/images/dfd.png';
+    const isDataUri = displayImage.startsWith('data:');
 
     return (
         <motion.div
@@ -36,20 +39,28 @@ export function ProductCard({ _id, name, price, originalPrice, size, rating = 5,
         >
             <div className="flex flex-col h-full bg-white transition-all duration-300">
                 <Link href={`/products/${_id}`} className="relative aspect-[4/3] overflow-hidden bg-white mb-2 md:mb-4">
-                    <Image
-                        src={image}
-                        alt={name}
-                        fill
-                        className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
-                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    />
+                    {isDataUri ? (
+                        <img
+                            src={displayImage}
+                            alt={name}
+                            className="w-full h-full object-contain p-4 transition-transform duration-700 group-hover:scale-105"
+                        />
+                    ) : (
+                        <Image
+                            src={displayImage}
+                            alt={name}
+                            fill
+                            className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
+                            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        />
+                    )}
                 </Link>
 
                 <div className="flex flex-col flex-1 px-1">
                     <Link href={`/products/${_id}`} className="w-full mb-3 md:mb-4">
-                        <Button variant="outline" className="w-full border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white rounded-none h-10 md:h-12 uppercase tracking-widest text-[10px] md:text-xs font-bold transition-all duration-300">
+                        <button className="w-full border border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white rounded-none h-10 md:h-12 uppercase tracking-widest text-[10px] md:text-xs font-bold transition-all duration-300">
                             Quick View
-                        </Button>
+                        </button>
                     </Link>
 
                     <Link href={`/products/${_id}`}>

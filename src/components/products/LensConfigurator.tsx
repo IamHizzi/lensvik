@@ -20,8 +20,10 @@ interface LensConfiguratorProps {
         name: string;
         price: number;
         image: string;
+        images?: string[];
     };
 }
+
 
 // ─── Data ──────────────────────────────────────────────────────────────────
 const MAIN_CATEGORIES = [
@@ -803,7 +805,15 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
                                     {/* Product row */}
                                     <div className="flex items-center gap-4 mb-6 relative z-10">
                                         <div className="relative w-16 h-16 md:w-20 md:h-20 bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden shrink-0">
-                                            <Image src={product.image} alt={product.name} fill className="object-contain p-2" />
+                                            {product.images?.[0] ? (
+                                                product.images[0].startsWith('data:') ? (
+                                                    <img src={product.images[0]} alt={product.name} className="w-full h-full object-contain p-2" />
+                                                ) : (
+                                                    <Image src={product.images[0]} alt={product.name} fill className="object-contain p-2" />
+                                                )
+                                            ) : (
+                                                <Image src={product.image || '/images/dfd.png'} alt={product.name} fill className="object-contain p-2" />
+                                            )}
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-0.5">Frame</p>

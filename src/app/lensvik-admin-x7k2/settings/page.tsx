@@ -9,7 +9,6 @@ const SECTIONS = [
   { id: 'tax', label: 'Tax & Currency', icon: DollarSign },
   { id: 'email', label: 'Email Templates', icon: Mail },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'api', label: 'API & Security', icon: Key },
 ];
 
 function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void }) {
@@ -214,37 +213,6 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeSection === 'api' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-4">API & Security</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">API Key</label>
-                  <div className="flex gap-2">
-                    <input type="password" value="sk_live_lensvik_xk2p9••••••••••••••••" readOnly className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono outline-none" />
-                    <button className="text-xs text-blue-600 font-bold border border-blue-200 rounded-xl px-4 py-2 hover:bg-blue-50 transition-all shadow-sm">Reveal</button>
-                    <button className="text-xs text-slate-500 font-bold border border-slate-200 rounded-xl px-4 py-2 hover:bg-slate-50 transition-all shadow-sm">Regenerate</button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Webhook URL</label>
-                  <input placeholder="https://your-server.com/webhooks/lensvik" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50" />
-                </div>
-                <div className="space-y-3 pt-2 border-t border-slate-100">
-                  {[
-                    { label: 'Two-Factor Authentication', enabled: true },
-                    { label: 'IP Whitelist for Admin', enabled: false },
-                    { label: 'Session Timeout (30 min)', enabled: true },
-                  ].map(item => (
-                    <div key={item.label} className="flex items-center justify-between py-2.5">
-                      <p className="text-sm text-slate-700 font-medium">{item.label}</p>
-                      <Toggle enabled={item.enabled} onChange={() => {}} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Save button */}
           <div className="flex justify-end">

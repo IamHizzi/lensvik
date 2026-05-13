@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Search, Filter, Download, Eye, Printer, ChevronDown,
   Clock, CheckCircle2, Truck, Package, XCircle, RefreshCcw, Glasses, ArrowUpRight
 } from 'lucide-react';
+import { toast } from 'sonner';
+
 
 const ALL_ORDERS: any[] = [];
 
@@ -35,18 +37,58 @@ const statusIcon: Record<string, React.ElementType> = {
 };
 
 export default function OrdersPage() {
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
-  const filtered = ALL_ORDERS.filter(o => {
-    const matchSearch = o.id.includes(search) || o.customer.toLowerCase().includes(search.toLowerCase()) || o.product.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/orders');
+      const data = await res.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      toast.error('Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error('Failed to update status');
+      toast.success('Status updated');
+      fetchOrders();
+      if (selectedOrder?._id === id) setSelectedOrder({ ...selectedOrder, status: newStatus });
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const filtered = orders.filter(o => {
+    const searchLower = search.toLowerCase();
+    const matchSearch = 
+      o._id?.toLowerCase().includes(searchLower) || 
+      o.customerName?.toLowerCase().includes(searchLower) || 
+      o.customerPhone?.includes(searchLower) ||
+      o.shippingAddress?.city?.toLowerCase().includes(searchLower);
     const matchStatus = statusFilter === 'All' || o.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
   const statusCounts = STATUS_OPTIONS.slice(1).reduce((acc, s) => {
-    acc[s] = ALL_ORDERS.filter(o => o.status === s).length;
+    acc[s] = orders.filter(o => o.status === s).length;
     return acc;
   }, {} as Record<string, number>);
 
@@ -56,7 +98,8 @@ export default function OrdersPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Orders</h1>
-          <p className="text-slate-500 text-sm mt-0.5 font-medium">{ALL_ORDERS.length} total orders recorded</p>
+          <p className="text-slate-500 text-sm mt-0.5 font-medium">{orders.length} total orders recorded</p>
+
         </div>
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm">
@@ -84,13 +127,12 @@ export default function OrdersPage() {
         ))}
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Pending', value: 0, color: 'text-amber-600', bg: 'bg-white' },
-          { label: 'Confirmed', value: 0, color: 'text-blue-600', bg: 'bg-white' },
-          { label: 'Shipped', value: 0, color: 'text-indigo-600', bg: 'bg-white' },
-          { label: 'Revenue', value: 'PKR 0', color: 'text-emerald-600', bg: 'bg-white' },
+          { label: 'Pending', value: orders.filter(o => o.status === 'Pending').length, color: 'text-amber-600', bg: 'bg-white' },
+          { label: 'Confirmed', value: orders.filter(o => o.status === 'Confirmed').length, color: 'text-blue-600', bg: 'bg-white' },
+          { label: 'Shipped', value: orders.filter(o => o.status === 'Shipped').length, color: 'text-indigo-600', bg: 'bg-white' },
+          { label: 'Revenue', value: `PKR ${orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0).toLocaleString()}`, color: 'text-emerald-600', bg: 'bg-white' },
         ].map(card => (
           <div key={card.label} className={`${card.bg} border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all`}>
             <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
@@ -98,6 +140,7 @@ export default function OrdersPage() {
           </div>
         ))}
       </div>
+
 
       {/* Search */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
@@ -133,25 +176,31 @@ export default function OrdersPage() {
             <tbody className="divide-y divide-slate-50">
               {filtered.map((order, i) => {
                 const StatusIcon = statusIcon[order.status] || Clock;
+                const firstItem = order.items?.[0];
                 return (
                   <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-5 py-4">
                       <div>
-                        <p className="text-xs font-bold text-blue-600 group-hover:underline cursor-pointer">{order.id}</p>
-                        <p className="text-[10px] text-slate-400 font-medium">{order.city}</p>
+                        <p className="text-xs font-bold text-blue-600 group-hover:underline cursor-pointer">{order._id}</p>
+                        <p className="text-[10px] text-slate-400 font-medium">{order.shippingAddress?.city || 'No City'}</p>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <div>
-                        <p className="text-xs text-slate-900 font-bold">{order.customer}</p>
-                        <p className="text-[10px] text-slate-500 font-medium">{order.phone}</p>
+                        <p className="text-xs text-slate-900 font-bold">{order.customerName}</p>
+                        <p className="text-[10px] text-slate-500 font-medium">{order.customerPhone}</p>
                       </div>
                     </td>
                     <td className="px-5 py-4">
                       <div>
-                        <p className="text-xs text-slate-800 font-bold max-w-[200px] truncate">{order.product}</p>
-                        <p className="text-[10px] text-slate-500 font-medium">{order.variant}</p>
-                        {order.prescription && (
+                        <p className="text-xs text-slate-800 font-bold max-w-[200px] truncate">
+                          {firstItem?.name || 'Unknown Product'}
+                          {order.items?.length > 1 ? ` + ${order.items.length - 1} more` : ''}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          {firstItem?.variant?.color} {firstItem?.variant?.size}
+                        </p>
+                        {firstItem?.prescription && (
                           <span className="inline-flex items-center gap-1 text-[9px] text-violet-600 bg-violet-50 border border-violet-100 rounded-full px-1.5 py-0.5 mt-1 font-bold">
                             <Glasses className="w-2.5 h-2.5" />VERIFIED RX
                           </span>
@@ -159,13 +208,15 @@ export default function OrdersPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <p className="text-xs text-slate-600 font-medium">{order.date}</p>
+                      <p className="text-xs text-slate-600 font-medium">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </p>
                     </td>
                     <td className="px-5 py-4">
-                      <p className="text-xs font-bold text-slate-900 whitespace-nowrap">PKR {order.amount.toLocaleString()}</p>
+                      <p className="text-xs font-bold text-slate-900 whitespace-nowrap">PKR {(order.totalAmount || 0).toLocaleString()}</p>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{order.payment}</span>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{order.paymentMethod}</span>
                     </td>
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full border ${statusStyle[order.status]}`}>
@@ -173,6 +224,7 @@ export default function OrdersPage() {
                         {order.status}
                       </span>
                     </td>
+
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center gap-1.5">
                         <button
@@ -206,8 +258,8 @@ export default function OrdersPage() {
           <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between mb-6 border-b border-slate-50 pb-4">
               <div>
-                <h2 className="text-slate-900 font-bold text-xl">{selectedOrder.id}</h2>
-                <p className="text-slate-500 text-xs font-medium mt-1">{selectedOrder.date} · {selectedOrder.city}</p>
+                <h2 className="text-slate-900 font-bold text-xl">{selectedOrder._id}</h2>
+                <p className="text-slate-500 text-xs font-medium mt-1">{new Date(selectedOrder.createdAt).toLocaleString()} · {selectedOrder.shippingAddress?.city}</p>
               </div>
               <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${statusStyle[selectedOrder.status]}`}>
                 {selectedOrder.status}
@@ -216,25 +268,30 @@ export default function OrdersPage() {
             <div className="grid grid-cols-2 gap-4 text-sm mb-6">
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5">Customer</p>
-                <p className="text-slate-900 font-bold">{selectedOrder.customer}</p>
-                <p className="text-slate-500 text-xs font-medium">{selectedOrder.phone}</p>
+                <p className="text-slate-900 font-bold">{selectedOrder.customerName}</p>
+                <p className="text-slate-500 text-xs font-medium">{selectedOrder.customerPhone}</p>
               </div>
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5">Payment</p>
-                <p className="text-slate-900 font-bold">{selectedOrder.payment}</p>
-                <p className="text-emerald-600 text-xs font-bold">PKR {selectedOrder.amount.toLocaleString()}</p>
+                <p className="text-slate-900 font-bold">{selectedOrder.paymentMethod}</p>
+                <p className="text-emerald-600 text-xs font-bold">PKR {(selectedOrder.totalAmount || 0).toLocaleString()}</p>
               </div>
-              <div className="col-span-2 bg-slate-50 border border-slate-100 rounded-2xl p-4">
+              <div className="col-span-2 bg-slate-50 border border-slate-100 rounded-2xl p-4 overflow-y-auto max-h-48">
                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1.5">Product Details</p>
-                <p className="text-slate-900 font-bold">{selectedOrder.product}</p>
-                <p className="text-slate-500 text-xs font-medium">{selectedOrder.variant}</p>
-                {selectedOrder.prescription && (
-                  <div className="mt-2 flex items-center gap-1.5 text-violet-600 bg-violet-50 px-2 py-1 rounded-lg w-fit border border-violet-100 font-bold text-[10px]">
-                    <Glasses className="w-3 h-3" /> VERIFIED PRESCRIPTION
+                {selectedOrder.items?.map((item: any, idx: number) => (
+                  <div key={idx} className="mb-3 last:mb-0 border-b border-slate-100 pb-2 last:border-0">
+                    <p className="text-slate-900 font-bold">{item.name}</p>
+                    <p className="text-slate-500 text-xs font-medium">{item.variant?.color} {item.variant?.size} {item.variant?.lensType}</p>
+                    {item.prescription && (
+                      <div className="mt-2 flex items-center gap-1.5 text-violet-600 bg-violet-50 px-2 py-1 rounded-lg w-fit border border-violet-100 font-bold text-[10px]">
+                        <Glasses className="w-3 h-3" /> VERIFIED PRESCRIPTION
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
             </div>
+
             
             {/* Order actions */}
             <div className="flex gap-3 pt-2">

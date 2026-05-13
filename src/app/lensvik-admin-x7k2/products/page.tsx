@@ -1,13 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, Eye, MoreVertical, Package, Filter, Download, Upload, Star, Tag, Archive, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Plus, Edit2, Trash2, Eye, Package, Filter, Download, Upload, Star, Sparkles, ChevronDown, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { toast } from 'sonner';
 
-const PRODUCTS: any[] = [];
-
-const CATEGORIES = ['All', 'Sunglasses', 'Eyeglasses', 'Prescription', 'Blue Light', 'Luxury', 'Accessories'];
+const CATEGORIES = ['All', 'Sunglasses', 'Eyeglasses', 'Prescription Glasses', 'Blue Light Glasses', 'Luxury', 'Accessories'];
 
 const statusStyle: Record<string, string> = {
   Active: 'bg-emerald-50 text-emerald-600 border-emerald-200',
@@ -17,17 +15,67 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [view, setView] = useState<'grid' | 'table'>('table');
 
-  const filtered = PRODUCTS.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/products');
+      const data = await res.json();
+      setProducts(data);
+    } catch (error) {
+      toast.error('Failed to fetch products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to delete product');
+      toast.success('Product deleted');
+      fetchProducts();
+    } catch (error: any) {
+      toast.error(error?.message || 'Unable to delete product');
+    }
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'Active' ? 'Draft' : 'Active';
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to update product status');
+      toast.success(`Product ${newStatus === 'Active' ? 'published' : 'saved as draft'}`);
+      fetchProducts();
+    } catch (error: any) {
+      toast.error(error?.message || 'Unable to update product status');
+    }
+  };
+
+  const filtered = products.filter(p => {
+    const matchSearch = p.name?.toLowerCase().includes(search.toLowerCase()) || p.sku?.toLowerCase().includes(search.toLowerCase());
     const matchCat = category === 'All' || p.category === category;
     return matchSearch && matchCat;
   });
 
-  const stockAlerts = PRODUCTS.filter(p => p.stock <= 10).length;
+  const stockAlerts = products.filter(p => p.stock <= 10).length;
 
   return (
     <div className="space-y-6 max-w-screen-2xl mx-auto pb-10">
@@ -35,7 +83,7 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Products</h1>
-          <p className="text-slate-500 text-sm mt-0.5">0 total products</p>
+          <p className="text-slate-500 text-sm mt-0.5">{products.length} total products</p>
         </div>
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-2 text-xs text-slate-400 border border-slate-200 rounded-xl px-3 py-2 hover:bg-slate-100 transition-colors">
@@ -108,11 +156,11 @@ export default function ProductsPage() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex-shrink-0">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                        <img src={product.images?.[0] || '/images/dfd.png'} alt={product.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-slate-900">{product.name}</p>
-                        <p className="text-[10px] text-slate-500">{product.variants} variants · {product.gender}</p>
+                        <p className="text-[10px] text-slate-500">{product.variants?.length || 0} variants · {product.gender}</p>
                       </div>
                     </div>
                   </td>
@@ -128,8 +176,8 @@ export default function ProductsPage() {
                     <p className="text-xs font-bold text-slate-900">PKR {product.price.toLocaleString()}</p>
                   </td>
                   <td className="px-4 py-4">
-                    <span className={`text-xs font-semibold ${product.stock === 0 ? 'text-red-400' : product.stock <= 10 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                      {product.stock === 0 ? 'Out' : product.stock}
+                    <span className={`text-xs font-semibold ${!product.stock ? 'text-slate-400' : product.stock === 0 ? 'text-red-400' : product.stock <= 10 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      {product.stock == null ? 'N/A' : product.stock === 0 ? 'Out' : product.stock}
                     </span>
                     {product.stock > 0 && product.stock <= 10 && (
                       <p className="text-[9px] text-amber-400/70">Low stock</p>
@@ -152,14 +200,34 @@ export default function ProductsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link 
+                        href={`/lensvik-admin-x7k2/products/edit/${product._id}`}
+                        className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                        title="Edit product"
+                      >
                         <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all">
+                      </Link>
+                      <Link 
+                        href={`/products/${product._id}`}
+                        target="_blank"
+                        className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all"
+                        title="View on website"
+                      >
                         <Eye className="w-3.5 h-3.5" />
+                      </Link>
+                      <button
+                        onClick={() => handleToggleStatus(product._id, product.status)}
+                        className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                        title={product.status === 'Active' ? 'Unpublish product' : 'Publish product'}
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
                       </button>
-                      <button className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all">
+                      <button 
+                        onClick={() => handleDelete(product._id)}
+                        className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all"
+                        title="Delete product"
+                      >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -169,12 +237,17 @@ export default function ProductsPage() {
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 && (
+        {loading ? (
+          <div className="text-center py-20">
+            <RefreshCcw className="w-8 h-8 text-blue-600 mx-auto mb-4 animate-spin" />
+            <p className="text-sm text-slate-500 font-medium">Loading products...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <Package className="w-8 h-8 text-slate-600 mx-auto mb-2" />
             <p className="text-sm text-slate-500">No products found</p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

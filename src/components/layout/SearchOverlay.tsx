@@ -112,7 +112,10 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
                                 {results.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {results.map((product) => (
+                                        {results.map((product) => {
+                                            const productImage = product.images?.[0] || product.image || '/images/dfd.png';
+                                            const isDataUri = productImage.startsWith('data:');
+                                            return (
                                             <Link 
                                                 key={product._id} 
                                                 href={`/products/${product._id}`}
@@ -120,12 +123,20 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                                 className="group bg-white p-4 rounded-3xl border border-slate-100 hover:border-primary/20 hover:shadow-xl transition-all flex items-center gap-6"
                                             >
                                                 <div className="relative w-24 h-24 bg-slate-50 rounded-2xl overflow-hidden shrink-0">
-                                                    <Image 
-                                                        src={product.image} 
-                                                        alt={product.name} 
-                                                        fill 
-                                                        className="object-contain p-2 group-hover:scale-110 transition-transform duration-500" 
-                                                    />
+                                                    {isDataUri ? (
+                                                        <img
+                                                            src={productImage}
+                                                            alt={product.name}
+                                                            className="w-full h-full object-contain p-2"
+                                                        />
+                                                    ) : (
+                                                        <Image 
+                                                            src={productImage} 
+                                                            alt={product.name} 
+                                                            fill 
+                                                            className="object-contain p-2 group-hover:scale-110 transition-transform duration-500" 
+                                                        />
+                                                    )}
                                                 </div>
                                                 <div className="flex-1">
                                                     <h4 className="text-sm font-black uppercase italic tracking-tighter text-slate-900 group-hover:text-primary transition-colors leading-tight">
@@ -138,7 +149,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                                     </div>
                                                 </div>
                                             </Link>
-                                        ))}
+                                            );
+                                        })}
+
                                     </div>
                                 ) : !isLoading && (
                                     <div className="py-20 text-center">

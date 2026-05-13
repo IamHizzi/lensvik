@@ -44,7 +44,7 @@ export default function SupportPage() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Support Tickets</h1>
-          <p className="text-slate-500 text-sm mt-0.5">0 total tickets</p>
+          <p className="text-slate-500 text-sm mt-0.5">{TICKETS.length} total tickets</p>
         </div>
       </div>
 

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RefreshCcw, Search, CheckCircle2, XCircle, Clock, Eye, AlertCircle } from 'lucide-react';
-
-const RETURNS: any[] = [];
+import { toast } from 'sonner';
 
 const statusStyle: Record<string, string> = {
   'Pending Review': 'bg-amber-50 text-amber-600 border-amber-200',
@@ -21,33 +20,69 @@ const statusIcon: Record<string, React.ElementType> = {
 };
 
 export default function ReturnsPage() {
+  const [returns, setReturns] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
 
-  const filtered = RETURNS.filter(r => {
-    const m = r.customer.toLowerCase().includes(search.toLowerCase()) || r.id.includes(search) || r.order.includes(search);
+  useEffect(() => {
+    fetchReturns();
+  }, []);
+
+  const fetchReturns = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/orders');
+      const orders = await res.json();
+      
+      const retData = orders
+        .filter((o: any) => o.status === 'Returned' || o.status === 'Cancelled' || o.status === 'Refunded')
+        .map((o: any) => ({
+          id: `RET-${o._id.substring(o._id.length - 6).toUpperCase()}`,
+          order: o._id.substring(0, 8).toUpperCase(),
+          customer: o.customerName,
+          amount: o.totalAmount || 0,
+          status: o.status === 'Returned' ? 'Pending Review' : (o.status === 'Refunded' ? 'Refund Processed' : 'Rejected'),
+          type: o.status === 'Cancelled' ? 'Cancellation' : 'Return',
+          reason: o.notes || 'No reason provided',
+          date: new Date(o.createdAt).toLocaleDateString(),
+          product: o.items?.[0]?.name || 'Product Details Not Found',
+          refundMethod: o.paymentMethod || 'Original Method'
+        }));
+      
+      setReturns(retData);
+    } catch (error) {
+      toast.error('Failed to load returns');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = returns.filter(r => {
+    const m = r.customer.toLowerCase().includes(search.toLowerCase()) || r.id.toLowerCase().includes(search.toLowerCase()) || r.order.toLowerCase().includes(search.toLowerCase());
     const mf = filter === 'All' || r.status === filter;
     return m && mf;
   });
 
-  const pending = RETURNS.filter(r => r.status === 'Pending Review').length;
-  const totalRefunds = RETURNS.filter(r => r.status === 'Refund Approved').reduce((a, r) => a + r.amount, 0);
+  const pending = returns.filter(r => r.status === 'Pending Review').length;
+  const totalRefunds = returns.filter(r => r.status === 'Refund Approved' || r.status === 'Refund Processed').reduce((a, r) => a + r.amount, 0);
+
 
   return (
     <div className="space-y-6 max-w-screen-2xl mx-auto pb-10">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Returns & Refunds</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{RETURNS.length} requests · {pending} pending review</p>
+          <p className="text-slate-500 text-sm mt-0.5">{returns.length} requests · {pending} pending review</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Pending Review', value: pending, color: 'text-amber-600', bg: 'bg-white' },
-          { label: 'Total Returns', value: RETURNS.length, color: 'text-blue-600', bg: 'bg-white' },
-          { label: 'Refunds Approved', value: `PKR ${(totalRefunds / 1000).toFixed(0)}K`, color: 'text-emerald-600', bg: 'bg-white' },
-          { label: 'Rejected', value: RETURNS.filter(r => r.status === 'Rejected').length, color: 'text-red-600', bg: 'bg-white' },
+          { label: 'Total Returns', value: returns.length, color: 'text-blue-600', bg: 'bg-white' },
+          { label: 'Refunds Processed', value: `PKR ${(totalRefunds / 1000).toFixed(0)}K`, color: 'text-emerald-600', bg: 'bg-white' },
+          { label: 'Rejected', value: returns.filter(r => r.status === 'Rejected').length, color: 'text-red-600', bg: 'bg-white' },
         ].map(card => (
           <div key={card.label} className={`${card.bg} border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all`}>
             <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
@@ -55,6 +90,7 @@ export default function ReturnsPage() {
           </div>
         ))}
       </div>
+
 
       <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 flex-wrap shadow-sm">
         <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 h-9 flex-1 min-w-48 focus-within:border-blue-500/50 transition-colors">

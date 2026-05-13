@@ -59,6 +59,13 @@ export default function ProductPage() {
         fetchProduct();
     }, [id]);
 
+    // Resolve image list: prefer images[] array, fallback to image field
+    const imageList: string[] = (product as any)?.images?.length
+        ? (product as any).images
+        : (product?.image ? [product.image] : ['/images/dfd.png']);
+    const activeImage = imageList[activeThumb] || imageList[0] || '/images/dfd.png';
+    const isDataUri = (src: string) => src?.startsWith('data:');
+
     useEffect(() => {
         if (searchParams.get("tryon") === "true") setIsVTOModalOpen(true);
     }, [searchParams]);
@@ -95,8 +102,10 @@ export default function ProductPage() {
     }
 
     const isPrescriptionProduct =
-        product.category.toLowerCase() === "eyeglasses" ||
-        product.category.toLowerCase() === "prescription";
+        product.category.toLowerCase().includes("eyeglasses") ||
+        product.category.toLowerCase().includes("prescription") ||
+        product.category.toLowerCase().includes("blue light");
+
 
     const discount = product.originalPrice
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -117,14 +126,22 @@ export default function ProductPage() {
                     >
                         {/* Main Image */}
                         <div className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-[#f5f6f8] border border-slate-100 group shadow-xl shadow-slate-100/50">
-                            <Image
-                                src={product.image}
-                                alt={product.name}
-                                fill
-                                className="object-contain p-6 md:p-10 group-hover:scale-105 transition-transform duration-700"
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                priority
-                            />
+                            {isDataUri(activeImage) ? (
+                                <img
+                                    src={activeImage}
+                                    alt={product.name}
+                                    className="w-full h-full object-contain p-6 md:p-10 group-hover:scale-105 transition-transform duration-700"
+                                />
+                            ) : (
+                                <Image
+                                    src={activeImage}
+                                    alt={product.name}
+                                    fill
+                                    className="object-contain p-6 md:p-10 group-hover:scale-105 transition-transform duration-700"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                    priority
+                                />
+                            )}
 
                             {/* Discount badge */}
                             {discount && (
@@ -157,7 +174,7 @@ export default function ProductPage() {
 
                         {/* Thumbnail Strip */}
                         <div className="grid grid-cols-4 gap-2 md:gap-3">
-                            {[0, 1, 2, 3].map((i) => (
+                            {imageList.slice(0, 4).map((img, i) => (
                                 <button
                                     key={i}
                                     onClick={() => setActiveThumb(i)}
@@ -165,13 +182,17 @@ export default function ProductPage() {
                                         activeThumb === i ? "border-primary shadow-md shadow-primary/10" : "border-slate-100 opacity-60 hover:opacity-100"
                                     }`}
                                 >
-                                    <Image
-                                        src={product.image}
-                                        alt={product.name}
-                                        fill
-                                        className="object-contain p-2 md:p-3"
-                                        sizes="(max-width: 768px) 25vw, 100px"
-                                    />
+                                    {isDataUri(img) ? (
+                                        <img src={img} alt={product.name} className="w-full h-full object-contain p-2 md:p-3" />
+                                    ) : (
+                                        <Image
+                                            src={img}
+                                            alt={product.name}
+                                            fill
+                                            className="object-contain p-2 md:p-3"
+                                            sizes="(max-width: 768px) 25vw, 100px"
+                                        />
+                                    )}
                                 </button>
                             ))}
                         </div>

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Star, Users, ShoppingBag, MapPin, Eye, MessageSquare } from 'lucide-react';
-
-const CUSTOMERS: any[] = [];
+import { useState, useEffect } from 'react';
+import { Search, Star, Users, ShoppingBag, MapPin, Eye, MessageSquare, Glasses } from 'lucide-react';
+import { toast } from 'sonner';
 
 const statusStyle: Record<string, string> = {
   VIP: 'bg-amber-50 text-amber-600 border-amber-200',
@@ -13,36 +12,95 @@ const statusStyle: Record<string, string> = {
 };
 
 export default function CustomersPage() {
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  const filtered = CUSTOMERS.filter(c => {
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/orders');
+      const orders = await res.json();
+      
+      // Group orders by email to create customer profiles
+      const customerMap = new Map();
+      
+      orders.forEach((o: any) => {
+        const key = o.customerEmail || o.customerPhone;
+        if (!customerMap.has(key)) {
+          customerMap.set(key, {
+            id: o.customerEmail,
+            name: o.customerName,
+            email: o.customerEmail,
+            phone: o.customerPhone,
+            city: o.shippingAddress?.city || 'Unknown',
+            orders: 0,
+            spent: 0,
+            lastOrder: o.createdAt,
+            prescriptions: 0,
+            status: 'New'
+          });
+        }
+        
+        const c = customerMap.get(key);
+        c.orders += 1;
+        c.spent += o.totalAmount || 0;
+        if (new Date(o.createdAt) > new Date(c.lastOrder)) {
+          c.lastOrder = o.createdAt;
+        }
+        
+        // Count prescriptions
+        if (o.items?.some((item: any) => item.prescription)) {
+          c.prescriptions += 1;
+        }
+        
+        // Determine status
+        if (c.spent > 50000) c.status = 'VIP';
+        else if (c.orders > 1) c.status = 'Active';
+        else c.status = 'New';
+      });
+      
+      setCustomers(Array.from(customerMap.values()));
+    } catch (error) {
+      toast.error('Failed to fetch customers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = customers.filter(c => {
     const m = c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase());
     const ms = statusFilter === 'All' || c.status === statusFilter;
     return m && ms;
   });
 
-  const vip = CUSTOMERS.filter(c => c.status === 'VIP').length;
-  const totalRevenue = CUSTOMERS.reduce((acc, c) => acc + c.spent, 0);
-  const totalOrders = CUSTOMERS.filter(c => c.orders > 0).reduce((a, c) => a + c.orders, 0);
+  const vip = customers.filter(c => c.status === 'VIP').length;
+  const totalRevenue = customers.reduce((acc, c) => acc + c.spent, 0);
+  const totalOrders = customers.reduce((a, c) => a + c.orders, 0);
   const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+
 
   return (
     <div className="space-y-6 max-w-screen-2xl mx-auto pb-10">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Customers</h1>
-          <p className="text-slate-500 text-sm mt-0.5">0 total customers</p>
+          <p className="text-slate-500 text-sm mt-0.5">{customers.length} total customers</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Customers', value: 0, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'VIP Members', value: 0, icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Total Revenue', value: 'PKR 0', icon: ShoppingBag, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Avg. Order Value', value: 'PKR 0', icon: ShoppingBag, color: 'text-violet-600', bg: 'bg-violet-50' },
+          { label: 'Total Customers', value: customers.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'VIP Members', value: vip, icon: Star, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Total Revenue', value: `PKR ${(totalRevenue / 1000).toFixed(1)}k`, icon: ShoppingBag, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Avg. Order Value', value: `PKR ${avgOrderValue.toLocaleString()}`, icon: ShoppingBag, color: 'text-violet-600', bg: 'bg-violet-50' },
         ].map(card => {
           const Icon = card.icon;
           return (
@@ -58,6 +116,7 @@ export default function CustomersPage() {
           );
         })}
       </div>
+
 
       {/* Filter */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 flex-wrap shadow-sm">

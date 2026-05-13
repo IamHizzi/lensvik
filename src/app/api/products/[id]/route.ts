@@ -1,30 +1,75 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
-import { MOCK_PRODUCTS } from '@/data/mockData';
+
+export async function DELETE(
+    request: Request,
+    context: { params: Promise<{ id: string }> }
+) {
+    try {
+        await dbConnect();
+        const { id } = await context.params;
+
+        // Use findOneAndDelete since _id is a custom string, not ObjectId
+        const deletedProduct = await Product.findOneAndDelete({ _id: id });
+
+        if (!deletedProduct) {
+            return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: 'Product deleted successfully' });
+    } catch (error: any) {
+        console.error('Failed to delete product:', error);
+        return NextResponse.json({ error: error.message || 'Failed to delete product' }, { status: 500 });
+    }
+}
+
+export async function PATCH(
+    request: Request,
+    context: { params: Promise<{ id: string }> }
+) {
+    try {
+        await dbConnect();
+        const { id } = await context.params;
+        const body = await request.json();
+        if (!body.image && Array.isArray(body.images) && body.images.length > 0) {
+            body.image = body.images[0];
+        }
+
+        const updatedProduct = await Product.findOneAndUpdate(
+            { _id: id },
+            { $set: body },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        }
+
+        return NextResponse.json(updatedProduct);
+    } catch (error: any) {
+        console.error('Failed to update product:', error);
+        return NextResponse.json({ error: error.message || 'Failed to update product' }, { status: 500 });
+    }
+}
 
 export async function GET(
     request: Request,
-    { params }: { params: Promise<{ id: string }> }
+    context: { params: Promise<{ id: string }> }
 ) {
-    const { id } = await params;
-
     try {
         await dbConnect();
-        const product = await Product.findById(id);
+        const { id } = await context.params;
 
-        if (product) {
-            return NextResponse.json(product);
+        const product = await Product.findOne({ _id: id });
+
+        if (!product) {
+            return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }
-    } catch (error) {
-        // Continue to mock fallback on DB error or invalid ID
-    }
 
-    // Fallback to mock data
-    const mockProduct = MOCK_PRODUCTS.find(p => p._id === id);
-    if (mockProduct) {
-        return NextResponse.json(mockProduct);
+        return NextResponse.json(product);
+    } catch (error: any) {
+        console.error('Failed to fetch product:', error);
+        return NextResponse.json({ error: error.message || 'Failed to fetch product' }, { status: 500 });
     }
-
-    return NextResponse.json({ message: 'Product not found' }, { status: 404 });
 }

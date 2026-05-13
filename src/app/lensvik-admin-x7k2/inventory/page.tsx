@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, AlertTriangle, Package, TrendingDown, RefreshCw, Filter } from 'lucide-react';
-
-const INVENTORY: any[] = [];
+import { useState, useEffect } from 'react';
+import { Search, AlertTriangle, Package, TrendingDown, RefreshCw, Filter, Trash2, Edit3, Check, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 function getStockStatus(stock: number, reorder: number) {
   if (stock === 0) return { label: 'Out of Stock', style: 'bg-red-50 text-red-600 border-red-200' };
@@ -12,39 +11,177 @@ function getStockStatus(stock: number, reorder: number) {
 }
 
 export default function InventoryPage() {
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<number>(0);
 
-  const filtered = INVENTORY.filter(item => {
+  useEffect(() => {
+    fetchInventory();
+  }, []);
+
+  const fetchInventory = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/products');
+      const products = await res.json();
+      
+      const items: any[] = [];
+      products.forEach((p: any) => {
+        if (p.variants && p.variants.length > 0) {
+          p.variants.forEach((v: any, vIdx: number) => {
+            items.push({
+              id: `${p._id}-${vIdx}`,
+              productId: p._id,
+              variantIndex: vIdx,
+              sku: v.sku || p.sku || 'NO-SKU',
+              name: p.name,
+              variant: `${v.color} / ${v.size} / ${v.lensType}`,
+              stock: v.stock || 0,
+              reorderPoint: 5,
+              reserved: 0,
+              available: v.stock || 0,
+              location: 'Main Warehouse',
+              cost: p.price * 0.6,
+            });
+          });
+        } else {
+          items.push({
+            id: p._id,
+            productId: p._id,
+            variantIndex: -1,
+            sku: p.sku || 'NO-SKU',
+            name: p.name,
+            variant: 'Standard',
+            stock: p.stock || 0,
+            reorderPoint: 5,
+            reserved: 0,
+            available: p.stock || 0,
+            location: 'Main Warehouse',
+            cost: p.price * 0.6,
+          });
+        }
+      });
+      
+      setInventory(items);
+    } catch (error) {
+      toast.error('Failed to fetch inventory');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateStock = async (item: any) => {
+    try {
+      const res = await fetch(`/api/products/${item.productId}`);
+      const product = await res.json();
+      
+      if (item.variantIndex === -1) {
+        product.stock = editValue;
+      } else {
+        product.variants[item.variantIndex].stock = editValue;
+      }
+      
+      const updateRes = await fetch(`/api/products/${item.productId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product)
+      });
+      
+      if (updateRes.ok) {
+        toast.success('Stock updated');
+        setEditingId(null);
+        fetchInventory();
+      } else {
+        throw new Error('Failed to update');
+      }
+    } catch (error) {
+      toast.error('Update failed');
+    }
+  };
+
+  const handleDelete = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product? This will remove all its variants.')) return;
+    try {
+      const res = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+      if (res.ok) {
+        toast.success('Product deleted');
+        fetchInventory();
+      } else {
+        throw new Error('Delete failed');
+      }
+    } catch (error) {
+      toast.error('Failed to delete product');
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!confirm('DANGER: This will delete ALL products in your inventory. Are you sure?')) return;
+    const pwd = prompt('Type "DELETE ALL" to confirm:');
+    if (pwd !== 'DELETE ALL') return;
+
+    try {
+      setLoading(true);
+      const res = await fetch('/api/products');
+      const products = await res.json();
+      
+      for (const p of products) {
+        await fetch(`/api/products/${p._id}`, { method: 'DELETE' });
+      }
+      
+      toast.success('Inventory cleared');
+      fetchInventory();
+    } catch (error) {
+      toast.error('Failed to clear inventory');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = inventory.filter(item => {
     const matchSearch = item.name.toLowerCase().includes(search.toLowerCase()) || item.sku.toLowerCase().includes(search.toLowerCase());
-    const status = getStockStatus(item.stock, item.reorderPoint);
     const matchFilter = filter === 'all' || (filter === 'low' && item.stock > 0 && item.stock <= item.reorderPoint) || (filter === 'out' && item.stock === 0) || (filter === 'ok' && item.stock > item.reorderPoint);
     return matchSearch && matchFilter;
   });
 
-  const outOfStock = INVENTORY.filter(i => i.stock === 0).length;
-  const lowStock = INVENTORY.filter(i => i.stock > 0 && i.stock <= i.reorderPoint).length;
-  const totalValue = INVENTORY.reduce((acc, i) => acc + i.stock * i.cost, 0);
+  const outOfStock = inventory.filter(i => i.stock === 0).length;
+  const lowStock = inventory.filter(i => i.stock > 0 && i.stock <= i.reorderPoint).length;
+  const totalValue = inventory.reduce((acc, i) => acc + i.stock * i.cost, 0);
 
   return (
     <div className="space-y-6 max-w-screen-2xl mx-auto pb-10">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-xl font-bold text-slate-900">Inventory</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{INVENTORY.length} SKUs tracked · Value: PKR {(totalValue / 1000000).toFixed(1)}M</p>
+          <p className="text-slate-500 text-sm mt-0.5">{inventory.length} SKUs tracked · Value: PKR {(totalValue / 1000000).toFixed(1)}M</p>
         </div>
-        <button className="flex items-center gap-2 text-xs font-bold bg-blue-50 text-blue-600 border border-blue-200 rounded-xl px-4 py-2.5 hover:bg-blue-100 transition-all shadow-sm">
-          <RefreshCw className="w-3.5 h-3.5" /> Sync Stock
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleClearAll}
+            disabled={loading || inventory.length === 0}
+            className="flex items-center gap-2 text-xs font-bold text-red-600 border border-red-200 rounded-xl px-4 py-2.5 hover:bg-red-50 transition-all shadow-sm disabled:opacity-50"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Empty Inventory
+          </button>
+          <button 
+            onClick={fetchInventory}
+            disabled={loading}
+            className="flex items-center gap-2 text-xs font-bold bg-blue-600 text-white rounded-xl px-4 py-2.5 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Sync Stock
+          </button>
+        </div>
       </div>
 
       {/* Alert cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total SKUs', value: INVENTORY.length, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Total SKUs', value: inventory.length, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Low Stock', value: lowStock, icon: TrendingDown, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Out of Stock', value: outOfStock, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
-          { label: 'Inventory Value', value: `PKR ${(totalValue / 1000000).toFixed(1)}M`, icon: Package, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Inventory Value', value: `PKR ${(totalValue / 1000).toFixed(0)}k`, icon: Package, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         ].map(card => {
           const Icon = card.icon;
           return (
@@ -80,16 +217,18 @@ export default function InventoryPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-100">
-                {['SKU', 'Product / Variant', 'Location', 'Stock', 'Reserved', 'Available', 'Reorder Point', 'Status'].map(h => (
+                {['SKU', 'Product / Variant', 'Stock', 'Reserved', 'Available', 'Reorder', 'Status', 'Actions'].map(h => (
                   <th key={h} className="text-left px-5 py-4 text-[10px] text-slate-500 uppercase tracking-widest font-bold whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filtered.map((item, i) => {
+              {filtered.map((item) => {
                 const status = getStockStatus(item.stock, item.reorderPoint);
+                const isEditing = editingId === item.id;
+
                 return (
-                  <tr key={i} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-5 py-4">
                       <p className="text-[10px] font-mono text-slate-400">{item.sku}</p>
                     </td>
@@ -98,16 +237,56 @@ export default function InventoryPage() {
                       <p className="text-[10px] text-slate-500">{item.variant}</p>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-[10px] text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 font-medium">{item.location}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className={`text-sm font-bold ${item.stock === 0 ? 'text-red-600' : item.stock <= item.reorderPoint ? 'text-amber-600' : 'text-slate-900'}`}>{item.stock}</p>
+                      {isEditing ? (
+                        <div className="flex items-center gap-1">
+                          <input 
+                            type="number" 
+                            value={editValue} 
+                            onChange={e => setEditValue(parseInt(e.target.value) || 0)}
+                            className="w-16 bg-white border border-blue-300 rounded px-2 py-1 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            autoFocus
+                          />
+                        </div>
+                      ) : (
+                        <p className={`text-sm font-bold ${item.stock === 0 ? 'text-red-600' : item.stock <= item.reorderPoint ? 'text-amber-600' : 'text-slate-900'}`}>{item.stock}</p>
+                      )}
                     </td>
                     <td className="px-5 py-4"><p className="text-xs text-slate-500">{item.reserved}</p></td>
                     <td className="px-5 py-4"><p className="text-xs font-bold text-emerald-600">{item.available}</p></td>
                     <td className="px-5 py-4"><p className="text-xs text-slate-500">{item.reorderPoint}</p></td>
                     <td className="px-5 py-4">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${status.style}`}>{status.label}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1.5">
+                        {isEditing ? (
+                          <>
+                            <button onClick={() => handleUpdateStock(item)} className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 transition-colors">
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg bg-slate-50 text-slate-400 border border-slate-100 hover:bg-slate-100 transition-colors">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button 
+                              onClick={() => { setEditingId(item.id); setEditValue(item.stock); }}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="Edit Stock"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(item.productId)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title="Delete Product"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

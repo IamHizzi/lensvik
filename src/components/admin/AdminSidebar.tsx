@@ -17,17 +17,12 @@ const navItems = [
   { label: 'Payments', href: '/lensvik-admin-x7k2/payments', icon: CreditCard, group: 'commerce' },
   { label: 'AI Content Lab', href: '/lensvik-admin-x7k2/ai-lab', icon: Sparkles, group: 'commerce' },
   { label: 'Analytics', href: '/lensvik-admin-x7k2/analytics', icon: BarChart3, group: 'commerce' },
-  { label: 'Support Tickets', href: '/lensvik-admin-x7k2/support', icon: HeadphonesIcon, group: 'operations' },
-  { label: 'Returns & Refunds', href: '/lensvik-admin-x7k2/returns', icon: RefreshCcw, group: 'operations' },
-  { label: 'Staff & Roles', href: '/lensvik-admin-x7k2/staff', icon: UserCog, group: 'system' },
   { label: 'Website Settings', href: '/lensvik-admin-x7k2/settings', icon: Settings, group: 'system' },
-  { label: 'Integrations', href: '/lensvik-admin-x7k2/integrations', icon: Plug, group: 'system' },
 ];
 
 const groups = [
   { id: 'main', label: 'Core' },
   { id: 'commerce', label: 'Commerce' },
-  { id: 'operations', label: 'Operations' },
   { id: 'system', label: 'System' },
 ];
 
