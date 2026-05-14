@@ -7,8 +7,12 @@ import { ShoppingCart, User, Menu, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { SearchIcon } from "lucide-react";
-import { SearchOverlay } from "./SearchOverlay";
 import { AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const SearchOverlay = dynamic(() => import("./SearchOverlay").then(mod => mod.SearchOverlay), {
+    ssr: false
+});
 
 export function Navbar() {
     const { cartCount } = useCart();

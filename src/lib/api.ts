@@ -1,6 +1,4 @@
-import axios from 'axios';
 
-const API_BASE_URL = '/api';
 
 export interface Product {
     _id: string;
@@ -65,19 +63,30 @@ function normalizeProduct(data: any): Product {
     };
 }
 
+const API_BASE_URL = '/api';
+
 export const getProducts = async (status = 'Active', limit?: number, category?: string): Promise<Product[]> => {
     const params = new URLSearchParams();
     if (status) params.append('status', status);
     if (limit) params.append('limit', limit.toString());
     if (category) params.append('category', category);
     
-    const response = await axios.get(`${API_BASE_URL}/products?${params.toString()}`);
-    const raw = response.data;
+    // Using native fetch for better Next.js caching and smaller bundle
+    const response = await fetch(`${API_BASE_URL}/products?${params.toString()}`, {
+        next: { revalidate: 60 } // Cache for 60 seconds
+    });
+    
+    if (!response.ok) return [];
+    const raw = await response.json();
     if (!Array.isArray(raw)) return [];
     return raw.map(normalizeProduct);
 };
 
 export const getProductById = async (id: string): Promise<Product> => {
-    const response = await axios.get(`${API_BASE_URL}/products/${id}`);
-    return normalizeProduct(response.data);
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        next: { revalidate: 60 }
+    });
+    if (!response.ok) throw new Error('Product not found');
+    const data = await response.json();
+    return normalizeProduct(data);
 };

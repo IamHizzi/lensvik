@@ -103,80 +103,79 @@ export default function CategoryPage() {
                         />
                     </aside>
 
-                    {/* Main Content */}
-                    <div className="flex-1">
-                        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-4">
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <h1 className="text-2xl md:text-5xl font-black tracking-tighter uppercase italic leading-none">{categoryDisplayName}</h1>
-                                    <Badge className="bg-primary/5 text-primary border-primary/10 label-tag px-3 py-1">
-                                        {filteredAndSortedProducts.length} Items
-                                    </Badge>
+                        {/* Main Content */}
+                        <div className="flex-1">
+                            <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12 gap-4">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <h1 className="text-2xl md:text-5xl font-black tracking-tighter uppercase italic leading-none">{categoryDisplayName}</h1>
+                                        <Badge className="bg-primary/5 text-primary border-primary/10 label-tag px-3 py-1">
+                                            {filteredAndSortedProducts.length} Items
+                                        </Badge>
+                                    </div>
+                                    <p className="text-small text-slate-500 font-medium italic">Premium {categoryDisplayName.toLowerCase()} curated for visionaries.</p>
                                 </div>
-                                <p className="text-small text-slate-500 font-medium italic">Premium {categoryDisplayName.toLowerCase()} curated for visionaries.</p>
-                            </div>
 
-                            <div className="flex items-center gap-3 w-full md:w-auto">
-                                {/* Mobile Filter Trigger */}
-                                <Sheet>
-                                    <SheetTrigger asChild>
-                                        <Button variant="outline" size="lg" className="lg:hidden flex-1 h-12 rounded-2xl btn-text border-slate-200">
-                                            <SlidersHorizontal className="w-4 h-4 mr-2" />
-                                            Filter
-                                        </Button>
-                                    </SheetTrigger>
-                                    <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-                                        <div className="py-6">
-                                            <SidebarFilters
-                                                filters={configFilters}
-                                                onFilterChange={handleFilterChange}
-                                                activeFilters={{ ...activeFilters, totalCount: filteredAndSortedProducts.length }}
-                                            />
-                                        </div>
-                                    </SheetContent>
-                                </Sheet>
+                                <div className="flex items-center gap-3 w-full md:w-auto">
+                                    {/* Mobile Filter Trigger */}
+                                    <Sheet>
+                                        <SheetTrigger asChild>
+                                            <Button variant="outline" size="lg" className="lg:hidden flex-1 h-12 rounded-2xl btn-text border-slate-200">
+                                                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                                                Filter
+                                            </Button>
+                                        </SheetTrigger>
+                                        <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                                            <div className="py-6">
+                                                <SidebarFilters
+                                                    filters={configFilters}
+                                                    onFilterChange={handleFilterChange}
+                                                    activeFilters={{ ...activeFilters, totalCount: filteredAndSortedProducts.length }}
+                                                />
+                                            </div>
+                                        </SheetContent>
+                                    </Sheet>
 
-                                <Select value={sortBy} onValueChange={setSortBy}>
-                                    <SelectTrigger className="w-full md:w-[220px] h-12 rounded-2xl btn-text bg-white border-2 border-slate-100 focus:ring-primary/10">
-                                        <div className="flex items-center gap-2">
-                                            <Filter className="w-4 h-4 text-slate-400" />
-                                            <SelectValue placeholder="Sort By" />
-                                        </div>
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                                        <SelectItem value="popular" className="btn-text">Popular Items</SelectItem>
-                                        <SelectItem value="price-low" className="btn-text">Price: Low to High</SelectItem>
-                                        <SelectItem value="price-high" className="btn-text">Price: High to Low</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </header>
+                                    <Select value={sortBy} onValueChange={setSortBy}>
+                                        <SelectTrigger className="w-full md:w-[220px] h-12 rounded-2xl btn-text bg-white border-2 border-slate-100 focus:ring-primary/10">
+                                            <div className="flex items-center gap-2">
+                                                <Filter className="w-4 h-4 text-slate-400" />
+                                                <SelectValue placeholder="Sort By" />
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                                            <SelectItem value="popular" className="btn-text">Popular Items</SelectItem>
+                                            <SelectItem value="price-low" className="btn-text">Price: Low to High</SelectItem>
+                                            <SelectItem value="price-high" className="btn-text">Price: High to Low</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </header>
 
-                        {loading ? (
-                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
-                                {[1, 2, 3, 4, 5, 6].map(i => (
-                                    <div key={i} className="aspect-[4/5] bg-slate-50 animate-pulse rounded-[2.5rem]" />
-                                ))}
-                            </div>
-                        ) : filteredAndSortedProducts.length > 0 ? (
-                            <motion.div
-                                layout
-                                className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6"
-                            >
-                                <AnimatePresence mode="popLayout">
-                                    {filteredAndSortedProducts.map((product, index) => (
-                                        <ProductCard key={product._id} {...product} index={index} />
+                            {loading ? (
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+                                    {[1, 2, 3, 4, 5, 6].map(i => (
+                                        <div key={i} className="aspect-[4/5] bg-slate-50 animate-pulse rounded-[2.5rem]" />
                                     ))}
-                                </AnimatePresence>
-                            </motion.div>
-                        ) : (
-                            <div className="text-center py-32 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-100">
-                                <h3 className="text-2xl font-black uppercase italic italic mb-4">No vision found</h3>
-                                <p className="text-small text-slate-400 mb-8">Adjust your filters to discover more possibilities.</p>
-                                <Button onClick={() => setActiveFilters({ categories: [], priceRange: [0, 15000], coatings: [], features: [] })} variant="link" className="btn-text text-primary">Reset all filters</Button>
-                            </div>
-                        )}
-                    </div>
+                                </div>
+                            ) : filteredAndSortedProducts.length > 0 ? (
+                                <motion.div
+                                    className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6"
+                                >
+                                    <AnimatePresence mode="popLayout">
+                                        {filteredAndSortedProducts.map((product, index) => (
+                                            <ProductCard key={product._id} {...product} index={index} />
+                                        ))}
+                                    </AnimatePresence>
+                                </motion.div>
+                            ) : (
+                                <div className="text-center py-32 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-100">
+                                    <h3 className="text-2xl font-black uppercase italic italic mb-4">No vision found</h3>
+                                    <p className="text-small text-slate-400 mb-8">Adjust your filters to discover more possibilities.</p>
+                                    <Button onClick={() => setActiveFilters({ categories: [], priceRange: [0, 15000], coatings: [], features: [] })} variant="link" className="btn-text text-primary">Reset all filters</Button>
+                                </div>
+                            )}
+                        </div>
                 </div>
             </div>
             <Footer />
