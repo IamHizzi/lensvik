@@ -24,7 +24,7 @@ export default function AddProductPage() {
   const [description, setDescription] = useState('');
   const [form, setForm] = useState({
     name: '', category: '', price: '', comparePrice: '', sku: '', barcode: '',
-    gender: 'Unisex', material: '', status: 'Draft', collection: '',
+    gender: 'Unisex', material: '', status: 'Draft', collectionName: '',
     pdMin: '', pdMax: '', bridgeWidth: '', templeLength: '', lensWidth: '', frameHeight: '',
     metaTitle: '', metaDesc: '', tags: '',
   });
@@ -43,28 +43,39 @@ export default function AddProductPage() {
       return;
     }
 
+    // Helper: convert empty string to undefined for optional numeric fields
+    const numOrUndef = (v: string) => v === '' ? undefined : Number(v);
+
     setLoading(true);
     try {
       const payload = {
-        ...form,
+        name: form.name,
+        category: form.category,
+        price: Number(form.price),
+        comparePrice: numOrUndef(form.comparePrice),
+        sku: form.sku || undefined,
+        barcode: form.barcode || undefined,
+        gender: form.gender,
+        material: form.material || undefined,
+        status: statusOverride || form.status,
+        collectionName: form.collectionName || undefined,
         description,
         images,
-        status: statusOverride || form.status,
         tags: (form.tags || '').split(',').map(t => t.trim()).filter(Boolean),
         measurements: {
-          pdMin: Number(form.pdMin),
-          pdMax: Number(form.pdMax),
-          lensWidth: Number(form.lensWidth),
-          frameHeight: Number(form.frameHeight),
-          bridgeWidth: Number(form.bridgeWidth),
-          templeLength: Number(form.templeLength),
+          pdMin: numOrUndef(form.pdMin),
+          pdMax: numOrUndef(form.pdMax),
+          lensWidth: numOrUndef(form.lensWidth),
+          frameHeight: numOrUndef(form.frameHeight),
+          bridgeWidth: numOrUndef(form.bridgeWidth),
+          templeLength: numOrUndef(form.templeLength),
         },
         options,
         seo: {
-          metaTitle: form.metaTitle,
-          metaDesc: form.metaDesc,
+          metaTitle: form.metaTitle || undefined,
+          metaDesc: form.metaDesc || undefined,
         },
-        // Generate variants
+        // Generate variants from selected colors/sizes
         variants: selectedColors.flatMap(color =>
           (selectedSizes.length > 0 ? selectedSizes : ['M']).map(size => ({
             color,
@@ -82,7 +93,10 @@ export default function AddProductPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error('Failed to publish product');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error ${res.status}`);
+      }
 
       toast.success(statusOverride === 'Active' ? 'Product published successfully!' : 'Product saved as draft!');
       router.push('/lensvik-admin-x7k2/products');
@@ -408,7 +422,7 @@ export default function AddProductPage() {
           {/* Collection */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Collection</label>
-            <select value={form.collection} onChange={e => setForm({ ...form, collection: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
+            <select value={form.collectionName} onChange={e => setForm({ ...form, collectionName: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
               <option value="">None</option>
               <option value="bestsellers">Best Sellers</option>
               <option value="new-arrivals">New Arrivals</option>

@@ -22,6 +22,8 @@ interface LensConfiguratorProps {
         image: string;
         images?: string[];
     };
+    color?: string;
+    size?: string;
 }
 
 
@@ -224,7 +226,7 @@ function StepIndicator({ current }: { current: number }) {
 }
 
 // ─── Main component ──────────────────────────────────────────────────────────
-export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorProps) {
+export function LensConfigurator({ isOpen, onClose, product, color, size }: LensConfiguratorProps) {
     const [step, setStep] = useState(1);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [selectedCategoryMeta, setSelectedCategoryMeta] = useState<typeof MAIN_CATEGORIES[0] | null>(null);
@@ -366,6 +368,9 @@ export function LensConfigurator({ isOpen, onClose, product }: LensConfiguratorP
             name: `${product.name} + ${selectedLens?.name}`,
             price: total,
             image: product.image,
+            color: color || "N/A",
+            size: size || "M",
+            lensType: selectedLens?.name || "Clear",
             prescription: {
                 measurements: { ...prescription },
                 lensCategory: { name: selectedCategory || "", price: 0 },

@@ -20,7 +20,7 @@ export interface Product {
     gender?: string;
     material?: string;
     status?: string;
-    collection?: string;
+    collectionName?: string;
     tags?: string[];
     sku?: string;
     barcode?: string;
@@ -65,8 +65,13 @@ function normalizeProduct(data: any): Product {
     };
 }
 
-export const getProducts = async (status = 'Active'): Promise<Product[]> => {
-    const response = await axios.get(`${API_BASE_URL}/products${status ? `?status=${encodeURIComponent(status)}` : ''}`);
+export const getProducts = async (status = 'Active', limit?: number, category?: string): Promise<Product[]> => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (limit) params.append('limit', limit.toString());
+    if (category) params.append('category', category);
+    
+    const response = await axios.get(`${API_BASE_URL}/products?${params.toString()}`);
     const raw = response.data;
     if (!Array.isArray(raw)) return [];
     return raw.map(normalizeProduct);

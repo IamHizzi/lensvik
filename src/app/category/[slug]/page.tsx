@@ -31,10 +31,8 @@ export default function CategoryPage() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const allProducts = await getProducts();
-                let filtered = allProducts.filter(p =>
-                    p.category.toLowerCase().replace(/\s+/g, '-') === slug
-                );
+                // Fetch only products for this category from server
+                let filtered = await getProducts('Active', 0, (slug as string).replace(/-/g, ' '));
 
                 if (subRoute && subRoute !== 'sale') {
                     filtered = filtered.filter(p =>

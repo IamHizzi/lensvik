@@ -10,7 +10,7 @@ const ProductSchema = new Schema({
     gender: { type: String, default: 'Unisex' },
     material: String,
     status: { type: String, default: 'Draft' },
-    collection: String,
+    collectionName: String,
     category: { type: String, required: true },
     description: String,
     images: [String],

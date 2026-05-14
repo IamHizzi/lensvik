@@ -130,6 +130,7 @@ export default function AnalyticsPage() {
         <BarChart data={monthlyRevenue} labels={months} color="#2563eb" />
       </div>
 
+      {/* Regional & Category Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Category performance */}
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -163,27 +164,6 @@ export default function AnalyticsPage() {
             )) : (
               <div className="text-center py-20 text-slate-400 text-xs font-bold uppercase tracking-widest">No regional data available</div>
             )}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Conversion funnel */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-900 mb-6 border-b border-slate-50 pb-4">Conversion Funnel</h3>
-          <div className="text-center py-20">
-            <Activity className="w-8 h-8 text-slate-100 mx-auto mb-3" />
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Funnel tracking inactive</p>
-            <p className="text-[10px] text-slate-500 mt-2">Integrate PostHog or GA4 for funnel insights</p>
-          </div>
-        </div>
-
-        {/* Device breakdown */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-900 mb-6 border-b border-slate-50 pb-4">Device Breakdown</h3>
-          <div className="text-center py-20">
-            <Smartphone className="w-8 h-8 text-slate-100 mx-auto mb-3" />
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Device tracking inactive</p>
           </div>
         </div>
       </div>

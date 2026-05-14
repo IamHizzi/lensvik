@@ -26,7 +26,7 @@ export default function CheckoutPage() {
         address: ""
     });
 
-    const handleCheckout = (e: React.FormEvent) => {
+    const handleCheckout = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!formData.fullName || !formData.phone || !formData.address || !formData.city) {
@@ -40,11 +40,55 @@ export default function CheckoutPage() {
         }
 
         setIsProcessing(true);
-        setTimeout(() => {
+        try {
+            const orderPayload = {
+                customerName: formData.fullName,
+                customerEmail: formData.email || `${formData.phone}@lensvik.com`,
+                customerPhone: formData.phone,
+                shippingAddress: {
+                    street: formData.address,
+                    city: formData.city,
+                    state: "Punjab", // Default or add field
+                    zipCode: "00000",
+                    country: "Pakistan"
+                },
+                items: cart.map(item => ({
+                    productId: item.productId,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    variant: {
+                        color: item.color || "N/A",
+                        size: item.size || "M",
+                        lensType: item.lensType || "Clear"
+                    },
+                    prescription: item.prescription ? {
+                        measurements: item.prescription.measurements,
+                        lensCategory: item.prescription.lensCategory.name,
+                        lensType: item.prescription.lensType.name
+                    } : undefined
+                })),
+                totalAmount: cartTotal,
+                paymentMethod: "COD",
+                paymentStatus: "Pending"
+            };
+
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderPayload)
+            });
+
+            if (!res.ok) throw new Error("Failed to place order");
+
             toast.success("Order Placed Successfully! We will call you for verification.");
             clearCart();
+            // Redirect or show success message
+        } catch (error) {
+            toast.error("Something went wrong. Please try again.");
+        } finally {
             setIsProcessing(false);
-        }, 2000);
+        }
     };
 
     if (cart.length === 0) {

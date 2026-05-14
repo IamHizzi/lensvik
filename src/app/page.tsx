@@ -22,7 +22,7 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await getProducts();
+        const data = await getProducts('Active', 8);
         setProducts(data);
       } catch (err) {
         console.error("Failed to fetch products", err);
@@ -34,7 +34,7 @@ export default function Home() {
   }, []);
 
 
-  const NEW_ARRIVALS = products.slice(-8).reverse();
+  const NEW_ARRIVALS = products;
 
   return (
     <main className="min-h-screen bg-background selection:bg-primary selection:text-white">

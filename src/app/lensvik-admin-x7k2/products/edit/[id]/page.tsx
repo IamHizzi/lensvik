@@ -28,7 +28,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [description, setDescription] = useState('');
   const [form, setForm] = useState({
     name: '', category: '', price: '', comparePrice: '', sku: '', barcode: '',
-    gender: 'Unisex', material: '', status: 'Draft', collection: '',
+    gender: 'Unisex', material: '', status: 'Draft', collectionName: '',
     pdMin: '', pdMax: '', bridgeWidth: '', templeLength: '', lensWidth: '', frameHeight: '',
     metaTitle: '', metaDesc: '', tags: '',
   });
@@ -61,7 +61,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         gender: data.gender || 'Unisex',
         material: data.material || '',
         status: data.status || 'Draft',
-        collection: data.collection || '',
+        collectionName: data.collectionName || '',
         pdMin: data.measurements?.pdMin?.toString() || '',
         pdMax: data.measurements?.pdMax?.toString() || '',
         bridgeWidth: data.measurements?.bridgeWidth?.toString() || '',
@@ -107,20 +107,31 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     setLoading(true);
     try {
+      // Helper to clean empty numeric fields
+      const cleanNum = (val: any) => (val === '' || val === undefined || val === null) ? undefined : Number(val);
+
       const payload = {
-        ...form,
+        name: form.name,
+        category: form.category,
+        price: Number(form.price),
+        comparePrice: cleanNum(form.comparePrice),
+        sku: form.sku,
+        barcode: form.barcode,
+        gender: form.gender,
+        material: form.material,
         description,
         images,
         ...(images.length > 0 ? { image: images[0] } : {}),
         status: statusOverride || form.status,
+        collectionName: form.collectionName,
         tags: (form.tags || '').split(',').map(t => t.trim()).filter(Boolean),
         measurements: {
-          pdMin: Number(form.pdMin),
-          pdMax: Number(form.pdMax),
-          lensWidth: Number(form.lensWidth),
-          frameHeight: Number(form.frameHeight),
-          bridgeWidth: Number(form.bridgeWidth),
-          templeLength: Number(form.templeLength),
+          pdMin: cleanNum(form.pdMin),
+          pdMax: cleanNum(form.pdMax),
+          lensWidth: cleanNum(form.lensWidth),
+          frameHeight: cleanNum(form.frameHeight),
+          bridgeWidth: cleanNum(form.bridgeWidth),
+          templeLength: cleanNum(form.templeLength),
         },
         options,
         seo: {
@@ -475,7 +486,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Collection</label>
-            <select value={form.collection} onChange={e => setForm({ ...form, collection: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
+            <select value={form.collectionName} onChange={e => setForm({ ...form, collectionName: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-900 outline-none appearance-none font-bold">
               <option value="">None</option>
               <option value="bestsellers">Best Sellers</option>
               <option value="new-arrivals">New Arrivals</option>

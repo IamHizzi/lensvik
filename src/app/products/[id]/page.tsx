@@ -42,6 +42,7 @@ export default function ProductPage() {
     const [isVTOModalOpen, setIsVTOModalOpen] = useState(false);
     const [isLensModalOpen, setIsLensModalOpen] = useState(false);
     const [activeThumb, setActiveThumb] = useState(0);
+    const [variations, setVariations] = useState({ color: "", size: "" });
     const [isWishlisted, setIsWishlisted] = useState(false);
     const { addToCart } = useCart();
 
@@ -72,7 +73,15 @@ export default function ProductPage() {
 
     const handleAddToCart = () => {
         if (product) {
-            addToCart({ productId: product._id, name: product.name, price: product.price, image: product.image });
+            addToCart({ 
+                productId: product._id, 
+                name: product.name, 
+                price: product.price, 
+                image: product.image,
+                color: variations.color,
+                size: variations.size,
+                lensType: "Clear"
+            });
             toast.success(`${product.name} added to cart!`);
         }
     };
@@ -173,29 +182,31 @@ export default function ProductPage() {
                         </div>
 
                         {/* Thumbnail Strip */}
-                        <div className="grid grid-cols-4 gap-2 md:gap-3">
-                            {imageList.slice(0, 4).map((img, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setActiveThumb(i)}
-                                    className={`aspect-square rounded-xl md:rounded-2xl overflow-hidden bg-[#f5f6f8] border-2 transition-all relative ${
-                                        activeThumb === i ? "border-primary shadow-md shadow-primary/10" : "border-slate-100 opacity-60 hover:opacity-100"
-                                    }`}
-                                >
-                                    {isDataUri(img) ? (
-                                        <img src={img} alt={product.name} className="w-full h-full object-contain p-2 md:p-3" />
-                                    ) : (
-                                        <Image
-                                            src={img}
-                                            alt={product.name}
-                                            fill
-                                            className="object-contain p-2 md:p-3"
-                                            sizes="(max-width: 768px) 25vw, 100px"
-                                        />
-                                    )}
-                                </button>
-                            ))}
-                        </div>
+                        {imageList.length > 1 && (
+                            <div className="flex gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-2">
+                                {imageList.map((img, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setActiveThumb(i)}
+                                        className={`w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-[#f5f6f8] border-2 transition-all relative shrink-0 ${
+                                            activeThumb === i ? "border-primary shadow-md shadow-primary/10" : "border-slate-100 opacity-60 hover:opacity-100"
+                                        }`}
+                                    >
+                                        {isDataUri(img) ? (
+                                            <img src={img} alt={product.name} className="w-full h-full object-contain p-2 md:p-3" />
+                                        ) : (
+                                            <Image
+                                                src={img}
+                                                alt={product.name}
+                                                fill
+                                                className="object-contain p-2 md:p-3"
+                                                sizes="(max-width: 768px) 25vw, 100px"
+                                            />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
 
                     {/* ── Right: Product Info ── */}
@@ -257,7 +268,7 @@ export default function ProductPage() {
                             ))}
                         </div>
 
-                        <VariationSelector />
+                        <VariationSelector variants={product.variants} onChange={setVariations} />
 
                         {/* ── CTA Buttons (Desktop only — mobile has sticky bar) ── */}
                         <div className="hidden md:flex flex-col gap-3 pt-5">
@@ -333,6 +344,8 @@ export default function ProductPage() {
                 isOpen={isLensModalOpen}
                 onClose={() => setIsLensModalOpen(false)}
                 product={product}
+                color={variations.color}
+                size={variations.size}
             />
 
             {/* Mobile spacing for sticky bar */}

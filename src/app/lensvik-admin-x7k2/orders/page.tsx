@@ -8,8 +8,6 @@ import {
 import { toast } from 'sonner';
 
 
-const ALL_ORDERS: any[] = [];
-
 const STATUS_OPTIONS = ['All', 'Pending', 'Confirmed', 'Lens Processing', 'Ready to Ship', 'Shipped', 'Delivered', 'Returned', 'Cancelled'];
 
 const statusStyle: Record<string, string> = {
@@ -295,9 +293,15 @@ export default function OrdersPage() {
             
             {/* Order actions */}
             <div className="flex gap-3 pt-2">
-              <button className="flex-1 bg-blue-600 text-white rounded-xl py-3 text-xs font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
-                Update Order Status
-              </button>
+              <select
+                value={selectedOrder.status}
+                onChange={e => handleUpdateStatus(selectedOrder._id, e.target.value)}
+                className="flex-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl py-3 px-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+              >
+                {STATUS_OPTIONS.slice(1).map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
               <button className="flex-1 bg-white text-slate-600 border border-slate-200 rounded-xl py-3 text-xs font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2">
                 <Printer className="w-4 h-4" />
                 Print Invoice

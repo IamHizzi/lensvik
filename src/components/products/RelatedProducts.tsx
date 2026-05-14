@@ -16,10 +16,11 @@ export function RelatedProducts({ currentProductId, category }: RelatedProductsP
     useEffect(() => {
         const fetchRelated = async () => {
             try {
-                const all = await getProducts();
-                // Filter by category and exclude current
+                // Fetch up to 5 from the same category
+                const all = await getProducts('Active', 5, category);
+                // Exclude current and limit to 4
                 const filtered = all
-                    .filter(p => p.category === category && p._id !== currentProductId)
+                    .filter(p => p._id !== currentProductId)
                     .slice(0, 4);
                 
                 setRelatedProducts(filtered);

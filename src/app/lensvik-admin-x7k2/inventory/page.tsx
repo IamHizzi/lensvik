@@ -124,12 +124,9 @@ export default function InventoryPage() {
 
     try {
       setLoading(true);
-      const res = await fetch('/api/products');
-      const products = await res.json();
-      
-      for (const p of products) {
-        await fetch(`/api/products/${p._id}`, { method: 'DELETE' });
-      }
+      const res = await fetch('/api/products', { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to clear inventory');
+
       
       toast.success('Inventory cleared');
       fetchInventory();

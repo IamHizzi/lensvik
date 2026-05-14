@@ -16,7 +16,6 @@ const breadcrumbMap: Record<string, string> = {
   '/lensvik-admin-x7k2/analytics': 'Analytics',
   '/lensvik-admin-x7k2/ai-lab': 'AI Content Lab',
   '/lensvik-admin-x7k2/settings': 'Settings',
-  '/lensvik-admin-x7k2/integrations': 'Integrations',
 };
 
 const notifications: any[] = [];
