@@ -44,7 +44,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 const filtered = allProducts.filter(p => 
                     p.name.toLowerCase().includes(query.toLowerCase()) ||
                     p.category.toLowerCase().includes(query.toLowerCase()) ||
-                    p.subcategory?.toLowerCase().includes(query.toLowerCase())
+                    p.gender?.toLowerCase().includes(query.toLowerCase())
                 ).slice(0, 6);
                 setResults(filtered);
                 setIsLoading(false);

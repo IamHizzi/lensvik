@@ -31,11 +31,20 @@ const SORT_OPTIONS = [
 
 type SortValue = typeof SORT_OPTIONS[number]["value"];
 
+// Gender options: display label → DB value stored in product.gender
+const GENDER_OPTS = [
+    { label: "Men",   db: "Male"   },
+    { label: "Women", db: "Female" },
+    { label: "Kids",  db: "Kids"   },
+] as const;
+
 interface Filters {
     categories: string[];
     priceRange: number | null;   // index into PRICE_RANGES
     coatings: string[];
     features: string[];
+    genders: string[];           // DB values: "Male" | "Female" | "Kids"
+    onSale: boolean;
 }
 
 // ─── Small helpers ───────────────────────────────────────────────────────────
@@ -44,7 +53,8 @@ function toggle<T>(arr: T[], val: T): T[] {
 }
 
 function activeCount(f: Filters) {
-    return f.categories.length + (f.priceRange !== null ? 1 : 0) + f.coatings.length + f.features.length;
+    return f.categories.length + (f.priceRange !== null ? 1 : 0) +
+        f.coatings.length + f.features.length + f.genders.length + (f.onSale ? 1 : 0);
 }
 
 // ─── Sidebar accordion section ───────────────────────────────────────────────
@@ -102,6 +112,25 @@ function Sidebar({ filters, setFilters, onReset }: {
                     </button>
                 )}
             </div>
+
+            {/* Gender */}
+            <FilterSection title="Shop By">
+                <div className="flex flex-wrap gap-2">
+                    {GENDER_OPTS.map(({ label, db }) => (
+                        <FilterPill
+                            key={db}
+                            label={label}
+                            checked={filters.genders.includes(db)}
+                            onChange={() => setFilters(f => ({ ...f, genders: toggle(f.genders, db) }))}
+                        />
+                    ))}
+                    <FilterPill
+                        label="On Sale"
+                        checked={filters.onSale}
+                        onChange={() => setFilters(f => ({ ...f, onSale: !f.onSale }))}
+                    />
+                </div>
+            </FilterSection>
 
             {/* Lens Category */}
             <FilterSection title="Lens Category">
@@ -196,10 +225,10 @@ export default function CollectionsPage() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [filters, setFilters] = useState<Filters>({
-        categories: [], priceRange: null, coatings: [], features: [],
+        categories: [], priceRange: null, coatings: [], features: [], genders: [], onSale: false,
     });
 
-    const resetFilters = () => setFilters({ categories: [], priceRange: null, coatings: [], features: [] });
+    const resetFilters = () => setFilters({ categories: [], priceRange: null, coatings: [], features: [], genders: [], onSale: false });
 
     useEffect(() => {
         getProducts().then(setProducts).catch(console.error).finally(() => setLoading(false));
@@ -218,6 +247,19 @@ export default function CollectionsPage() {
         // Category filter (maps to product.category)
         if (filters.categories.length) {
             p = p.filter(x => filters.categories.some(cat => x.category?.toLowerCase().includes(cat.toLowerCase())));
+        }
+
+        // Gender filter (maps to product.gender DB field)
+        if (filters.genders.length) {
+            p = p.filter(x => filters.genders.some(g => x.gender?.toLowerCase() === g.toLowerCase()));
+        }
+
+        // On Sale filter
+        if (filters.onSale) {
+            p = p.filter(x => {
+                const compare = x.comparePrice ?? x.originalPrice;
+                return compare && compare > x.price;
+            });
         }
 
         // Price range

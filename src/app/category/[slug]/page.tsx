@@ -35,11 +35,25 @@ export default function CategoryPage() {
                 let filtered = await getProducts('Active', 0, (slug as string).replace(/-/g, ' '));
 
                 if (subRoute && subRoute !== 'sale') {
-                    filtered = filtered.filter(p =>
-                        p.subcategory && p.subcategory.toLowerCase() === subRoute.toLowerCase()
-                    );
+                    const subLower = subRoute.toLowerCase();
+                    filtered = filtered.filter(p => {
+                        const genderLower = (p.gender || '').toLowerCase();
+                        if (subLower === 'men') {
+                            return genderLower === 'male' || genderLower === 'unisex';
+                        }
+                        if (subLower === 'women') {
+                            return genderLower === 'female' || genderLower === 'unisex';
+                        }
+                        if (subLower === 'kids') {
+                            return genderLower === 'kids';
+                        }
+                        return genderLower === subLower;
+                    });
                 } else if (subRoute === 'sale') {
-                    filtered = filtered.filter(p => (p.originalPrice || 0) > p.price);
+                    filtered = filtered.filter(p => {
+                        const compare = p.comparePrice ?? p.originalPrice ?? 0;
+                        return compare > p.price;
+                    });
                 }
 
                 setProducts(filtered);
