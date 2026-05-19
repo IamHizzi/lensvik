@@ -136,54 +136,111 @@ export function VirtualTryOn({ isOpen, onClose, productName = 'Glasses', product
                                     const w = tempCanvas.width;
                                     const h = tempCanvas.height;
 
-                                    // Remove white/light background
-                                    const severWidth = Math.floor(w * 0.06);
+                                    // ── PASS 1: Strict flood-fill from edges ──────────────────────────────
+                                    // Only removes near-PURE-WHITE pixels (threshold=245).
+                                    // This is strict enough that grey/silver frame rims (≈200 RGB)
+                                    // will NEVER be classified as background, so the flood-fill
+                                    // cannot cross the top rim of light-coloured frames.
+
+                                    const STRICT_BG = 245;
+                                    const visited = new Uint8Array(w * h);
+
+                                    const isStrictBackground = (byteIdx: number) => {
+                                        const r = data[byteIdx], g = data[byteIdx + 1], b = data[byteIdx + 2];
+                                        const max = Math.max(r, g, b);
+                                        const min = Math.min(r, g, b);
+                                        const sat = max === 0 ? 0 : (max - min) / max;
+                                        // Near-pure-white AND essentially unsaturated
+                                        return max > STRICT_BG && sat < 0.12;
+                                    };
+
+                                    const queue: number[] = [];
+                                    for (let x = 0; x < w; x++) {
+                                        const topPx = x;
+                                        if (!visited[topPx] && isStrictBackground(topPx * 4)) { visited[topPx] = 1; queue.push(topPx); }
+                                        const botPx = (h - 1) * w + x;
+                                        if (!visited[botPx] && isStrictBackground(botPx * 4)) { visited[botPx] = 1; queue.push(botPx); }
+                                    }
                                     for (let y = 0; y < h; y++) {
-                                        for (let x = 0; x < w; x++) {
-                                            const idx = (y * w + x) * 4;
-                                            const r = data[idx], g = data[idx + 1], b = data[idx + 2];
-                                            if (r > 190 && g > 190 && b > 190) data[idx + 3] = 0;
-                                            if (x < severWidth || x > (w - severWidth)) data[idx + 3] = 0;
-                                        }
+                                        const leftPx = y * w;
+                                        if (!visited[leftPx] && isStrictBackground(leftPx * 4)) { visited[leftPx] = 1; queue.push(leftPx); }
+                                        const rightPx = y * w + (w - 1);
+                                        if (!visited[rightPx] && isStrictBackground(rightPx * 4)) { visited[rightPx] = 1; queue.push(rightPx); }
                                     }
 
-                                    // Connected component — keep largest
-                                    const labels = new Int32Array(w * h).fill(-1);
-                                    let nextLabel = 0;
-                                    const components: number[][] = [];
-
-                                    for (let y = 0; y < h; y++) {
-                                        for (let x = 0; x < w; x++) {
-                                            const idx = y * w + x;
-                                            if (data[idx * 4 + 3] > 0 && labels[idx] === -1) {
-                                                const currentLabel = nextLabel++;
-                                                const stack = [idx];
-                                                const component: number[] = [];
-                                                labels[idx] = currentLabel;
-                                                while (stack.length > 0) {
-                                                    const p = stack.pop()!;
-                                                    component.push(p);
-                                                    const px = p % w, py = Math.floor(p / w);
-                                                    for (const [nx, ny] of [[px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]]) {
-                                                        if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                                                            const nIdx = ny * w + nx;
-                                                            if (data[nIdx * 4 + 3] > 0 && labels[nIdx] === -1) {
-                                                                labels[nIdx] = currentLabel;
-                                                                stack.push(nIdx);
-                                                            }
-                                                        }
-                                                    }
+                                    while (queue.length > 0) {
+                                        const p = queue.pop()!;
+                                        data[p * 4 + 3] = 0;
+                                        const px = p % w, py = Math.floor(p / w);
+                                        for (const [nx, ny] of [[px+1,py],[px-1,py],[px,py+1],[px,py-1]] as [number,number][]) {
+                                            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                                                const nIdx = ny * w + nx;
+                                                if (!visited[nIdx] && isStrictBackground(nIdx * 4)) {
+                                                    visited[nIdx] = 1;
+                                                    queue.push(nIdx);
                                                 }
-                                                components.push(component);
                                             }
                                         }
                                     }
 
-                                    if (components.length > 0) {
-                                        components.sort((a, b) => b.length - a.length);
-                                        const largest = new Set(components[0]);
-                                        for (let i = 0; i < w * h; i++) {
-                                            if (!largest.has(i)) data[i * 4 + 3] = 0;
+                                    // ── PASS 2: Fringe-only cleanup ───────────────────────────────────────
+                                    // After the strict fill there may be leftover anti-aliasing pixels
+                                    // at the border of the frame (near-white but not pure white).
+                                    // We remove a pixel only if it is light-ish AND has 3+ transparent
+                                    // neighbours — meaning it is a true edge fringe, not a frame element.
+                                    // A frame pixel that is surrounded by other frame pixels will never
+                                    // have 3 transparent neighbours, so it is always preserved.
+
+                                    const FRINGE_THRESHOLD = 230;
+                                    for (let y = 1; y < h - 1; y++) {
+                                        for (let x = 1; x < w - 1; x++) {
+                                            const idx = y * w + x;
+                                            if (data[idx * 4 + 3] === 0) continue; // already gone
+
+                                            const r = data[idx * 4], g = data[idx * 4 + 1], b = data[idx * 4 + 2];
+                                            const max = Math.max(r, g, b);
+                                            const min = Math.min(r, g, b);
+                                            const sat = max === 0 ? 0 : (max - min) / max;
+
+                                            if (max > FRINGE_THRESHOLD && sat < 0.20) {
+                                                // Count how many of the 4 cardinal neighbours are transparent
+                                                let transparent = 0;
+                                                if (data[((y-1)*w+x  )*4+3] === 0) transparent++;
+                                                if (data[((y+1)*w+x  )*4+3] === 0) transparent++;
+                                                if (data[(y*w+(x-1)  )*4+3] === 0) transparent++;
+                                                if (data[(y*w+(x+1)  )*4+3] === 0) transparent++;
+                                                // Only remove if surrounded on 3+ sides — true fringe
+                                                if (transparent >= 3) data[idx * 4 + 3] = 0;
+                                            }
+                                        }
+                                    }
+
+                                    // ── Trim narrow side slivers ──────────────────────────────────────────
+                                    const severWidth = Math.floor(w * 0.025);
+                                    for (let y = 0; y < h; y++) {
+                                        for (let x = 0; x < severWidth; x++) {
+                                            data[(y * w + x) * 4 + 3] = 0;
+                                            data[(y * w + (w - 1 - x)) * 4 + 3] = 0;
+                                        }
+                                    }
+
+                                    // ── PASS 3: Remove enclosed lens-interior white ────────────────────────
+                                    // The flood-fill from the outside cannot cross the closed frame boundary,
+                                    // so the pure-white area inside each lens still appears solid white.
+                                    // Fix: global scan — remove any remaining opaque pixel that is
+                                    // near-pure-white (> 245 brightness, < 8% saturation).
+                                    // Product-photo backgrounds are essentially RGB(255,255,255).
+                                    // Real frame material — even silver or white frames — has genuine
+                                    // surface texture and slight colour variation, so its pixels will
+                                    // not all exceed 245 uniformly. This makes the removal safe.
+                                    for (let i = 0; i < w * h; i++) {
+                                        if (data[i * 4 + 3] === 0) continue; // already transparent
+                                        const r = data[i * 4], g = data[i * 4 + 1], b = data[i * 4 + 2];
+                                        const max = Math.max(r, g, b);
+                                        const min = Math.min(r, g, b);
+                                        const sat = max === 0 ? 0 : (max - min) / max;
+                                        if (max > 245 && sat < 0.08) {
+                                            data[i * 4 + 3] = 0;
                                         }
                                     }
 
