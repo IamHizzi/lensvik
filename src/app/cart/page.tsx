@@ -291,40 +291,10 @@ export default function CartPage() {
                                 </div>
                             </section>
 
-                            {/* Trust Badges */}
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 space-y-2.5">
-                                {[
-                                    {
-                                        icon: ShieldCheck,
-                                        label: "100% Authentic",
-                                    },
-                                    {
-                                        icon: Truck,
-                                        label: "Free Delivery",
-                                    },
-                                    {
-                                        icon: ShieldCheck,
-                                        label: "Easy Returns",
-                                    },
-                                ].map(({ icon: Icon, label }) => (
-                                    <div
-                                        key={label}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <Icon className="w-4 h-4 text-emerald-600 shrink-0" />
-
-                                        <span className="text-xs font-black uppercase tracking-wide text-slate-700">
-                                            {label}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <Footer />
         </main>
     );
 }

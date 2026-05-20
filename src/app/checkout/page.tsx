@@ -369,7 +369,6 @@ Total: Rs ${cartTotal.toLocaleString()}`
                     </div>
                 </div>
             </div>
-            <Footer />
         </main>
     );
 }
