@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/models/Order';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         await dbConnect();
-        const orders = await Order.find({}).sort({ createdAt: -1 });
+        const limitParam = request.nextUrl.searchParams.get('limit');
+        const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10), 1), 500) : 0;
+
+        const query = Order.find({}).sort({ createdAt: -1 }).lean();
+        if (limit > 0) query.limit(limit);
+
+        const orders = await query;
         return NextResponse.json(orders);
     } catch (error: any) {
         console.error('Failed to fetch orders:', error);

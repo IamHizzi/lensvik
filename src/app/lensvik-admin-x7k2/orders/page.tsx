@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Search, Filter, Download, Eye, Printer, ChevronDown,
   Clock, CheckCircle2, Truck, Package, XCircle, RefreshCcw, Glasses, ArrowUpRight
@@ -48,11 +48,15 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/orders');
+      const res = await fetch(`${window.location.origin}/api/orders`, { cache: 'no-store' });
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to fetch orders');
+      }
       setOrders(Array.isArray(data) ? data : []);
-    } catch (error) {
-      toast.error('Failed to fetch orders');
+    } catch (error: any) {
+      console.error('Fetch orders error:', error);
+      toast.error(error.message || 'Failed to fetch orders');
     } finally {
       setLoading(false);
     }
@@ -74,21 +78,40 @@ export default function OrdersPage() {
     }
   };
 
-  const filtered = orders.filter(o => {
+  const filteredOrders = useMemo(() => {
     const searchLower = search.toLowerCase();
-    const matchSearch = 
-      o._id?.toLowerCase().includes(searchLower) || 
-      o.customerName?.toLowerCase().includes(searchLower) || 
-      o.customerPhone?.includes(searchLower) ||
-      o.shippingAddress?.city?.toLowerCase().includes(searchLower);
-    const matchStatus = statusFilter === 'All' || o.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
+    return orders.filter(o => {
+      const matchSearch = 
+        o._id?.toLowerCase().includes(searchLower) || 
+        o.customerName?.toLowerCase().includes(searchLower) || 
+        o.customerPhone?.includes(searchLower) ||
+        o.shippingAddress?.city?.toLowerCase().includes(searchLower);
+      const matchStatus = statusFilter === 'All' || o.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+  }, [orders, search, statusFilter]);
 
-  const statusCounts = STATUS_OPTIONS.slice(1).reduce((acc, s) => {
-    acc[s] = orders.filter(o => o.status === s).length;
-    return acc;
-  }, {} as Record<string, number>);
+  const statusCounts = useMemo(() => {
+    return STATUS_OPTIONS.slice(1).reduce((acc, s) => {
+      acc[s] = orders.filter(o => o.status === s).length;
+      return acc;
+    }, {} as Record<string, number>);
+  }, [orders]);
+
+  const totalRevenue = useMemo(() => {
+    return orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0);
+  }, [orders]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-20">
+        <div className="text-center">
+          <p className="text-lg font-bold text-slate-900">Loading orders...</p>
+          <p className="text-sm text-slate-500 mt-2">Checking your database and fetching the latest order records.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-screen-2xl mx-auto pb-10">
@@ -100,6 +123,13 @@ export default function OrdersPage() {
 
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={fetchOrders}
+            className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm"
+          >
+            <RefreshCcw className="w-3.5 h-3.5" />
+            Refresh
+          </button>
           <button className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm">
             <Download className="w-3.5 h-3.5" />
             Export Orders
@@ -127,10 +157,10 @@ export default function OrdersPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Pending', value: orders.filter(o => o.status === 'Pending').length, color: 'text-amber-600', bg: 'bg-white' },
-          { label: 'Confirmed', value: orders.filter(o => o.status === 'Confirmed').length, color: 'text-blue-600', bg: 'bg-white' },
-          { label: 'Shipped', value: orders.filter(o => o.status === 'Shipped').length, color: 'text-indigo-600', bg: 'bg-white' },
-          { label: 'Revenue', value: `PKR ${orders.reduce((acc, o) => acc + (o.totalAmount || 0), 0).toLocaleString()}`, color: 'text-emerald-600', bg: 'bg-white' },
+          { label: 'Pending', value: statusCounts['Pending'] || 0, color: 'text-amber-600', bg: 'bg-white' },
+          { label: 'Confirmed', value: statusCounts['Confirmed'] || 0, color: 'text-blue-600', bg: 'bg-white' },
+          { label: 'Shipped', value: statusCounts['Shipped'] || 0, color: 'text-indigo-600', bg: 'bg-white' },
+          { label: 'Revenue', value: `PKR ${totalRevenue.toLocaleString()}`, color: 'text-emerald-600', bg: 'bg-white' },
         ].map(card => (
           <div key={card.label} className={`${card.bg} border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all`}>
             <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
@@ -172,11 +202,11 @@ export default function OrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filtered.map((order, i) => {
+              {filteredOrders.map((order) => {
                 const StatusIcon = statusIcon[order.status] || Clock;
                 const firstItem = order.items?.[0];
                 return (
-                  <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr key={order._id || order.customerPhone || crypto.randomUUID()} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-5 py-4">
                       <div>
                         <p className="text-xs font-bold text-blue-600 group-hover:underline cursor-pointer">{order._id}</p>
@@ -241,7 +271,7 @@ export default function OrdersPage() {
               })}
             </tbody>
           </table>
-          {filtered.length === 0 && (
+          {filteredOrders.length === 0 && (
             <div className="text-center py-20 bg-slate-50/20">
               <Package className="w-10 h-10 text-slate-200 mx-auto mb-3" />
               <p className="text-sm text-slate-400 font-medium tracking-tight">No orders found matching your search</p>

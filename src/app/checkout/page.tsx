@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { toast } from "sonner";
 import Image from "next/image";
+import { MessageCircle } from "lucide-react";
 
 const PAKISTANI_CITIES = [
     "Karachi", "Lahore", "Islamabad", "Rawalpindi", "Faisalabad", "Multan", "Peshawar", "Quetta", "Sialkot", "Gujranwala", "Hyderabad", "Bahawalpur", "Sargodha", "Sukkur"
@@ -52,6 +53,9 @@ export default function CheckoutPage() {
                     zipCode: "00000",
                     country: "Pakistan"
                 },
+                status: 'Pending',
+                paymentMethod: "COD",
+                paymentStatus: "Pending",
                 items: cart.map(item => ({
                     productId: item.productId,
                     name: item.name,
@@ -68,24 +72,27 @@ export default function CheckoutPage() {
                         lensType: item.prescription.lensType.name
                     } : undefined
                 })),
-                totalAmount: cartTotal,
-                paymentMethod: "COD",
-                paymentStatus: "Pending"
+                totalAmount: cartTotal
             };
 
-            const res = await fetch('/api/orders', {
+            const res = await fetch(`${window.location.origin}/api/orders`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderPayload)
             });
 
-            if (!res.ok) throw new Error("Failed to place order");
+            const responseData = await res.json();
+            if (!res.ok) {
+                const errorMessage = responseData?.error || 'Failed to place order';
+                throw new Error(errorMessage);
+            }
 
-            toast.success("Order Placed Successfully! We will call you for verification.");
+            toast.success(`Order ${responseData._id || ''} placed successfully!`);
             clearCart();
             // Redirect or show success message
-        } catch (error) {
-            toast.error("Something went wrong. Please try again.");
+        } catch (error: any) {
+            console.error('Checkout error:', error);
+            toast.error(error?.message || "Something went wrong. Please try again.");
         } finally {
             setIsProcessing(false);
         }
@@ -291,16 +298,56 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            <Button
-                                type="submit"
-                                onClick={handleCheckout}
-                                disabled={isProcessing}
-                                className="w-full h-12 md:h-14 rounded-full font-black text-base md:text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 mt-6 md:mt-8 hover:scale-[1.02] transition-all italic active:scale-95 group relative overflow-hidden text-white"
-                            >
-                                <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                                {isProcessing ? "Processing..." : "Place Order (COD)"}
-                                <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1.5 transition-transform" />
-                            </Button>
+                            <div className="space-y-3 mt-6 md:mt-8">
+                                {/* COD Button */}
+                                <Button
+                                    type="submit"
+                                    onClick={handleCheckout}
+                                    disabled={isProcessing}
+                                    className="w-full h-12 md:h-14 rounded-full font-black text-base md:text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all italic active:scale-95 group relative overflow-hidden text-white"
+                                >
+                                    <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+
+                                    {isProcessing ? "Processing..." : "Place Order (COD)"}
+
+                                    <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1.5 transition-transform" />
+                                </Button>
+
+                                {/* WhatsApp Order Button */}
+                                <a
+                                    href={`https://wa.me/923709573005?text=${encodeURIComponent(
+                                        `Hello Lensvik, I want to place an order.
+
+Name: ${formData.fullName}
+Phone: ${formData.phone}
+City: ${formData.city}
+Address: ${formData.address}
+
+Order Details:
+${cart
+                                            .map(
+                                                (item) =>
+                                                    `• ${item.name} x${item.quantity} - Rs ${(
+                                                        item.price * item.quantity
+                                                    ).toLocaleString()}`
+                                            )
+                                            .join("\n")}
+
+Total: Rs ${cartTotal.toLocaleString()}`
+                                    )}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block"
+                                >
+                                    <Button
+                                        type="button"
+                                        className="w-full h-12 md:h-14 rounded-full font-black text-base md:text-lg bg-green-500 hover:bg-green-600 shadow-xl shadow-green-500/20 hover:scale-[1.02] transition-all italic active:scale-95 group text-white"
+                                    >
+                                        <MessageCircle className="mr-2 w-5 h-5" />
+                                        Order via WhatsApp
+                                    </Button>
+                                </a>
+                            </div>
 
                             <div className="mt-6 flex items-center justify-center gap-4 p-3 bg-white/50 rounded-xl border border-white/50">
                                 <div className="flex items-center gap-1.5 text-[7px] md:text-[8px] uppercase font-bold tracking-widest text-slate-400">
