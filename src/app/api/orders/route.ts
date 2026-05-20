@@ -5,7 +5,8 @@ import Order from '@/models/Order';
 export async function GET(request: Request) {
     try {
         await dbConnect();
-        const limitParam = request.nextUrl.searchParams.get('limit');
+        const url = new URL(request.url);
+        const limitParam = url.searchParams.get('limit');
         const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10), 1), 500) : 0;
 
         const query = Order.find({}).sort({ createdAt: -1 }).lean();

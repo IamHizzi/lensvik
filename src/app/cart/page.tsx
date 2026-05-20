@@ -20,7 +20,7 @@ import Image from "next/image";
 import { Footer } from "@/components/layout/Footer";
 
 export default function CartPage() {
-    const { cart, removeFromCart, updateQuantity, cartTotal } = useCart();
+    const { cart, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
 
     /* ── Empty state ── */
     if (cart.length === 0) {
@@ -64,12 +64,20 @@ export default function CartPage() {
                         Shopping Cart
                     </h1>
 
-                    <div className="flex items-center gap-2 mt-2">
-                        <div className="w-12 h-1.5 bg-primary rounded-full" />
+                    <div className="mt-4 space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-black uppercase tracking-widest text-slate-400">
+                                {cartCount} item{cartCount !== 1 ? "s" : ""}
+                            </span>
 
-                        <span className="text-xs font-black uppercase tracking-widest text-slate-400">
-                            {cart.length} item{cart.length !== 1 ? "s" : ""}
-                        </span>
+                            <span className="text-xs font-black uppercase tracking-widest text-slate-400">
+                                • Subtotal Rs {cartTotal.toLocaleString()}
+                            </span>
+                        </div>
+
+                        <p className="text-sm text-slate-500 max-w-2xl">
+                            Review the products in your cart, adjust quantities, or proceed to checkout to complete your order.
+                        </p>
                     </div>
                 </div>
 
@@ -181,9 +189,15 @@ export default function CartPage() {
                                                             Unit Price
                                                         </p>
 
-                                                        <p className="text-lg md:text-xl font-black text-primary">
-                                                            Rs{" "}
-                                                            {item.price.toLocaleString()}
+                                                        <p className="text-lg font-black text-primary">
+                                                            Rs {item.price.toLocaleString()}
+                                                        </p>
+
+                                                        <p className="text-xs text-slate-400 mt-1">
+                                                            Total: Rs {(
+                                                                item.price *
+                                                                item.quantity
+                                                            ).toLocaleString()}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -221,9 +235,14 @@ export default function CartPage() {
                         <div className="sticky top-40 space-y-4">
                             {/* Order Summary Card */}
                             <section className="bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm p-5 md:p-7">
-                                <h2 className="font-black text-base md:text-lg uppercase tracking-tight italic text-slate-900 mb-6">
+                                <h2 className="font-black text-base md:text-lg uppercase tracking-tight italic text-slate-900 mb-4">
                                     Order Summary
                                 </h2>
+
+                                <div className="flex items-center justify-between text-sm text-slate-500 mb-5">
+                                    <span>{cartCount} item{cartCount !== 1 ? "s" : ""}</span>
+                                    <span className="font-medium">Ready for checkout</span>
+                                </div>
 
                                 {/* Totals */}
                                 <div className="space-y-3 pb-5 border-b border-slate-100">
