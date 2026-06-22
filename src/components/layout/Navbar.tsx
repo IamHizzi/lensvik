@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, User, Menu, X, MessageCircle } from "lucide-react";
+import { ShoppingCart, User, Menu, X, MessageCircle, LogOut, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
+import { useCustomer } from "@/context/CustomerContext";
 import { SearchIcon } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -16,6 +17,7 @@ const SearchOverlay = dynamic(() => import("./SearchOverlay").then(mod => mod.Se
 
 export function Navbar() {
     const { cartCount } = useCart();
+    const { customer, logout } = useCustomer();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -95,9 +97,32 @@ export function Navbar() {
                             <SearchIcon className="w-5 h-5 md:w-[22px] md:h-[22px]" />
                         </Button>
 
-                        <Button variant="ghost" size="icon" className="w-9 h-9 md:w-10 md:h-10 text-slate-800">
-                            <User className="w-5 h-5 md:w-[22px] md:h-[22px]" />
-                        </Button>
+                        {customer ? (
+                            <div className="hidden md:flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-tight text-slate-700 max-w-[100px] truncate">
+                                    Hi, {customer.name}
+                                </span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={logout}
+                                    className="w-9 h-9 md:w-10 md:h-10 text-slate-800"
+                                    title="Logout"
+                                >
+                                    <LogOut className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="hidden md:flex items-center gap-2">
+                                <Link href="/login">
+                                    <Button variant="ghost" className="text-slate-800 font-bold text-xs uppercase tracking-tight">
+                                        <User className="w-4 h-4 mr-1.5" />
+                                        Sign In
+                                    </Button>
+                                </Link>
+                     
+                            </div>
+                        )}
                         <Link href="/cart">
                             <Button variant="ghost" size="icon" className="relative w-9 h-9 md:w-10 md:h-10 text-slate-800">
                                 <ShoppingCart className="w-5 h-5 md:w-[22px] md:h-[22px]" />

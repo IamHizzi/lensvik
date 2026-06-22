@@ -135,7 +135,20 @@ export default function ProductPage() {
                     >
                         {/* Main Image */}
                         <div className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-[#f5f6f8] border border-slate-100 group shadow-xl shadow-slate-100/50">
-                            {isDataUri(activeImage) ? (
+                            {product.videoUrl && activeThumb === 0 && (
+                                <video
+                                    src={product.videoUrl}
+                                    controls
+                                    autoPlay
+                                    muted
+                                    loop
+                                    className="w-full h-full object-contain p-6 md:p-10"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                />
+                            )}
+                            {(!product.videoUrl || activeThumb > 0) && (isDataUri(activeImage) ? (
                                 <img
                                     src={activeImage}
                                     alt={product.name}
@@ -150,7 +163,7 @@ export default function ProductPage() {
                                     sizes="(max-width: 768px) 100vw, 50vw"
                                     priority
                                 />
-                            )}
+                            ))}
 
                             {/* Discount badge */}
                             {discount && (
@@ -256,18 +269,7 @@ export default function ProductPage() {
                             {product.description || "Experimental architecture meets optical precision. Hand-assembled from surgical-grade titanium for a weightless experience that adapts to your every movement."}
                         </p>
 
-                        {/* Feature checklist */}
-                        <div className="grid grid-cols-2 gap-y-2.5 gap-x-4 mb-5 md:mb-7 bg-slate-50 px-4 py-4 rounded-2xl border border-slate-100">
-                            {FEATURES.map((feat) => (
-                                <div key={feat} className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold uppercase tracking-tight text-slate-600">
-                                    <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                        <CheckCircle2 className="w-2.5 h-2.5 text-primary" />
-                                    </div>
-                                    {feat}
-                                </div>
-                            ))}
-                        </div>
-
+                     
                         <VariationSelector variants={product.variants} onChange={setVariations} />
 
                         {/* ── CTA Buttons (Desktop only — mobile has sticky bar) ── */}
@@ -304,7 +306,16 @@ export default function ProductPage() {
                 </div>
 
                 {/* Full-width sections */}
-                <ProductSpecs measurements={product.measurements} description={product.description} />
+                <ProductSpecs
+                    measurements={product.measurements}
+                    description={product.description}
+                    color={(product as any)?.variants?.find((v: any) => v.color === variations.color)?.color || (product as any)?.variants?.[0]?.color}
+                    size={(product as any)?.variants?.find((v: any) => v.size === variations.size)?.size || (product as any)?.variants?.[0]?.size}
+                    material={product.material}
+                    shape={product.shape}
+                    rim={product.rim}
+                    referenceImage={(product as any).referenceImage}
+                />
                 <RelatedProducts currentProductId={product._id} category={product.category} />
             </div>
 

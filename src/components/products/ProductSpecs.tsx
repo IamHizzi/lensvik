@@ -1,26 +1,31 @@
 "use client";
 
 import React, { useState } from "react";
-import { Ruler, ShieldCheck, Heart, Star, Package, RefreshCw, CheckCircle2, ChevronDown, ChevronUp, Zap, Eye, Monitor, Droplets, Sparkles, Clock } from "lucide-react";
+import { ShieldCheck, Heart, Star, Package, RefreshCw, CheckCircle2, ChevronDown, ChevronUp, Zap, Eye, Monitor, Droplets, Sparkles, Clock, Ruler } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductSpecsProps {
-    measurements?: { 
-        lensWidth?: number; 
-        bridgeWidth?: number; 
+    measurements?: {
+        lensWidth?: number;
+        bridgeWidth?: number;
         templeLength?: number;
         pdMin?: number;
         pdMax?: number;
         frameHeight?: number;
     };
     description?: string;
+    color?: string;
+    size?: string;
+    material?: string;
+    shape?: string;
+    rim?: string;
+    referenceImage?: string;
 }
 
 
 const TABS = [
-    { id: "features",    label: "Features" },
+    { id: "details",    label: "Details" },
     { id: "how-it-works", label: "How It Works" },
-    { id: "specs",       label: "Tech Specs" },
     { id: "faq",         label: "FAQ" },
     { id: "reviews",     label: "Reviews" },
 ];
@@ -100,8 +105,8 @@ function FaqItem({ q, a }: { q: string; a: string }) {
     );
 }
 
-export function ProductSpecs({ measurements, description }: ProductSpecsProps) {
-    const [activeTab, setActiveTab] = useState("features");
+export function ProductSpecs({ measurements, description, color, size: frameSize, material, shape, rim, referenceImage }: ProductSpecsProps) {
+    const [activeTab, setActiveTab] = useState("details");
 
     return (
         <div className="mt-10 md:mt-16">
@@ -127,38 +132,67 @@ export function ProductSpecs({ measurements, description }: ProductSpecsProps) {
             <div className="min-h-[260px]">
                 <AnimatePresence mode="wait">
 
-                    {/* FEATURES */}
-                    {activeTab === "features" && (
-                        <motion.div key="features" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {FEATURES_LIST.map((f, i) => (
-                                    <div key={i} className="flex items-start gap-4 p-4 md:p-5 bg-white rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all">
-                                        <div className={`w-10 h-10 md:w-11 md:h-11 rounded-xl ${f.bg} flex items-center justify-center shrink-0`}>
-                                            <f.icon className={`w-5 h-5 ${f.color}`} />
+                    {/* DETAILS */}
+                    {activeTab === "details" && (
+                        <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                <div className="md:col-span-2 space-y-5">
+                                    <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4">
+                                        <div className="flex items-center gap-2">
+                                            <Ruler className="w-4 h-4 text-primary" />
+                                            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Product Details</h4>
                                         </div>
-                                        <div>
-                                            <p className={`text-[10px] font-black uppercase tracking-widest ${f.color} mb-1`}>{f.title}</p>
-                                            <p className="text-xs text-slate-500 font-medium leading-relaxed">{f.desc}</p>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {frameSize && (
+                                                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+                                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Size</span>
+                                                    <span className="text-xs font-bold text-slate-800">{frameSize}</span>
+                                                </div>
+                                            )}
+                                            {color && (
+                                                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+                                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Color</span>
+                                                    <span className="text-xs font-bold text-slate-800">{color}</span>
+                                                </div>
+                                            )}
+                                            {material && (
+                                                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+                                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Material</span>
+                                                    <span className="text-xs font-bold text-slate-800">{material}</span>
+                                                </div>
+                                            )}
+                                            {shape && (
+                                                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+                                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Shape</span>
+                                                    <span className="text-xs font-bold text-slate-800 uppercase">{shape}</span>
+                                                </div>
+                                            )}
+                                            {rim && (
+                                                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
+                                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Rim</span>
+                                                    <span className="text-xs font-bold text-slate-800">{rim}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                ))}
-                            </div>
-                            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
-                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">2-Year Warranty</span>
+                                
                                 </div>
-                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
-                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">30-Day Returns</span>
-                                </div>
-                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
-                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Free Nationwide Shipping</span>
-                                </div>
-                                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 flex items-center gap-3">
-                                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Rx Verified</span>
+                                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Eye className="w-4 h-4 text-primary" />
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Reference</h4>
+                                    </div>
+                                    <div className="bg-white rounded-xl p-4 border border-slate-100">
+                                        {referenceImage ? (
+                                            <img
+                                                src={referenceImage}
+                                                alt="Frame dimensions reference"
+                                                className="w-full h-auto object-contain"
+                                            />
+                                        ) : (
+                                            <p className="text-[10px] text-slate-400 text-center py-8 font-medium">No reference image uploaded</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
@@ -189,64 +223,6 @@ export function ProductSpecs({ measurements, description }: ProductSpecsProps) {
                                 <p className="text-sm text-slate-600 font-medium leading-relaxed">
                                     <span className="font-black text-slate-900">Every prescription is verified by our in-house opticians</span> before your lenses go into production — guaranteeing optical accuracy and comfort.
                                 </p>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* TECH SPECS */}
-                    {activeTab === "specs" && (
-                        <motion.div key="specs" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <Ruler className="w-4 h-4 text-primary" />
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Frame Dimensions</h4>
-                                    </div>
-                                    {[
-                                        ["Lens Width", `${measurements?.lensWidth || 52}mm`],
-                                        ["Bridge Width", `${measurements?.bridgeWidth || 18}mm`],
-                                        ["Temple Length", `${measurements?.templeLength || 145}mm`],
-                                        ["Frame Weight", "≈ 18g"],
-                                    ].map(([k, v]) => (
-                                        <div key={k} className="flex justify-between items-center border-b border-slate-50 pb-2">
-                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{k}</span>
-                                            <span className="text-xs font-bold font-mono text-slate-800">{v}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <Heart className="w-4 h-4 text-primary" />
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Material & Build</h4>
-                                    </div>
-                                    {[
-                                        ["Frame Material", "Surgical Acetate"],
-                                        ["Hinge Type", "7-Barrel Steel"],
-                                        ["Nose Pads", "Hypoallergenic"],
-                                        ["Core Wire", "Integrated Steel"],
-                                    ].map(([k, v]) => (
-                                        <div key={k} className="flex justify-between items-center border-b border-slate-50 pb-2">
-                                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">{k}</span>
-                                            <span className="text-xs font-bold text-slate-800">{v}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <RefreshCw className="w-4 h-4 text-primary" />
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-primary">Warranty & Care</h4>
-                                    </div>
-                                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                                        Complimentary professional cleaning kit included. Clean only with the provided microfiber cloth — never paper or clothing.
-                                    </p>
-                                    <div className="pt-2 space-y-2">
-                                        {["2-Year Structural Warranty", "14-Day Hassle-Free Returns", "Free Lens Adjustment (30 days)"].map(p => (
-                                            <div key={p} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-600">
-                                                <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />{p}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         </motion.div>
                     )}

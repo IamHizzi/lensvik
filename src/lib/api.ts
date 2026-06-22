@@ -10,6 +10,9 @@ export interface Product {
     rating?: number;
     image: string;
     images?: string[];
+    referenceImage?: string;
+    videoUrl?: string;
+    videoData?: string;
     vtoImage?: string;
     category: string;
     subcategory?: string;
@@ -17,6 +20,8 @@ export interface Product {
     description?: string;
     gender?: string;
     material?: string;
+    shape?: string;
+    rim?: string;
     status?: string;
     collectionName?: string;
     tags?: string[];
@@ -65,11 +70,29 @@ function normalizeProduct(data: any): Product {
 
 const API_BASE_URL = '/api';
 
-export const getProducts = async (status = 'Active', limit?: number, category?: string): Promise<Product[]> => {
+export const getProducts = async (status = 'Active', limit?: number, category?: string, filters?: {
+    material?: string[];
+    shape?: string[];
+    rim?: string[];
+    size?: string[];
+    gender?: string[];
+    coating?: string[];
+    feature?: string[];
+}): Promise<Product[]> => {
     const params = new URLSearchParams();
     if (status) params.append('status', status);
     if (limit) params.append('limit', limit.toString());
     if (category) params.append('category', category);
+    
+    if (filters) {
+        if (filters.material?.length) params.append('material', filters.material.join(','));
+        if (filters.shape?.length) params.append('shape', filters.shape.join(','));
+        if (filters.rim?.length) params.append('rim', filters.rim.join(','));
+        if (filters.size?.length) params.append('size', filters.size.join(','));
+        if (filters.gender?.length) params.append('gender', filters.gender.join(','));
+        if (filters.coating?.length) params.append('coating', filters.coating.join(','));
+        if (filters.feature?.length) params.append('feature', filters.feature.join(','));
+    }
     
     // Using native fetch for better Next.js caching and smaller bundle
     const response = await fetch(`${API_BASE_URL}/products?${params.toString()}`, {

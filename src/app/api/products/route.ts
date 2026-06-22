@@ -19,6 +19,41 @@ export async function GET(request: Request) {
             query.category = { $regex: new RegExp(category, 'i') };
         }
 
+        if (url.searchParams.get('material')) {
+            const materials = url.searchParams.get('material')!.split(',');
+            query.material = { $in: materials };
+        }
+
+        if (url.searchParams.get('shape')) {
+            const shapes = url.searchParams.get('shape')!.split(',');
+            query.shape = { $in: shapes };
+        }
+
+        if (url.searchParams.get('rim')) {
+            const rims = url.searchParams.get('rim')!.split(',');
+            query.rim = { $in: rims };
+        }
+
+        if (url.searchParams.get('size')) {
+            const sizes = url.searchParams.get('size')!.split(',');
+            query.size = { $in: sizes };
+        }
+
+        if (url.searchParams.get('gender')) {
+            const genders = url.searchParams.get('gender')!.split(',');
+            query.gender = { $in: genders };
+        }
+
+        if (url.searchParams.get('coating')) {
+            const coatings = url.searchParams.get('coating')!.split(',');
+            query.tags = { $in: coatings };
+        }
+
+        if (url.searchParams.get('feature')) {
+            const features = url.searchParams.get('feature')!.split(',');
+            query.tags = { $in: features };
+        }
+
         let productsQuery = Product.find(query).sort({ createdAt: -1 });
         
         if (limit > 0) {

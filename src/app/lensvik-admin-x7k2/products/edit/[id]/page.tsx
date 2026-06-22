@@ -11,12 +11,16 @@ const CATEGORIES = ['Sunglasses', 'Eyeglasses', 'Prescription Glasses', 'Blue Li
 const FRAME_COLORS = ['Black', 'Tortoise', 'Gold', 'Silver', 'Gunmetal', 'Rose Gold', 'Brown', 'Navy', 'Clear', 'Red'];
 const LENS_TYPES = ['Clear', 'UV400', 'Polarized', 'Anti-Reflective', 'Blue Light Filter', 'Photochromic', 'Mirrored'];
 const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
-const MATERIALS = ['Acetate', 'Metal', 'Titanium', 'TR-90', 'Stainless Steel', 'Wood', 'Carbon Fiber'];
+const MATERIALS = ['Plastic', 'Acetate', 'Mix Material', 'Metal', 'TR', 'Titanium'];
+const SHAPES = ['Cat Eye', 'Wayfarer', 'Square', 'Aviator', 'Oval', 'Sports', 'Rectangle', 'Hexagonal', 'Round', 'Clubmaster'];
+const RIM_TYPES = ['Full Rim', 'Half Rim', 'Rimless'];
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);
 
   const [images, setImages] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoFile, setVideoFile] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedLensTypes, setSelectedLensTypes] = useState<string[]>([]);
@@ -28,9 +32,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [description, setDescription] = useState('');
   const [form, setForm] = useState({
     name: '', category: '', price: '', comparePrice: '', sku: '', barcode: '',
-    gender: 'Unisex', material: '', status: 'Draft', collectionName: '',
+    gender: 'Unisex', material: '', shape: '', rim: '', size: '', status: 'Draft', collectionName: '',
     pdMin: '', pdMax: '', bridgeWidth: '', templeLength: '', lensWidth: '', frameHeight: '',
-    metaTitle: '', metaDesc: '', tags: '',
+    metaTitle: '', metaDesc: '', tags: '', referenceImage: '', lensSubtype: '',
   });
   const [options, setOptions] = useState({
     prescriptionCompatible: true,
@@ -50,7 +54,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       const res = await fetch(`/api/products/${id}`);
       if (!res.ok) throw new Error('Product not found');
       const data = await res.json();
-      
+
       setForm({
         name: data.name || '',
         category: data.category || '',
@@ -60,8 +64,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         barcode: data.barcode || '',
         gender: data.gender || 'Unisex',
         material: data.material || '',
+        shape: data.shape || '',
+        rim: data.rim || '',
+        size: data.size || data.variants?.[0]?.size || '',
         status: data.status || 'Draft',
         collectionName: data.collectionName || '',
+        referenceImage: data.referenceImage || '',
+        lensSubtype: data.subcategory || '',
         pdMin: data.measurements?.pdMin?.toString() || '',
         pdMax: data.measurements?.pdMax?.toString() || '',
         bridgeWidth: data.measurements?.bridgeWidth?.toString() || '',
@@ -72,25 +81,26 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         metaDesc: data.seo?.metaDesc || '',
         tags: data.tags?.join(', ') || '',
       });
-      
+
       setDescription(data.description || '');
       setImages(data.images || []);
+      setVideoUrl(data.videoUrl || '');
+      setVideoFile(data.videoData || null);
       setOptions(data.options || {
         prescriptionCompatible: true,
         blueLightFilter: true,
         virtualTryOn: false,
         lensCustomization: true,
       });
-      
-      // Extract selected variants
+
       const colors = Array.from(new Set(data.variants?.map((v: any) => v.color).filter(Boolean)));
       const sizes = Array.from(new Set(data.variants?.map((v: any) => v.size).filter(Boolean)));
       const lenses = Array.from(new Set(data.variants?.map((v: any) => v.lensType).filter(Boolean)));
-      
+
       setSelectedColors(colors as string[]);
       setSelectedSizes(sizes as string[]);
       setSelectedLensTypes(lenses as string[]);
-      
+
     } catch (error: any) {
       toast.error(error.message);
       router.push('/lensvik-admin-x7k2/products');
@@ -107,7 +117,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
     setLoading(true);
     try {
-      // Helper to clean empty numeric fields
       const cleanNum = (val: any) => (val === '' || val === undefined || val === null) ? undefined : Number(val);
 
       const payload = {
@@ -119,6 +128,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         barcode: form.barcode,
         gender: form.gender,
         material: form.material,
+        shape: form.shape,
+        rim: form.rim,
+        referenceImage: form.referenceImage || undefined,
+        videoUrl: videoUrl || undefined,
+        videoData: videoFile || undefined,
+        subcategory: form.lensSubtype || undefined,
         description,
         images,
         ...(images.length > 0 ? { image: images[0] } : {}),
@@ -196,7 +211,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     if (!form.name) return;
     setAiLoading(true);
     await new Promise(r => setTimeout(r, 1500));
-    setDescription(`Experience luxury vision with the ${form.name}. Crafted with precision engineering and premium ${form.material || 'acetate'} materials, these frames offer the perfect fusion of style and functionality. Designed for ${form.gender?.toLowerCase() || 'everyone'}, they feature UV400 protection, lightweight construction, and timeless aesthetics that complement any lifestyle. Whether you're in a boardroom or on the beach, these frames deliver unmatched comfort and sophistication. Available in multiple sizes and lens options to suit your personal vision needs.`);
+    setDescription(`Experience luxury vision with the ${form.name}. Crafted with precision engineering and premium ${form.material || 'acetate'} materials, these frames offer a perfect fusion of style and functionality. Designed for ${form.gender?.toLowerCase() || 'everyone'}, they feature UV400 protection, lightweight construction, and timeless aesthetics.`);
     setAiLoading(false);
   };
 
@@ -222,7 +237,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <Link href="/lensvik-admin-x7k2/products" className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-all shadow-sm">
@@ -234,33 +248,20 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link 
-            href={`/products/${id}`}
-            target="_blank"
-            className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm"
-          >
+          <Link href={`/products/${id}`} target="_blank" className="flex items-center gap-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2.5 hover:bg-slate-50 transition-all shadow-sm">
             <Eye className="w-4 h-4" /> Preview
           </Link>
-          <button
-            onClick={() => handleUpdate()}
-            disabled={loading}
-            className="flex items-center gap-2 text-xs font-bold bg-blue-600 text-white rounded-xl px-5 py-2.5 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50"
-          >
+          <button onClick={() => handleUpdate()} disabled={loading} className="flex items-center gap-2 text-xs font-bold bg-blue-600 text-white rounded-xl px-5 py-2.5 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 disabled:opacity-50">
             {loading ? 'Saving...' : <><Save className="w-4 h-4" /> Save Changes</>}
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 bg-white border border-slate-200 rounded-2xl p-1.5 shadow-sm">
         {tabs.map(t => {
           const Icon = t.icon;
           return (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold py-2.5 rounded-xl transition-all ${tab === t.id ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
-            >
+            <button key={t.id} onClick={() => setTab(t.id)} className={`flex-1 flex items-center justify-center gap-2 text-xs font-bold py-2.5 rounded-xl transition-all ${tab === t.id ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
               <Icon className="w-4 h-4" />
               <span className="hidden sm:inline uppercase tracking-tight">{t.label}</span>
             </button>
@@ -274,16 +275,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <>
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-sm font-bold text-slate-900 mb-5 border-b border-slate-50 pb-4 uppercase tracking-tight">Product Images</h3>
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={e => { e.preventDefault(); setDragging(true); }}
-                  onDragLeave={() => setDragging(false)}
-                  onClick={() => fileRef.current?.click()}
-                  className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${dragging ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}
-                >
+                <div onDrop={handleDrop} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onClick={() => fileRef.current?.click()} className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${dragging ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}>
                   <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
                   <p className="text-sm text-slate-600 font-bold tracking-tight">Drop images here or <span className="text-blue-600">browse</span></p>
-                  <p className="text-xs text-slate-400 mt-1 font-medium">PNG, JPG, WebP up to 10MB · Recommended 1200×1200px</p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">PNG, JPG, WebP up to 10MB · You can upload up to 10+ images</p>
                   <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                 </div>
                 {images.length > 0 && (
@@ -357,9 +352,65 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} placeholder="ISBN, UPC, GTIN..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-mono font-bold" />
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Frame Shape</label>
+                    <select value={form.shape} onChange={e => setForm({ ...form, shape: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      <option value="">Select shape</option>
+                      {SHAPES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Rim Type</label>
+                    <select value={form.rim} onChange={e => setForm({ ...form, rim: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      <option value="">Select rim type</option>
+                      {RIM_TYPES.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tags</label>
                   <input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="sunglasses, polarized, summer (comma separated)" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-medium" />
+                </div>
+                {form.category === 'Contact Lenses' && (
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Lens Type</label>
+                        <select value={form.lensSubtype} onChange={e => setForm({ ...form, lensSubtype: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                            <option value="">Select lens type</option>
+                            <option value="Transparent Lenses">Transparent Lenses</option>
+                            <option value="Colored Lenses">Colored Lenses</option>
+                        </select>
+                    </div>
+                )}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Reference Image (Dimensions Diagram)</label>
+                  <div onDrop={handleDrop} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onClick={() => fileRef.current?.click()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${dragging ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}>
+                    <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                    <p className="text-xs text-slate-600 font-bold">Drop reference image or browse</p>
+                    <p className="text-[10px] text-slate-400 mt-1">PNG with dimension annotations</p>
+                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                  </div>
+                  {form.referenceImage && (
+                    <div className="mt-4 relative w-32 h-32 rounded-xl overflow-hidden border border-slate-200">
+                      <img src={form.referenceImage} alt="Reference" className="w-full h-full object-contain bg-slate-50" />
+                      <button onClick={(e) => { e.stopPropagation(); setForm({ ...form, referenceImage: '' }); }} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">×</button>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Upload Product Video</label>
+                  <div onDrop={(e) => { e.preventDefault(); setDragging(false); const file = e.dataTransfer.files[0]; if (file && file.type.startsWith('video/')) { const reader = new FileReader(); reader.onloadend = () => { setVideoFile(reader.result as string); setVideoUrl(''); }; reader.readAsDataURL(file); } }} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onClick={() => document.getElementById('video-upload')?.click()} className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${dragging ? 'border-purple-600 bg-purple-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}>
+                    <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                    <p className="text-sm text-slate-600 font-bold tracking-tight">Drop video file here or <span className="text-purple-600">browse</span></p>
+                    <p className="text-xs text-slate-400 mt-1 font-medium">MP4, WebM up to 50MB</p>
+                    <input id="video-upload" type="file" accept="video/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => { setVideoFile(reader.result as string); setVideoUrl(''); }; reader.readAsDataURL(file); } }} />
+                  </div>
+                  {(videoFile || videoUrl) && (
+                    <div className="mt-4 relative">
+                      <video src={videoFile || videoUrl} controls className="w-full max-w-md rounded-xl border border-slate-200" />
+                      <button onClick={(e) => { e.stopPropagation(); setVideoFile(null); setVideoUrl(''); }} className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-lg font-bold hover:bg-red-600 shadow-lg">×</button>
+                    </div>
+                  )}
                 </div>
               </div>
             </>
@@ -439,12 +490,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   { id: 'lensCustomization', label: 'Lens Customization Available' },
                 ].map(opt => (
                   <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={(options as any)[opt.id]}
-                      onChange={e => setOptions({ ...options, [opt.id]: e.target.checked })}
-                      className="w-5 h-5 rounded-lg border-slate-300 bg-slate-50 accent-blue-600 cursor-pointer"
-                    />
+                    <input type="checkbox" checked={(options as any)[opt.id]} onChange={e => setOptions({ ...options, [opt.id]: e.target.checked })} className="w-5 h-5 rounded-lg border-slate-300 bg-slate-50 accent-blue-600 cursor-pointer" />
                     <span className="text-sm text-slate-600 font-bold group-hover:text-slate-900 transition-colors uppercase tracking-tight">{opt.label}</span>
                   </label>
                 ))}
@@ -511,26 +557,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   </div>
                 )}
                 <div className="pt-3 border-t border-slate-50">
-                  <p className="text-xs text-blue-600 font-bold">
-                    {selectedColors.length * (selectedSizes.length || 1)} total variants generated
-                  </p>
+                  <p className="text-xs text-blue-600 font-bold">{selectedColors.length * (selectedSizes.length || 1)} total variants generated</p>
                 </div>
               </div>
             </div>
           )}
           <div className="space-y-3">
-            <button
-              onClick={() => handleUpdate()}
-              disabled={loading}
-              className="w-full bg-blue-600 text-white text-sm font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 uppercase tracking-tight disabled:opacity-50"
-            >
+            <button onClick={() => handleUpdate()} disabled={loading} className="w-full bg-blue-600 text-white text-sm font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 uppercase tracking-tight disabled:opacity-50">
               <Save className="w-4 h-4" />
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
-            <button
-              onClick={() => router.push('/lensvik-admin-x7k2/products')}
-              className="w-full bg-white border border-slate-200 text-slate-600 text-sm font-bold py-3.5 rounded-xl hover:bg-slate-50 transition-all shadow-sm uppercase tracking-tight"
-            >
+            <button onClick={() => router.push('/lensvik-admin-x7k2/products')} className="w-full bg-white border border-slate-200 text-slate-600 text-sm font-bold py-3.5 rounded-xl hover:bg-slate-50 transition-all shadow-sm uppercase tracking-tight">
               Cancel
             </button>
           </div>

@@ -10,10 +10,14 @@ const CATEGORIES = ['Sunglasses', 'Eyeglasses', 'Prescription Glasses', 'Blue Li
 const FRAME_COLORS = ['Black', 'Tortoise', 'Gold', 'Silver', 'Gunmetal', 'Rose Gold', 'Brown', 'Navy', 'Clear', 'Red'];
 const LENS_TYPES = ['Clear', 'UV400', 'Polarized', 'Anti-Reflective', 'Blue Light Filter', 'Photochromic', 'Mirrored'];
 const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
-const MATERIALS = ['Acetate', 'Metal', 'Titanium', 'TR-90', 'Stainless Steel', 'Wood', 'Carbon Fiber'];
+const MATERIALS = ['Plastic', 'Acetate', 'Mix Material', 'Metal', 'TR', 'Titanium'];
+const SHAPES = ['Cat Eye', 'Wayfarer', 'Square', 'Aviator', 'Oval', 'Sports', 'Rectangle', 'Hexagonal', 'Round', 'Clubmaster'];
+const RIM_TYPES = ['Full Rim', 'Half Rim', 'Rimless'];
 
 export default function AddProductPage() {
   const [images, setImages] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoFile, setVideoFile] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedLensTypes, setSelectedLensTypes] = useState<string[]>([]);
@@ -24,9 +28,9 @@ export default function AddProductPage() {
   const [description, setDescription] = useState('');
   const [form, setForm] = useState({
     name: '', category: '', price: '', comparePrice: '', sku: '', barcode: '',
-    gender: 'Unisex', material: '', status: 'Draft', collectionName: '',
+    gender: 'Unisex', material: '', shape: '', rim: '', size: '', status: 'Draft', collectionName: '',
     pdMin: '', pdMax: '', bridgeWidth: '', templeLength: '', lensWidth: '', frameHeight: '',
-    metaTitle: '', metaDesc: '', tags: '',
+    metaTitle: '', metaDesc: '', tags: '', referenceImage: '', lensSubtype: '',
   });
   const [options, setOptions] = useState({
     prescriptionCompatible: true,
@@ -57,6 +61,13 @@ export default function AddProductPage() {
         barcode: form.barcode || undefined,
         gender: form.gender,
         material: form.material || undefined,
+        shape: form.shape || undefined,
+        rim: form.rim || undefined,
+        size: form.size || undefined,
+        referenceImage: form.referenceImage || undefined,
+        videoUrl: videoUrl || undefined,
+        videoData: videoFile || undefined,
+        subcategory: form.lensSubtype || undefined,
         status: statusOverride || form.status,
         collectionName: form.collectionName || undefined,
         description,
@@ -213,7 +224,7 @@ export default function AddProductPage() {
                 >
                   <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
                   <p className="text-sm text-slate-600 font-bold tracking-tight">Drop images here or <span className="text-blue-600">browse</span></p>
-                  <p className="text-xs text-slate-400 mt-1 font-medium">PNG, JPG, WebP up to 10MB · Recommended 1200×1200px</p>
+                  <p className="text-xs text-slate-400 mt-1 font-medium">PNG, JPG, WebP up to 10MB · You can upload up to 10+ images</p>
                   <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                 </div>
                 {images.length > 0 && (
@@ -288,9 +299,81 @@ export default function AddProductPage() {
                     <input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} placeholder="ISBN, UPC, GTIN..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-mono font-bold" />
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Frame Shape</label>
+                    <select value={form.shape} onChange={e => setForm({ ...form, shape: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      <option value="">Select shape</option>
+                      {SHAPES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Rim Type</label>
+                    <select value={form.rim} onChange={e => setForm({ ...form, rim: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      <option value="">Select rim type</option>
+                      {RIM_TYPES.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Size</label>
+                    <select value={form.size} onChange={e => setForm({ ...form, size: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      <option value="">Select size</option>
+                      {FRAME_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Frame Material</label>
+                    <select value={form.material} onChange={e => setForm({ ...form, material: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                      <option value="">Select material</option>
+                      {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tags</label>
                   <input value={form.tags} onChange={e => setForm({ ...form, tags: e.target.value })} placeholder="sunglasses, polarized, summer (comma separated)" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500/50 transition-all font-medium" />
+                </div>
+                {form.category === 'Contact Lenses' && (
+                    <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Lens Type</label>
+                        <select value={form.lensSubtype} onChange={e => setForm({ ...form, lensSubtype: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-sm text-slate-900 outline-none focus:border-blue-500/50 transition-all appearance-none font-medium">
+                            <option value="">Select lens type</option>
+                            <option value="Transparent Lenses">Transparent Lenses</option>
+                            <option value="Colored Lenses">Colored Lenses</option>
+                        </select>
+                    </div>
+                )}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Reference Image (Dimensions Diagram)</label>
+                  <div onDrop={handleDrop} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onClick={() => fileRef.current?.click()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${dragging ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}>
+                    <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                    <p className="text-xs text-slate-600 font-bold">Drop reference image or browse</p>
+                    <p className="text-[10px] text-slate-400 mt-1">PNG with dimension annotations</p>
+                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                  </div>
+                  {form.referenceImage && (
+                    <div className="mt-4 relative w-32 h-32 rounded-xl overflow-hidden border border-slate-200">
+                      <img src={form.referenceImage} alt="Reference" className="w-full h-full object-contain bg-slate-50" />
+                      <button onClick={(e) => { e.stopPropagation(); setForm({ ...form, referenceImage: '' }); }} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600">×</button>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Upload Product Video</label>
+                  <div onDrop={(e) => { e.preventDefault(); setDragging(false); const file = e.dataTransfer.files[0]; if (file && file.type.startsWith('video/')) { const reader = new FileReader(); reader.onloadend = () => { setVideoFile(reader.result as string); setVideoUrl(''); }; reader.readAsDataURL(file); } }} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onClick={() => document.getElementById('video-upload-add')?.click()} className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${dragging ? 'border-purple-600 bg-purple-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}>
+                    <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                    <p className="text-sm text-slate-600 font-bold tracking-tight">Drop video file here or <span className="text-purple-600">browse</span></p>
+                    <p className="text-xs text-slate-400 mt-1 font-medium">MP4, WebM up to 50MB</p>
+                    <input id="video-upload-add" type="file" accept="video/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => { setVideoFile(reader.result as string); setVideoUrl(''); }; reader.readAsDataURL(file); } }} />
+                  </div>
+                  {(videoFile || videoUrl) && (
+                    <div className="mt-4 relative">
+                      <video src={videoFile || videoUrl} controls className="w-full max-w-md rounded-xl border border-slate-200" />
+                      <button onClick={(e) => { e.stopPropagation(); setVideoFile(null); setVideoUrl(''); }} className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-lg font-bold hover:bg-red-600 shadow-lg">×</button>
+                    </div>
+                  )}
                 </div>
               </div>
             </>

@@ -2,6 +2,7 @@ import { Raleway, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/context/CartContext";
+import { CustomerProvider } from "@/context/CustomerContext";
 import { Metadata } from "next";
 
 const raleway = Raleway({
@@ -35,10 +36,12 @@ export default function RootLayout({
       <body
         className={`${raleway.variable} ${poppins.variable} font-sans antialiased`}
       >
-        <CartProvider>
-          {children}
-          <Toaster position="top-right" />
-        </CartProvider>
+        <CustomerProvider>
+          <CartProvider>
+            {children}
+            <Toaster position="top-right" />
+          </CartProvider>
+        </CustomerProvider>
       </body>
     </html>
   );

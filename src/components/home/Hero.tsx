@@ -8,7 +8,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 const banners = [
     {
-        image: "/images/dfd.png",
+        image: "/images/professional_product_photography_shot_of_202606201447.jpeg",
         title: "Premium Eyewear",
         subtitle: "Curated for Visionaries",
         tag: "New Collection",
@@ -16,7 +16,7 @@ const banners = [
         ctaHref: "/collections",
     },
     {
-        image: "/images/rt.png",
+        image: "/images/professional_product_photography_shot_of_202606201448.jpeg",
         title: "Discover Your Style",
         subtitle: "Frames for Every Face",
         tag: "Virtual Try-On",
@@ -24,7 +24,7 @@ const banners = [
         ctaHref: "/products",
     },
     {
-        image: "/images/v.png",
+        image: "/images/A_landscape_website_banner_displaying_202606201449.jpeg",
         title: "See the World",
         subtitle: "In Stunning Clarity",
         tag: "Best Sellers",

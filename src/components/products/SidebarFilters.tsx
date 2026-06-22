@@ -10,6 +10,11 @@ interface SidebarFiltersProps {
     filters: {
         categories: string[];
         priceRange: [number, number];
+        materials?: string[];
+        shapes?: string[];
+        rims?: string[];
+        sizes?: string[];
+        gender?: string[];
         coatings: string[];
         features: string[];
     };
@@ -82,6 +87,90 @@ export function SidebarFilters({ filters, onFilterChange, activeFilters }: Sideb
                                     />
                                     <label htmlFor={coating} className="text-sm font-medium text-slate-600 group-hover:text-primary cursor-pointer transition-colors">
                                         {coating}
+                                    </label>
+                                </div>
+                            ))}
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="material" className="border-slate-100">
+                        <AccordionTrigger className="hover:no-underline py-4">
+                            <span className="label-tag text-slate-900 group-hover:text-primary transition-colors">Material</span>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-6 space-y-3">
+                            {filters.materials?.map((material) => (
+                                <div key={material} className="flex items-center space-x-3 group cursor-pointer">
+                                    <Checkbox
+                                        id={material}
+                                        checked={activeFilters.materials?.includes(material)}
+                                        onCheckedChange={() => onFilterChange("materials", material)}
+                                        className="h-5 w-5 rounded-md data-[state=checked]:bg-primary"
+                                    />
+                                    <label htmlFor={material} className="text-sm font-medium text-slate-600 group-hover:text-primary cursor-pointer transition-colors">
+                                        {material}
+                                    </label>
+                                </div>
+                            ))}
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="shape" className="border-slate-100">
+                        <AccordionTrigger className="hover:no-underline py-4">
+                            <span className="label-tag text-slate-900 group-hover:text-primary transition-colors">Shape</span>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-6 space-y-3">
+                            {filters.shapes?.map((shape) => (
+                                <div key={shape} className="flex items-center space-x-3 group cursor-pointer">
+                                    <Checkbox
+                                        id={shape}
+                                        checked={activeFilters.shapes?.includes(shape)}
+                                        onCheckedChange={() => onFilterChange("shapes", shape)}
+                                        className="h-5 w-5 rounded-md data-[state=checked]:bg-primary"
+                                    />
+                                    <label htmlFor={shape} className="text-sm font-medium text-slate-600 group-hover:text-primary cursor-pointer transition-colors capitalize">
+                                        {shape.replace(/_/g, ' ')}
+                                    </label>
+                                </div>
+                            ))}
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="rim" className="border-slate-100">
+                        <AccordionTrigger className="hover:no-underline py-4">
+                            <span className="label-tag text-slate-900 group-hover:text-primary transition-colors">Rim</span>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-6 space-y-3">
+                            {filters.rims?.map((rim) => (
+                                <div key={rim} className="flex items-center space-x-3 group cursor-pointer">
+                                    <Checkbox
+                                        id={rim}
+                                        checked={activeFilters.rims?.includes(rim)}
+                                        onCheckedChange={() => onFilterChange("rims", rim)}
+                                        className="h-5 w-5 rounded-md data-[state=checked]:bg-primary"
+                                    />
+                                    <label htmlFor={rim} className="text-sm font-medium text-slate-600 group-hover:text-primary cursor-pointer transition-colors">
+                                        {rim.replace(/_/g, ' ')}
+                                    </label>
+                                </div>
+                            ))}
+                        </AccordionContent>
+                    </AccordionItem>
+
+                    <AccordionItem value="size" className="border-slate-100">
+                        <AccordionTrigger className="hover:no-underline py-4">
+                            <span className="label-tag text-slate-900 group-hover:text-primary transition-colors">Size</span>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-6 space-y-3">
+                            {filters.sizes?.map((size) => (
+                                <div key={size} className="flex items-center space-x-3 group cursor-pointer">
+                                    <Checkbox
+                                        id={size}
+                                        checked={activeFilters.sizes?.includes(size)}
+                                        onCheckedChange={() => onFilterChange("sizes", size)}
+                                        className="h-5 w-5 rounded-md data-[state=checked]:bg-primary"
+                                    />
+                                    <label htmlFor={size} className="text-sm font-medium text-slate-600 group-hover:text-primary cursor-pointer transition-colors capitalize">
+                                        {size}
                                     </label>
                                 </div>
                             ))}
