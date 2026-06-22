@@ -12,9 +12,12 @@ import {
 } from "lucide-react";
 
 // ─── Filter Types ────────────────────────────────────────────────────────────
-const LENS_CATEGORIES = ["Eyeglasses", "Sunglasses", "Contact Lenses", "Blue Light", "NextGen"] as const;
-const COATING_TYPES = ["Antiglare", "Blu Screen", "Photochromic", "Hydrophilic", "Standard"] as const;
-const FEATURES_OPTS = ["UV400 Protection", "Scratch Resistant", "Blue Light Blocking", "Anti-Fog", "Water Repellent"] as const;
+const COATING_TYPES = ["Blue Block", "Anti-Glare", "Photochromic", "Transition", "Antiglare", "Blu Screen", "Hydrophilic", "Standard"] as const;
+const FEATURES_OPTS = ["UV400 Protection", "Scratch Resistant", "Blue Light Blocking", "Anti-Fog", "Water Repellent", "Ultra-Light", "High-Index", "Flexible Hinge", "Scratch-Proof"] as const;
+const MATERIALS_OPTS = ["Plastic", "Acetate", "Mix Material", "Metal", "TR", "Titanium"] as const;
+const SHAPES_OPTS = ["Cat Eye", "Wayfarer", "Square", "Aviator", "Oval", "Sports", "Rectangle", "Hexagonal", "Round", "Clubmaster"] as const;
+const RIMS_OPTS = ["Full Rim", "Half Rim", "Rimless"] as const;
+const SIZES_OPTS = ["Large", "Medium", "Small"] as const;
 const PRICE_RANGES = [
     { label: "Under Rs 3,000", min: 0, max: 3000 },
     { label: "Rs 3,000 – 6,000", min: 3000, max: 6000 },
@@ -34,8 +37,7 @@ type SortValue = typeof SORT_OPTIONS[number]["value"];
 // Gender options: display label → DB value stored in product.gender
 const GENDER_OPTS = [
     { label: "Men",   db: "Male"   },
-    { label: "Women", db: "Female" },
-    { label: "Kids",  db: "Kids"   },
+    { label: "Women", db: "Female" }
 ] as const;
 
 interface Filters {
@@ -43,6 +45,10 @@ interface Filters {
     priceRange: number | null;   // index into PRICE_RANGES
     coatings: string[];
     features: string[];
+    materials: string[];
+    shapes: string[];
+    rims: string[];
+    sizes: string[];
     genders: string[];           // DB values: "Male" | "Female" | "Kids"
     onSale: boolean;
 }
@@ -54,7 +60,8 @@ function toggle<T>(arr: T[], val: T): T[] {
 
 function activeCount(f: Filters) {
     return f.categories.length + (f.priceRange !== null ? 1 : 0) +
-        f.coatings.length + f.features.length + f.genders.length + (f.onSale ? 1 : 0);
+        f.coatings.length + f.features.length + f.materials.length + f.shapes.length +
+        f.rims.length + f.sizes.length + f.genders.length + (f.onSale ? 1 : 0);
 }
 
 // ─── Sidebar accordion section ───────────────────────────────────────────────
@@ -124,27 +131,10 @@ function Sidebar({ filters, setFilters, onReset }: {
                             onChange={() => setFilters(f => ({ ...f, genders: toggle(f.genders, db) }))}
                         />
                     ))}
-                    <FilterPill
-                        label="On Sale"
-                        checked={filters.onSale}
-                        onChange={() => setFilters(f => ({ ...f, onSale: !f.onSale }))}
-                    />
+                 
                 </div>
             </FilterSection>
 
-            {/* Lens Category */}
-            <FilterSection title="Lens Category">
-                <div className="flex flex-wrap gap-2">
-                    {LENS_CATEGORIES.map(cat => (
-                        <FilterPill
-                            key={cat}
-                            label={cat}
-                            checked={filters.categories.includes(cat)}
-                            onChange={() => setFilters(f => ({ ...f, categories: toggle(f.categories, cat) }))}
-                        />
-                    ))}
-                </div>
-            </FilterSection>
 
             {/* Price Range */}
             <FilterSection title="Price Range">
@@ -170,48 +160,65 @@ function Sidebar({ filters, setFilters, onReset }: {
                 </div>
             </FilterSection>
 
-            {/* Coating Type */}
-            <FilterSection title="Coating Type">
+        
+
+            {/* Material */}
+            <FilterSection title="Material">
                 <div className="flex flex-wrap gap-2">
-                    {COATING_TYPES.map(coat => (
+                    {MATERIALS_OPTS.map(mat => (
                         <FilterPill
-                            key={coat}
-                            label={coat}
-                            checked={filters.coatings.includes(coat)}
-                            onChange={() => setFilters(f => ({ ...f, coatings: toggle(f.coatings, coat) }))}
+                            key={mat}
+                            label={mat}
+                            checked={filters.materials.includes(mat)}
+                            onChange={() => setFilters(f => ({ ...f, materials: toggle(f.materials, mat) }))}
                         />
                     ))}
                 </div>
             </FilterSection>
 
-            {/* Features */}
-            <FilterSection title="Features">
-                <div className="flex flex-col gap-2">
-                    {FEATURES_OPTS.map(feat => (
-                        <label key={feat} className="flex items-center gap-2.5 cursor-pointer group">
-                            <div
-                                className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-all ${filters.features.includes(feat)
-                                        ? "border-primary bg-primary"
-                                        : "border-slate-200 group-hover:border-primary/50"
-                                    }`}
-                                onClick={() => setFilters(f => ({ ...f, features: toggle(f.features, feat) }))}
-                            >
-                                {filters.features.includes(feat) && (
-                                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                )}
-                            </div>
-                            <span
-                                className={`text-[11px] font-semibold transition-colors ${filters.features.includes(feat) ? "text-slate-900 font-black" : "text-slate-500"}`}
-                                onClick={() => setFilters(f => ({ ...f, features: toggle(f.features, feat) }))}
-                            >
-                                {feat}
-                            </span>
-                        </label>
+            {/* Shape */}
+            <FilterSection title="Shape">
+                <div className="flex flex-wrap gap-2">
+                    {SHAPES_OPTS.map(shape => (
+                        <FilterPill
+                            key={shape}
+                            label={shape}
+                            checked={filters.shapes.includes(shape)}
+                            onChange={() => setFilters(f => ({ ...f, shapes: toggle(f.shapes, shape) }))}
+                        />
                     ))}
                 </div>
             </FilterSection>
+
+            {/* Rim */}
+            <FilterSection title="Rim">
+                <div className="flex flex-wrap gap-2">
+                    {RIMS_OPTS.map(rim => (
+                        <FilterPill
+                            key={rim}
+                            label={rim}
+                            checked={filters.rims.includes(rim)}
+                            onChange={() => setFilters(f => ({ ...f, rims: toggle(f.rims, rim) }))}
+                        />
+                    ))}
+                </div>
+            </FilterSection>
+
+            {/* Size */}
+            <FilterSection title="Size">
+                <div className="flex flex-wrap gap-2">
+                    {SIZES_OPTS.map(size => (
+                        <FilterPill
+                            key={size}
+                            label={size}
+                            checked={filters.sizes.includes(size)}
+                            onChange={() => setFilters(f => ({ ...f, sizes: toggle(f.sizes, size) }))}
+                        />
+                    ))}
+                </div>
+            </FilterSection>
+
+      
         </div>
     );
 }
@@ -225,10 +232,10 @@ export default function CollectionsPage() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [filters, setFilters] = useState<Filters>({
-        categories: [], priceRange: null, coatings: [], features: [], genders: [], onSale: false,
+        categories: [], priceRange: null, coatings: [], features: [], materials: [], shapes: [], rims: [], sizes: [], genders: [], onSale: false,
     });
 
-    const resetFilters = () => setFilters({ categories: [], priceRange: null, coatings: [], features: [], genders: [], onSale: false });
+    const resetFilters = () => setFilters({ categories: [], priceRange: null, coatings: [], features: [], materials: [], shapes: [], rims: [], sizes: [], genders: [], onSale: false });
 
     useEffect(() => {
         getProducts().then(setProducts).catch(console.error).finally(() => setLoading(false));
@@ -260,6 +267,26 @@ export default function CollectionsPage() {
                 const compare = x.comparePrice ?? x.originalPrice;
                 return compare && compare > x.price;
             });
+        }
+
+        // Material filter
+        if (filters.materials.length) {
+            p = p.filter(x => filters.materials.some(mat => x.material?.toLowerCase() === mat.toLowerCase()));
+        }
+
+        // Shape filter
+        if (filters.shapes.length) {
+            p = p.filter(x => filters.shapes.some(shape => x.shape?.toLowerCase() === shape.toLowerCase()));
+        }
+
+        // Rim filter
+        if (filters.rims.length) {
+            p = p.filter(x => filters.rims.some(rim => x.rim?.toLowerCase() === rim.toLowerCase()));
+        }
+
+        // Size filter
+        if (filters.sizes.length) {
+            p = p.filter(x => filters.sizes.some(size => x.size?.toLowerCase() === size.toLowerCase()));
         }
 
         // Price range
@@ -334,6 +361,26 @@ export default function CollectionsPage() {
                     {filters.categories.map(c => (
                         <span key={c} onClick={() => setFilters(f => ({ ...f, categories: toggle(f.categories, c) }))} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-primary/20 transition-all">
                             {c} <X className="w-3 h-3" />
+                        </span>
+                    ))}
+                    {filters.materials.map(m => (
+                        <span key={m} onClick={() => setFilters(f => ({ ...f, materials: toggle(f.materials, m) }))} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-blue-100 transition-all">
+                            {m} <X className="w-3 h-3" />
+                        </span>
+                    ))}
+                    {filters.shapes.map(s => (
+                        <span key={s} onClick={() => setFilters(f => ({ ...f, shapes: toggle(f.shapes, s) }))} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-all">
+                            {s} <X className="w-3 h-3" />
+                        </span>
+                    ))}
+                    {filters.rims.map(r => (
+                        <span key={r} onClick={() => setFilters(f => ({ ...f, rims: toggle(f.rims, r) }))} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-amber-100 transition-all">
+                            {r} <X className="w-3 h-3" />
+                        </span>
+                    ))}
+                    {filters.sizes.map(s => (
+                        <span key={s} onClick={() => setFilters(f => ({ ...f, sizes: toggle(f.sizes, s) }))} className="flex items-center gap-1.5 h-8 px-3 rounded-full bg-purple-50 text-purple-600 text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-purple-100 transition-all">
+                            {s} <X className="w-3 h-3" />
                         </span>
                     ))}
 
