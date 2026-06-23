@@ -135,9 +135,22 @@ export default function ProductPage() {
                     >
                         {/* Main Image */}
                         <div className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-[#f5f6f8] border border-slate-100 group shadow-xl shadow-slate-100/50">
-                            {product.videoUrl && activeThumb === 0 && (
+                            {product?.videoUrl && activeThumb === 0 && (
                                 <video
                                     src={product.videoUrl}
+                                    controls
+                                    autoPlay
+                                    muted
+                                    loop
+                                    className="w-full h-full object-contain p-6 md:p-10"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                />
+                            )}
+                            {product?.videoData && activeThumb === 0 && !product.videoUrl && (
+                                <video
+                                    src={product.videoData}
                                     controls
                                     autoPlay
                                     muted

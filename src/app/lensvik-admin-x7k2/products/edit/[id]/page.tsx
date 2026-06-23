@@ -22,6 +22,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [videoUrl, setVideoUrl] = useState('');
   const [videoFile, setVideoFile] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [refDragging, setRefDragging] = useState(false);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedLensTypes, setSelectedLensTypes] = useState<string[]>([]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
@@ -182,6 +183,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   };
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const refFileRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -205,6 +207,30 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       };
       reader.readAsDataURL(f);
     });
+  };
+
+  const handleRefDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setRefDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm({ ...form, referenceImage: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRefFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm({ ...form, referenceImage: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAiDescription = async () => {
@@ -384,11 +410,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 )}
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Reference Image (Dimensions Diagram)</label>
-                  <div onDrop={handleDrop} onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onClick={() => fileRef.current?.click()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${dragging ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}>
+                  <div onDrop={handleRefDrop} onDragOver={e => { e.preventDefault(); setRefDragging(true); }} onDragLeave={() => setRefDragging(false)} onClick={() => refFileRef.current?.click()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${refDragging ? 'border-blue-600 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'}`}>
                     <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                     <p className="text-xs text-slate-600 font-bold">Drop reference image or browse</p>
                     <p className="text-[10px] text-slate-400 mt-1">PNG with dimension annotations</p>
-                    <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                    <input ref={refFileRef} type="file" accept="image/*" className="hidden" onChange={handleRefFileChange} />
                   </div>
                   {form.referenceImage && (
                     <div className="mt-4 relative w-32 h-32 rounded-xl overflow-hidden border border-slate-200">

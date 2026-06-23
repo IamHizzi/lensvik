@@ -12,8 +12,6 @@ import {
 } from "lucide-react";
 
 // ─── Filter Types ────────────────────────────────────────────────────────────
-const COATING_TYPES = ["Blue Block", "Anti-Glare", "Photochromic", "Transition", "Antiglare", "Blu Screen", "Hydrophilic", "Standard"] as const;
-const FEATURES_OPTS = ["UV400 Protection", "Scratch Resistant", "Blue Light Blocking", "Anti-Fog", "Water Repellent", "Ultra-Light", "High-Index", "Flexible Hinge", "Scratch-Proof"] as const;
 const MATERIALS_OPTS = ["Plastic", "Acetate", "Mix Material", "Metal", "TR", "Titanium"] as const;
 const SHAPES_OPTS = ["Cat Eye", "Wayfarer", "Square", "Aviator", "Oval", "Sports", "Rectangle", "Hexagonal", "Round", "Clubmaster"] as const;
 const RIMS_OPTS = ["Full Rim", "Half Rim", "Rimless"] as const;
@@ -43,8 +41,6 @@ const GENDER_OPTS = [
 interface Filters {
     categories: string[];
     priceRange: number | null;   // index into PRICE_RANGES
-    coatings: string[];
-    features: string[];
     materials: string[];
     shapes: string[];
     rims: string[];
@@ -60,8 +56,8 @@ function toggle<T>(arr: T[], val: T): T[] {
 
 function activeCount(f: Filters) {
     return f.categories.length + (f.priceRange !== null ? 1 : 0) +
-        f.coatings.length + f.features.length + f.materials.length + f.shapes.length +
-        f.rims.length + f.sizes.length + f.genders.length + (f.onSale ? 1 : 0);
+        f.materials.length + f.shapes.length + f.rims.length + f.sizes.length +
+        f.genders.length + (f.onSale ? 1 : 0);
 }
 
 // ─── Sidebar accordion section ───────────────────────────────────────────────
@@ -232,10 +228,10 @@ export default function CollectionsPage() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [filters, setFilters] = useState<Filters>({
-        categories: [], priceRange: null, coatings: [], features: [], materials: [], shapes: [], rims: [], sizes: [], genders: [], onSale: false,
+        categories: [], priceRange: null, materials: [], shapes: [], rims: [], sizes: [], genders: [], onSale: false,
     });
 
-    const resetFilters = () => setFilters({ categories: [], priceRange: null, coatings: [], features: [], materials: [], shapes: [], rims: [], sizes: [], genders: [], onSale: false });
+    const resetFilters = () => setFilters({ categories: [], priceRange: null, materials: [], shapes: [], rims: [], sizes: [], genders: [], onSale: false });
 
     useEffect(() => {
         getProducts().then(setProducts).catch(console.error).finally(() => setLoading(false));

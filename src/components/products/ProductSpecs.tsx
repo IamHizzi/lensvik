@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ShieldCheck, Heart, Star, Package, RefreshCw, CheckCircle2, ChevronDown, ChevronUp, Zap, Eye, Monitor, Droplets, Sparkles, Clock, Ruler } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 interface ProductSpecsProps {
     measurements?: {
@@ -107,6 +108,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export function ProductSpecs({ measurements, description, color, size: frameSize, material, shape, rim, referenceImage }: ProductSpecsProps) {
     const [activeTab, setActiveTab] = useState("details");
+    const isDataUri = (src?: string) => src?.startsWith('data:');
 
     return (
         <div className="mt-10 md:mt-16">
@@ -184,13 +186,26 @@ export function ProductSpecs({ measurements, description, color, size: frameSize
                                     </div>
                                     <div className="bg-white rounded-xl p-4 border border-slate-100">
                                         {referenceImage ? (
-                                            <img
-                                                src={referenceImage}
-                                                alt="Frame dimensions reference"
-                                                className="w-full h-auto object-contain"
-                                            />
+                                            isDataUri(referenceImage) ? (
+                                                <img
+                                                    src={referenceImage}
+                                                    alt="Frame dimensions reference"
+                                                    className="w-full h-auto object-contain max-h-[300px]"
+                                                />
+                                            ) : (
+                                                <Image
+                                                    src={referenceImage}
+                                                    alt="Frame dimensions reference"
+                                                    width={400}
+                                                    height={300}
+                                                    className="w-full h-auto object-contain max-h-[300px]"
+                                                />
+                                            )
                                         ) : (
-                                            <p className="text-[10px] text-slate-400 text-center py-8 font-medium">No reference image uploaded</p>
+                                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                                <Ruler className="w-8 h-8 text-slate-200 mb-2" />
+                                                <p className="text-[10px] text-slate-400 font-medium">No reference image uploaded</p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>

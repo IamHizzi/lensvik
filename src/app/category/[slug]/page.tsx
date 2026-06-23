@@ -29,9 +29,7 @@ export default function CategoryPage() {
         shapes: [] as string[],
         rims: [] as string[],
         sizes: [] as string[],
-        gender: [] as string[],
-        coatings: [] as string[],
-        features: [] as string[]
+        gender: [] as string[]
     });
 
     useEffect(() => {
@@ -43,8 +41,6 @@ export default function CategoryPage() {
                 if (activeFilters.rims?.length) filters.rim = activeFilters.rims;
                 if (activeFilters.sizes?.length) filters.size = activeFilters.sizes;
                 if (activeFilters.gender?.length) filters.gender = activeFilters.gender;
-                if (activeFilters.coatings?.length) filters.coating = activeFilters.coatings;
-                if (activeFilters.features?.length) filters.feature = activeFilters.features;
 
                 let filtered = await getProducts('Active', 0, (slug as string).replace(/-/g, ' '), Object.keys(filters).length ? filters : undefined);
 
@@ -108,9 +104,7 @@ export default function CategoryPage() {
         shapes: ["Cat Eye", "Wayfarer", "Square", "Aviator", "Oval", "Sports", "Rectangle", "Hexagonal", "Round", "Clubmaster"],
         rims: ["Full Rim", "Half Rim", "Rimless"],
         sizes: ["Large", "Medium", "Small"],
-        gender: ["Men", "Women"],
-        coatings: ["Blue Block", "Anti-Glare", "Photochromic", "Transition"],
-        features: ["Ultra-Light", "High-Index", "Flexible Hinge", "Scratch-Proof"]
+        gender: ["Men", "Women"]
     };
 
     const categoryDisplayName = slug ? (slug as string).replace(/-/g, ' ').toUpperCase() : "COLLECTION";
@@ -230,7 +224,7 @@ export default function CategoryPage() {
                             <div className="text-center py-32 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-100">
                                 <h3 className="text-2xl font-black uppercase italic mb-4">No vision found</h3>
                                 <p className="text-small text-slate-400 mb-8">Adjust your filters to discover more possibilities.</p>
-                                <Button onClick={() => setActiveFilters({ categories: [], priceRange: [0, 15000], materials: [], shapes: [], rims: [], sizes: [], gender: [], coatings: [], features: [] })} variant="link" className="btn-text text-primary">Reset all filters</Button>
+                                <Button onClick={() => setActiveFilters({ categories: [], priceRange: [0, 15000], materials: [], shapes: [], rims: [], sizes: [], gender: [] })} variant="link" className="btn-text text-primary">Reset all filters</Button>
                             </div>
                         )}
                     </div>
