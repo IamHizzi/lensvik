@@ -307,58 +307,165 @@ export function LensConfigurator({ isOpen, onClose, product, color, size }: Lens
         }
         setUploadState("loading");
         try {
-            // Dynamically import Tesseract.js (avoids SSR issues)
-            const Tesseract = (await import("tesseract.js")).default;
-            const result = await Tesseract.recognize(file, "eng", {
-                logger: () => {}, // suppress console logs
+            // Dynamically import Tesseract.js v7 worker API
+            const Tesseract = await import("tesseract.js");
+            const worker = await Tesseract.createWorker("eng", 1, {
+                logger: () => {}, // suppress logs
             });
+            const result = await worker.recognize(file);
+            await worker.terminate();
             const text = result.data.text;
 
-            // ── Prescription parser ──────────────────────────────────────
+            // Normalize lines: collapse spaces but keep newlines
+            const normalizedLines = text.split('\n').map(line => 
+                line.replace(/[^\S\r\n]+/g, " ")
+                    .replace(/[|]/g, " ")
+                    .replace(/O(?=\d)/g, "0")
+                    .trim()
+            ).filter(Boolean);
+
+            const normalized = normalizedLines.join(" ");
+
+            const num = "([+-]?\\d+\\.?\\d*)";
+            const ws  = "[\\s:=.]+";
+
             const getVal = (patterns: RegExp[]): string => {
                 for (const re of patterns) {
-                    const m = text.match(re);
-                    if (m) return m[1].trim();
+                    const m = normalized.match(re);
+                    if (m) return m[1].trim().replace(/^[+]/, "+");
                 }
                 return "";
             };
 
-            // Generic matcher: "LABEL ... ±number"
-            const num = "([+-]?\\d+\\.?\\d*)";
-            const ws  = "[\\s:=]+";
-
+            // ── Strategy 1: Explicit label matching (OD/OS, R/L, Right/Left) ──
             const parsed = {
-                // Right Eye (OD)
-                od_sph:  getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}SPH${ws}${num}`, "i"), new RegExp(`SPH${ws}${num}`, "i")]),
-                od_cyl:  getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}CYL${ws}${num}`, "i"), new RegExp(`CYL${ws}${num}`, "i")]),
-                od_axis: getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}AXIS${ws}(\\d+)`, "i"), new RegExp(`AXIS${ws}(\\d+)`, "i")]),
-                od_add:  getVal([new RegExp(`(?:OD|R\\.?E\\.?|Right)[^\\n]{0,30}ADD${ws}${num}`, "i"), new RegExp(`ADD${ws}${num}`, "i")]),
-                // Left Eye (OS)
-                os_sph:  getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}SPH${ws}${num}`, "i")]),
-                os_cyl:  getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}CYL${ws}${num}`, "i")]),
-                os_axis: getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}AXIS${ws}(\\d+)`, "i")]),
-                os_add:  getVal([new RegExp(`(?:OS|L\\.?E\\.?|Left)[^\\n]{0,30}ADD${ws}${num}`, "i")]),
-                // PD
-                pd:      getVal([new RegExp(`PD${ws}(\\d+\\.?\\d*)`, "i"), new RegExp(`Pupillary[\\s\\S]{0,20}(\\d{2})`, "i")]),
+                od_sph:  getVal([
+                    new RegExp(`(?:OD|R\\.?E\\.?|Right|R\\b)[^\\n]{0,40}SPH${ws}${num}`, "i"),
+                    new RegExp(`(?:OD|R\\.?E\\.?|Right|R\\b)[^\\n]{0,15}${num}`, "i"),
+                ]),
+                od_cyl:  getVal([
+                    new RegExp(`(?:OD|R\\.?E\\.?|Right|R\\b)[^\\n]{0,40}CYL${ws}${num}`, "i"),
+                    new RegExp(`(?:OD|R\\.?E\\.?|Right|R\\b)\\s+${num}\\s+${num}`, "i"),
+                ]),
+                od_axis: getVal([
+                    new RegExp(`(?:OD|R\\.?E\\.?|Right|R\\b)[^\\n]{0,40}(?:AXIS|AX)${ws}(\\d+)`, "i"),
+                    new RegExp(`(?:OD|R\\.?E\\.?|Right|R\\b)\\s+${num}\\s+${num}\\s+(\\d+)`, "i"),
+                ]),
+                od_add:  getVal([
+                    new RegExp(`(?:OD|R\\.?E\\.?|Right|R\\b)[^\\n]{0,40}ADD${ws}${num}`, "i"),
+                    new RegExp(`ADD[^\\n]{0,10}${num}`, "i"),
+                ]),
+                os_sph:  getVal([
+                    new RegExp(`(?:OS|L\\.?E\\.?|Left|L\\b)[^\\n]{0,40}SPH${ws}${num}`, "i"),
+                    new RegExp(`(?:OS|L\\.?E\\.?|Left|L\\b)[^\\n]{0,15}${num}`, "i"),
+                ]),
+                os_cyl:  getVal([
+                    new RegExp(`(?:OS|L\\.?E\\.?|Left|L\\b)[^\\n]{0,40}CYL${ws}${num}`, "i"),
+                    new RegExp(`(?:OS|L\\.?E\\.?|Left|L\\b)\\s+${num}\\s+${num}`, "i"),
+                ]),
+                os_axis: getVal([
+                    new RegExp(`(?:OS|L\\.?E\\.?|Left|L\\b)[^\\n]{0,40}(?:AXIS|AX)${ws}(\\d+)`, "i"),
+                    new RegExp(`(?:OS|L\\.?E\\.?|Left|L\\b)\\s+${num}\\s+${num}\\s+(\\d+)`, "i"),
+                ]),
+                os_add:  getVal([
+                    new RegExp(`(?:OS|L\\.?E\\.?|Left|L\\b)[^\\n]{0,40}ADD${ws}${num}`, "i"),
+                ]),
+                pd:      getVal([
+                    new RegExp(`PD${ws}(\\d+\\.?\\d*)`, "i"),
+                    new RegExp(`Pupillary[\\s\\S]{0,20}(\\d{2})`, "i"),
+                    new RegExp(`(?:P\\.?D\\.?|Inter-pupillary)[^\\n]{0,10}(\\d{2,3})`, "i"),
+                ]),
             };
 
+            // ── Strategy 2: Global Value Stream Parser ──
+            // If explicit regex matching yielded nothing, scan the entire text stream for values
+            if (!parsed.od_sph && !parsed.os_sph && !parsed.od_cyl && !parsed.os_cyl) {
+                // Combine all lines
+                const allWords = normalizedLines.join(" ").split(/\s+/).map(w => w.trim()).filter(Boolean);
+
+                // Find index of first keywords related to prescription values to skip name, date etc.
+                const keywords = ["sph", "cyl", "axis", "d.v", "n.v", "dv", "nv", "right", "left", "dist", "near"];
+                let startIdx = allWords.findIndex(w => keywords.some(kw => w.toLowerCase().includes(kw)));
+                if (startIdx === -1) startIdx = 0;
+
+                const slicedWords = allWords.slice(startIdx);
+
+                // Collect value tokens (numbers, dashes, degree values, plano)
+                const rawTokens: string[] = [];
+                for (const word of slicedWords) {
+                    const cleanWord = word.replace(/°/g, "");
+                    if (/^[+-]?\d+(?:\.\d+)?$/.test(cleanWord) || 
+                        /^[-—–_~]+$/.test(cleanWord) || 
+                        /^(?:plano|plan|pl)$/i.test(cleanWord)) {
+                        rawTokens.push(cleanWord);
+                    }
+                }
+
+                // Merge standalone sign indicators (e.g. if "-" and "2.0" were split)
+                const mergedTokens: string[] = [];
+                for (let i = 0; i < rawTokens.length; i++) {
+                    const tok = rawTokens[i];
+                    if (/^[-—–_~]$/.test(tok) && i + 1 < rawTokens.length && /^\d+(?:\.\d+)?$/.test(rawTokens[i + 1])) {
+                        mergedTokens.push("-" + rawTokens[i + 1]);
+                        i++;
+                    } else {
+                        mergedTokens.push(tok);
+                    }
+                }
+
+                // Format Plano/dashes into blank string
+                const formatVal = (v: string) => /^[-—–_~]+$/.test(v) || /plano/i.test(v) ? "" : v;
+
+                if (mergedTokens.length >= 6) {
+                    parsed.od_sph = formatVal(mergedTokens[0]);
+                    parsed.od_cyl = formatVal(mergedTokens[1]);
+                    parsed.od_axis = formatVal(mergedTokens[2]);
+                    parsed.os_sph = formatVal(mergedTokens[3]);
+                    parsed.os_cyl = formatVal(mergedTokens[4]);
+                    parsed.os_axis = formatVal(mergedTokens[5]);
+
+                    // If we have a 7th token, check if it's the PD (typically 50-80)
+                    if (mergedTokens.length >= 7) {
+                        const potentialPd = parseInt(mergedTokens[6], 10);
+                        if (!isNaN(potentialPd) && potentialPd >= 40 && potentialPd <= 90) {
+                            parsed.pd = mergedTokens[6];
+                        }
+                    }
+                }
+            }
+
             const anyFound = Object.values(parsed).some(v => v !== "");
+
+            // ── Apply extracted values directly — explicit field assignment avoids type-inference issues ──
             if (anyFound) {
-                setPrescription(parsed);
+                setPrescription(prev => ({
+                    od_sph:  parsed.od_sph  || prev.od_sph,
+                    od_cyl:  parsed.od_cyl  || prev.od_cyl,
+                    od_axis: parsed.od_axis || prev.od_axis,
+                    od_add:  parsed.od_add  || prev.od_add,
+                    os_sph:  parsed.os_sph  || prev.os_sph,
+                    os_cyl:  parsed.os_cyl  || prev.os_cyl,
+                    os_axis: parsed.os_axis || prev.os_axis,
+                    os_add:  parsed.os_add  || prev.os_add,
+                    pd:      parsed.pd      || prev.pd,
+                }));
                 setUploadState("done");
-                toast.success("Prescription extracted! Please verify the values.");
+                toast.success("Prescription values filled! Please verify before continuing.", { duration: 5000 });
             } else {
+                console.warn("Tesseract raw text (no match):\n", text.slice(0, 800));
                 setUploadState("idle");
-                toast.warning("Could not extract prescription values. Please enter them manually or try a clearer image.");
+                toast.warning("Could not auto-read this image. Please enter your prescription values manually below — or take a clearer photo.", { duration: 6000 });
             }
         } catch (err) {
             console.error("OCR error:", err);
             setUploadState("idle");
-            toast.error("OCR failed. Please enter prescription values manually.");
+            toast.error("OCR failed. Please enter prescription values manually below.");
         }
         // Reset file input so same file can be re-uploaded
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
+
+
 
 
     const handleAddToCart = () => {
@@ -373,7 +480,7 @@ export function LensConfigurator({ isOpen, onClose, product, color, size }: Lens
             lensType: selectedLens?.name || "Clear",
             prescription: {
                 measurements: { ...prescription },
-                lensCategory: { name: selectedCategory || "", price: 0 },
+                lensCategory: { name: selectedCategoryMeta?.title || selectedCategory || "", price: 0 },
                 lensType: { name: selectedLens?.name || "", price: selectedLens?.price || 0 },
             },
         });

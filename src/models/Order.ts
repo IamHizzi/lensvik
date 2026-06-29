@@ -23,10 +23,13 @@ const OrderSchema = new Schema({
             lensType: String
         },
         prescription: {
-            od: { sph: String, cyl: String, axis: String, add: String },
-            os: { sph: String, cyl: String, axis: String, add: String },
-            pd: String,
-            type: String
+            measurements: {
+                od_sph: String, od_cyl: String, od_axis: String, od_add: String,
+                os_sph: String, os_cyl: String, os_axis: String, os_add: String,
+                pd: String
+            },
+            lensCategory: { name: String, price: Number },
+            lensType: { name: String, price: Number }
         }
     }],
     totalAmount: { type: Number, required: true },

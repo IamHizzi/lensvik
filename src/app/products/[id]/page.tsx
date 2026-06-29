@@ -71,6 +71,19 @@ export default function ProductPage() {
         if (searchParams.get("tryon") === "true") setIsVTOModalOpen(true);
     }, [searchParams]);
 
+    // Keyboard navigation for image gallery
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "ArrowRight") {
+                setActiveThumb((prev) => (prev + 1) % imageList.length);
+            } else if (e.key === "ArrowLeft") {
+                setActiveThumb((prev) => (prev - 1 + imageList.length) % imageList.length);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [imageList.length]);
+
     const handleAddToCart = () => {
         if (product) {
             addToCart({ 

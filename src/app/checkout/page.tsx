@@ -68,8 +68,8 @@ export default function CheckoutPage() {
                     },
                     prescription: item.prescription ? {
                         measurements: item.prescription.measurements,
-                        lensCategory: item.prescription.lensCategory.name,
-                        lensType: item.prescription.lensType.name
+                        lensCategory: { name: item.prescription.lensCategory.name, price: item.prescription.lensCategory.price },
+                        lensType: { name: item.prescription.lensType.name, price: item.prescription.lensType.price }
                     } : undefined
                 })),
                 totalAmount: cartTotal
