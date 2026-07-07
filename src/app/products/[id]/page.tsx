@@ -147,7 +147,47 @@ export default function ProductPage() {
                         className="space-y-3 md:space-y-4"
                     >
                         {/* Main Image */}
-                        <div className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-[#f5f6f8] border border-slate-100 group shadow-xl shadow-slate-100/50">
+                        <div
+                            className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-[#f5f6f8] border border-slate-100 group shadow-xl shadow-slate-100/50 touch-pan-y"
+                            onTouchStart={(e) => {
+                                const touch = e.touches[0];
+                                (e.currentTarget as HTMLElement).dataset.touchStartX = String(touch.clientX);
+                                (e.currentTarget as HTMLElement).dataset.touchStartY = String(touch.clientY);
+                            }}
+                            onTouchMove={(e) => {
+                                // Determine direction on move to prevent vertical scroll interference
+                                if (!(e.currentTarget as HTMLElement).dataset.touchStartX) return;
+                                const touch = e.touches[0];
+                                const deltaX = Math.abs(touch.clientX - Number((e.currentTarget as HTMLElement).dataset.touchStartX));
+                                const deltaY = Math.abs(touch.clientY - Number((e.currentTarget as HTMLElement).dataset.touchStartY));
+                                // If horizontal swipe is more dominant than vertical, prevent scroll
+                                if (deltaX > deltaY && deltaX > 10) {
+                                    e.preventDefault();
+                                }
+                            }}
+                            onTouchEnd={(e) => {
+                                const el = e.currentTarget as HTMLElement;
+                                const startX = Number(el.dataset.touchStartX);
+                                const startY = Number(el.dataset.touchStartY);
+                                if (!startX) return;
+                                const touch = e.changedTouches[0];
+                                const deltaX = touch.clientX - startX;
+                                const deltaY = touch.clientY - startY;
+                                const threshold = 50;
+                                // Only trigger if horizontal swipe is dominant
+                                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > threshold) {
+                                    if (deltaX > 0) {
+                                        // Swipe right → previous image
+                                        setActiveThumb((prev) => (prev - 1 + imageList.length) % imageList.length);
+                                    } else {
+                                        // Swipe left → next image
+                                        setActiveThumb((prev) => (prev + 1) % imageList.length);
+                                    }
+                                }
+                                delete el.dataset.touchStartX;
+                                delete el.dataset.touchStartY;
+                            }}
+                        >
                             {product?.videoUrl && activeThumb === 0 && (
                                 <video
                                     src={product.videoUrl}
