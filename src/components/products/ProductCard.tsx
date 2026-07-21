@@ -24,8 +24,8 @@ export function ProductCard({ _id, name, price, originalPrice, image, images, ca
 
     const isSale = originalPrice && originalPrice > price;
 
-    // Resolve the best available image — prefer images[0], fallback to image prop, then placeholder
-    const rawImage = (images && images.length > 0) ? images[0] : (image || '/images/dfd.png');
+    // Resolve the best available image — prefer images[1] (thumbnail), fallback to images[0], then image prop, then placeholder
+    const rawImage = (images && images.length > 1) ? images[1] : (images && images.length > 0 ? images[0] : (image || '/images/dfd.png'));
     const displayImage = rawImage || '/images/dfd.png';
     const isDataUri = displayImage.startsWith('data:');
 
