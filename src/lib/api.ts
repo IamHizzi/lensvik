@@ -58,7 +58,8 @@ export interface Product {
 /** Normalize a raw product object so both `image` and `images` are always resolved */
 function normalizeProduct(data: any): Product {
     const images: string[] = data.images && data.images.length > 0 ? data.images : [];
-    const image = data.image || images[0] || '/images/dfd.png';
+    // First uploaded image (index 0) = try-on image; Second uploaded image (index 1) = thumbnail
+    const image = data.image || images[1] || images[0] || '/images/dfd.png';
     return {
         ...data,
         image,

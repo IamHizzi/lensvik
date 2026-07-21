@@ -38,6 +38,33 @@ const COLOR_MAP: Record<string, string> = {
     "Pearl": "#fde68a",
 };
 
+/** Generate a consistent hex color from any color name string */
+function colorNameToHex(name: string): string {
+    let hash = 0;
+    const normalized = name.replace(/\s+/g, '').toLowerCase();
+    for (let i = 0; i < normalized.length; i++) {
+        hash = normalized.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash) % 360;
+    const s = 45 + (Math.abs(hash + 100) % 30);
+    const l = 35 + (Math.abs(hash + 200) % 30);
+    const hslToHex = (h: number, s: number, l: number) => {
+        s /= 100; l /= 100;
+        const a = s * Math.min(l, 1 - l);
+        const f = (n: number) => {
+            const k = (n + h / 30) % 12;
+            const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            return Math.round(255 * color).toString(16).padStart(2, '0');
+        };
+        return `#${f(0)}${f(8)}${f(4)}`;
+    };
+    return hslToHex(h, s, l);
+}
+
+function resolveColor(colorName: string): string {
+    return COLOR_MAP[colorName] || colorNameToHex(colorName);
+}
+
 interface VariationSelectorProps {
     variants?: Array<{ color?: string; size?: string }>;
     onChange: (selections: { color: string; size: string }) => void;
@@ -74,10 +101,14 @@ export function VariationSelector({ variants = [], onChange }: VariationSelector
                             className={`relative w-8 h-8 rounded-full transition-all duration-300 border border-slate-100 ${
                                 selectedColor === color ? 'ring-2 ring-primary ring-offset-2 scale-110' : 'hover:scale-105'
                             }`}
-                            style={{ backgroundColor: COLOR_MAP[color] || "#cbd5e1" }}
+                            style={{ backgroundColor: resolveColor(color) }}
                         >
                             {selectedColor === color && (
-                                <Check className={`w-3 h-3 absolute inset-0 m-auto drop-shadow-md ${color === 'Clear' ? 'text-slate-900' : 'text-white'}`} />
+                                <Check className={`w-3 h-3 absolute inset-0 m-auto drop-shadow-md ${
+                                    ['Clear', 'White', 'Crystal', 'Transparent', 'Champagne', 'Beige', 'Silver', 'Platinum', 'Pearl', 'Khaki'].includes(color) 
+                                        ? 'text-slate-900' 
+                                        : 'text-white'
+                                }`} />
                             )}
                         </button>
                     ))}

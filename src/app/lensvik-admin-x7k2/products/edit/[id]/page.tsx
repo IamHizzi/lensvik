@@ -137,7 +137,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         subcategory: form.lensSubtype || undefined,
         description,
         images,
-        ...(images.length > 0 ? { image: images[0] } : {}),
+        ...(images.length > 1 ? { image: images[1] } : images.length > 0 ? { image: images[0] } : {}),
         status: statusOverride || form.status,
         collectionName: form.collectionName,
         tags: (form.tags || '').split(',').map(t => t.trim()).filter(Boolean),
@@ -305,6 +305,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
                   <p className="text-sm text-slate-600 font-bold tracking-tight">Drop images here or <span className="text-blue-600">browse</span></p>
                   <p className="text-xs text-slate-400 mt-1 font-medium">PNG, JPG, WebP up to 10MB · You can upload up to 10+ images</p>
+                  <p className="text-[10px] text-purple-600/70 mt-2 font-bold uppercase tracking-tight">1st image = Try-On · 2nd image = Thumbnail (catalog/listing)</p>
                   <input ref={fileRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
                 </div>
                 {images.length > 0 && (
@@ -317,7 +318,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                             <X className="w-4 h-4" />
                           </button>
                         </div>
-                        {i === 0 && <span className="absolute bottom-2 left-2 text-[8px] bg-blue-600 text-white rounded-md px-2 py-0.5 font-bold uppercase">Main</span>}
+                        {i === 0 && <span className="absolute bottom-2 left-2 text-[8px] bg-purple-600 text-white rounded-md px-2 py-0.5 font-bold uppercase">Try-On</span>}
+                        {i === 1 && <span className="absolute bottom-2 left-2 text-[8px] bg-blue-600 text-white rounded-md px-2 py-0.5 font-bold uppercase">Thumbnail</span>}
                       </div>
                     ))}
                     <button onClick={() => fileRef.current?.click()} className="w-24 h-24 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/30 flex items-center justify-center text-slate-400 hover:border-slate-300 hover:text-slate-600 transition-all shadow-sm">

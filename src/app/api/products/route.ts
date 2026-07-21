@@ -64,9 +64,12 @@ export async function GET(request: Request) {
 
         const normalizedProducts = products.map(p => {
             const obj = p.toObject();
+            const images = obj.images && obj.images.length > 0 ? obj.images : [];
             return {
                 ...obj,
-                image: obj.image || (obj.images && obj.images[0]) || '/images/dfd.png'
+                // images[0] = try-on image, images[1] = thumbnail
+                image: images[1] || images[0] || '/images/dfd.png',
+                vtoImage: images[0] || images[1] || '/images/dfd.png',
             };
         });
 

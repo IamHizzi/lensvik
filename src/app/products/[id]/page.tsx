@@ -42,6 +42,8 @@ export default function ProductPage() {
     const [isVTOModalOpen, setIsVTOModalOpen] = useState(false);
     const [isLensModalOpen, setIsLensModalOpen] = useState(false);
     const [activeThumb, setActiveThumb] = useState(0);
+    const [isZoomed, setIsZoomed] = useState(false);
+    const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
     const [variations, setVariations] = useState({ color: "", size: "" });
     const [isWishlisted, setIsWishlisted] = useState(false);
     const { addToCart } = useCart();
@@ -148,7 +150,7 @@ export default function ProductPage() {
                     >
                         {/* Main Image */}
                         <div
-                            className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-[#f5f6f8] border border-slate-100 group shadow-xl shadow-slate-100/50 touch-pan-y"
+                            className="relative aspect-square rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white border border-slate-100 group shadow-xl shadow-slate-100/50 touch-pan-y"
                             onTouchStart={(e) => {
                                 const touch = e.touches[0];
                                 (e.currentTarget as HTMLElement).dataset.touchStartX = String(touch.clientX);
@@ -214,22 +216,48 @@ export default function ProductPage() {
                                     }}
                                 />
                             )}
-                            {(!product.videoUrl || activeThumb > 0) && (isDataUri(activeImage) ? (
-                                <img
-                                    src={activeImage}
-                                    alt={product.name}
-                                    className="w-full h-full object-contain p-6 md:p-10 group-hover:scale-105 transition-transform duration-700"
-                                />
-                            ) : (
-                                <Image
-                                    src={activeImage}
-                                    alt={product.name}
-                                    fill
-                                    className="object-contain p-6 md:p-10 group-hover:scale-105 transition-transform duration-700"
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                    priority
-                                />
-                            ))}
+                            {(!product.videoUrl || activeThumb > 0) && (
+                                <div
+                                    className="w-full h-full cursor-pointer"
+                                    onClick={() => {
+                                        // On mobile: cycle next/prev image on single tap
+                                        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                                            setActiveThumb((prev) => (prev + 1) % imageList.length);
+                                        }
+                                    }}
+                                    onDoubleClick={(e) => {
+                                        e.preventDefault();
+                                        if (!isZoomed) {
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            const x = ((e.clientX - rect.left) / rect.width) * 100;
+                                            const y = ((e.clientY - rect.top) / rect.height) * 100;
+                                            setZoomPos({ x, y });
+                                        }
+                                        setIsZoomed(!isZoomed);
+                                    }}
+                                >
+                                    <div className={`w-full h-full transition-transform duration-300 ease-out ${isZoomed ? 'scale-[2]' : ''}`}
+                                        style={isZoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
+                                    >
+                                        {isDataUri(activeImage) ? (
+                                            <img
+                                                src={activeImage}
+                                                alt={product.name}
+                                                className="w-full h-full object-contain p-6 md:p-10"
+                                            />
+                                        ) : (
+                                            <Image
+                                                src={activeImage}
+                                                alt={product.name}
+                                                fill
+                                                className="object-contain p-6 md:p-10"
+                                                sizes="(max-width: 768px) 100vw, 50vw"
+                                                priority
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Discount badge */}
                             {discount && (
@@ -267,7 +295,7 @@ export default function ProductPage() {
                                     <button
                                         key={i}
                                         onClick={() => setActiveThumb(i)}
-                                        className={`w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-[#f5f6f8] border-2 transition-all relative shrink-0 ${
+                                        className={`w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl overflow-hidden bg-white border-2 transition-all relative shrink-0 ${
                                             activeThumb === i ? "border-primary shadow-md shadow-primary/10" : "border-slate-100 opacity-60 hover:opacity-100"
                                         }`}
                                     >
