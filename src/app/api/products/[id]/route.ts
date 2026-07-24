@@ -33,11 +33,9 @@ export async function PATCH(
         const { id } = await context.params;
         const body = await request.json();
         // images[0] = try-on image, images[1] = thumbnail
-        if (!body.image && Array.isArray(body.images) && body.images.length > 0) {
+        if (Array.isArray(body.images) && body.images.length > 0) {
             body.image = body.images[1] || body.images[0];
-        }
-        if (Array.isArray(body.images) && body.images.length > 0 && !body.vtoImage) {
-            body.vtoImage = body.images[0];
+            body.vtoImage = body.images[0] || body.images[1];
         }
 
         const updatedProduct = await Product.findOneAndUpdate(

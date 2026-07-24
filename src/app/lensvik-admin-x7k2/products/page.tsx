@@ -156,7 +156,7 @@ export default function ProductsPage() {
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden flex-shrink-0">
-                        <img src={product.images?.[0] || '/images/dfd.png'} alt={product.name} className="w-full h-full object-cover" />
+                        <img src={product.image || product.images?.[1] || product.images?.[0] || '/images/dfd.png'} alt={product.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-slate-900">{product.name}</p>

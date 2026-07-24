@@ -113,7 +113,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                 {results.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {results.map((product) => {
-                                            const productImage = product.images?.[0] || product.image || '/images/dfd.png';
+                                            const productImage = product.image || product.images?.[1] || product.images?.[0] || '/images/dfd.png';
                                             const isDataUri = productImage.startsWith('data:');
                                             return (
                                             <Link 

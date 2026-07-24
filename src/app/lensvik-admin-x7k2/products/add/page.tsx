@@ -73,6 +73,8 @@ export default function AddProductPage() {
         collectionName: form.collectionName || undefined,
         description,
         images,
+        image: images[1] || images[0] || undefined,
+        vtoImage: images[0] || images[1] || undefined,
         tags: (form.tags || '').split(',').map(t => t.trim()).filter(Boolean),
         measurements: {
           pdMin: numOrUndef(form.pdMin),

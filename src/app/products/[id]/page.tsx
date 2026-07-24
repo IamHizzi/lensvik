@@ -9,7 +9,7 @@ import { getProductById, Product } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Heart, Share2, CheckCircle2, Star, Eye, ChevronRight } from "lucide-react";
+import { ShoppingCart, Heart, Share2, CheckCircle2, Star, Eye, ChevronRight, ZoomIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import { LensConfigurator } from "@/components/products/LensConfigurator";
 import { VariationSelector } from "@/components/products/VariationSelector";
 import { ProductSpecs } from "@/components/products/ProductSpecs";
 import { RelatedProducts } from "@/components/products/RelatedProducts";
+import { ProductZoomModal } from "@/components/products/ProductZoomModal";
 
 // Dynamic imports
 const VirtualTryOn = dynamic(() => import("@/components/vto/VirtualTryOn").then(mod => mod.VirtualTryOn), {
@@ -41,6 +42,7 @@ export default function ProductPage() {
     const [loading, setLoading] = useState(true);
     const [isVTOModalOpen, setIsVTOModalOpen] = useState(false);
     const [isLensModalOpen, setIsLensModalOpen] = useState(false);
+    const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
     const [activeThumb, setActiveThumb] = useState(0);
     const [isZoomed, setIsZoomed] = useState(false);
     const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
@@ -53,6 +55,9 @@ export default function ProductPage() {
             try {
                 const data = await getProductById(id as string);
                 setProduct(data);
+                if (data && (data as any).images?.length > 1) {
+                    setActiveThumb(1);
+                }
             } catch (err) {
                 console.error("Failed to fetch product", err);
             } finally {
@@ -218,27 +223,10 @@ export default function ProductPage() {
                             )}
                             {(!product.videoUrl || activeThumb > 0) && (
                                 <div
-                                    className="w-full h-full cursor-pointer"
-                                    onClick={() => {
-                                        // On mobile: cycle next/prev image on single tap
-                                        if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                                            setActiveThumb((prev) => (prev + 1) % imageList.length);
-                                        }
-                                    }}
-                                    onDoubleClick={(e) => {
-                                        e.preventDefault();
-                                        if (!isZoomed) {
-                                            const rect = e.currentTarget.getBoundingClientRect();
-                                            const x = ((e.clientX - rect.left) / rect.width) * 100;
-                                            const y = ((e.clientY - rect.top) / rect.height) * 100;
-                                            setZoomPos({ x, y });
-                                        }
-                                        setIsZoomed(!isZoomed);
-                                    }}
+                                    className="w-full h-full cursor-pointer relative"
+                                    onClick={() => setIsZoomModalOpen(true)}
                                 >
-                                    <div className={`w-full h-full transition-transform duration-300 ease-out ${isZoomed ? 'scale-[2]' : ''}`}
-                                        style={isZoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : {}}
-                                    >
+                                    <div className="w-full h-full">
                                         {isDataUri(activeImage) ? (
                                             <img
                                                 src={activeImage}
@@ -261,13 +249,13 @@ export default function ProductPage() {
 
                             {/* Discount badge */}
                             {discount && (
-                                <div className="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">
+                                <div className="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full z-10">
                                     -{discount}%
                                 </div>
                             )}
 
                             {/* Action buttons */}
-                            <div className="absolute top-4 right-4 flex flex-col gap-2">
+                            <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
                                 <button
                                     onClick={() => setIsWishlisted(!isWishlisted)}
                                     className={`w-9 h-9 md:w-10 md:h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all hover:scale-110 ${isWishlisted ? "text-red-500" : "text-slate-400"}`}
@@ -279,13 +267,21 @@ export default function ProductPage() {
                                 </button>
                             </div>
 
-                            {/* VTO overlay button */}
-                            <button
-                                onClick={() => setIsVTOModalOpen(true)}
-                                className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md hover:bg-primary hover:text-white transition-all border border-white/50"
-                            >
-                                <Eye className="w-3 h-3" /> Try On
-                            </button>
+                            {/* VTO overlay button & Zoom button */}
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setIsVTOModalOpen(true); }}
+                                    className="pointer-events-auto flex items-center gap-1.5 bg-white/90 backdrop-blur-md text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md hover:bg-primary hover:text-white transition-all border border-white/50"
+                                >
+                                    <Eye className="w-3 h-3" /> Try On
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setIsZoomModalOpen(true); }}
+                                    className="pointer-events-auto flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md hover:bg-black transition-all border border-slate-800"
+                                >
+                                    <ZoomIn className="w-3 h-3" /> Tap to Zoom
+                                </button>
+                            </div>
                         </div>
 
                         {/* Thumbnail Strip */}
@@ -442,7 +438,7 @@ export default function ProductPage() {
             <VirtualTryOn
                 isOpen={isVTOModalOpen}
                 onClose={() => setIsVTOModalOpen(false)}
-                productImage={product.vtoImage || product.image}
+                productImage={(product as any)?.images?.[0] || product?.vtoImage || product?.image}
                 productName={product.name}
             />
             <LensConfigurator
@@ -451,6 +447,13 @@ export default function ProductPage() {
                 product={product}
                 color={variations.color}
                 size={variations.size}
+            />
+            <ProductZoomModal
+                isOpen={isZoomModalOpen}
+                onClose={() => setIsZoomModalOpen(false)}
+                images={imageList}
+                initialIndex={activeThumb}
+                productName={product.name}
             />
 
             {/* Mobile spacing for sticky bar */}

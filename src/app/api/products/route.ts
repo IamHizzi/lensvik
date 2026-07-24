@@ -62,14 +62,40 @@ export async function GET(request: Request) {
 
         const products = await productsQuery;
 
+        // Strip heavy data URI arrays from list responses — only send lightweight references
         const normalizedProducts = products.map(p => {
             const obj = p.toObject();
             const images = obj.images && obj.images.length > 0 ? obj.images : [];
+            const thumbnail = images[1] || images[0] || '/images/dfd.png';
+            const vtoImg = images[0] || images[1] || '/images/dfd.png';
             return {
-                ...obj,
-                // images[0] = try-on image, images[1] = thumbnail
-                image: images[1] || images[0] || '/images/dfd.png',
-                vtoImage: images[0] || images[1] || '/images/dfd.png',
+                _id: obj._id,
+                name: obj.name,
+                price: obj.price,
+                comparePrice: obj.comparePrice,
+                originalPrice: obj.originalPrice ?? obj.comparePrice ?? undefined,
+                image: thumbnail,
+                vtoImage: vtoImg,
+                category: obj.category,
+                gender: obj.gender,
+                material: obj.material,
+                shape: obj.shape,
+                rim: obj.rim,
+                size: obj.size,
+                description: obj.description,
+                tags: obj.tags,
+                status: obj.status,
+                collectionName: obj.collectionName,
+                rating: obj.rating,
+                reviews: obj.reviews,
+                measurements: obj.measurements,
+                options: obj.options,
+                variants: obj.variants,
+                referenceImage: obj.referenceImage,
+                seo: obj.seo,
+                sku: obj.sku,
+                barcode: obj.barcode,
+                createdAt: obj.createdAt,
             };
         });
 
@@ -92,6 +118,11 @@ export async function POST(request: Request) {
         const clean = Object.fromEntries(
             Object.entries(body).filter(([_, v]) => v !== undefined && v !== '' && v !== null)
         );
+
+        if (Array.isArray(clean.images) && clean.images.length > 0) {
+            clean.image = clean.images[1] || clean.images[0];
+            clean.vtoImage = clean.images[0] || clean.images[1];
+        }
 
         const newProduct = new Product({
             ...clean,

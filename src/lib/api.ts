@@ -57,13 +57,15 @@ export interface Product {
 
 /** Normalize a raw product object so both `image` and `images` are always resolved */
 function normalizeProduct(data: any): Product {
+    // Backward compat: if API returns the full images[] array, use it; otherwise use already-resolved `image`
     const images: string[] = data.images && data.images.length > 0 ? data.images : [];
-    // First uploaded image (index 0) = try-on image; Second uploaded image (index 1) = thumbnail
     const image = data.image || images[1] || images[0] || '/images/dfd.png';
+    const vtoImage = data.vtoImage || images[0] || images[1] || '/images/dfd.png';
     return {
         ...data,
         image,
-        images,
+        vtoImage,
+        images: data.images || [], // preserve images only if present (detail view), empty for list view
         // Map comparePrice → originalPrice for backward compat with ProductCard
         originalPrice: data.originalPrice ?? data.comparePrice ?? undefined,
     };
