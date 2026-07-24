@@ -167,32 +167,32 @@ export function ProductZoomModal({
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex flex-col select-none touch-none">
+            <div className="fixed inset-0 z-[200] bg-white flex flex-col select-none touch-none">
                 {/* Header Controls */}
-                <div className="relative z-10 flex items-center justify-between px-4 py-4 md:px-8 border-b border-white/10 bg-black/40">
-                    <div className="flex flex-col">
-                        <span className="text-white font-bold text-sm md:text-base line-clamp-1">{productName}</span>
-                        <span className="text-white/50 text-xs font-semibold">
+                <div className="relative z-10 flex items-center justify-between px-4 py-4 md:px-8 border-b border-slate-100 bg-white/90 backdrop-blur-md">
+                    <div className="flex flex-col min-w-0 mr-4">
+                        <span className="text-slate-900 font-bold text-sm md:text-base line-clamp-1">{productName}</span>
+                        <span className="text-slate-400 text-xs font-semibold">
                             {currentIndex + 1} / {images.length}
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                         {/* Zoom Controls */}
-                        <div className="flex items-center bg-white/10 rounded-full p-1 border border-white/10">
+                        <div className="flex items-center bg-slate-100 rounded-full p-1 border border-slate-200/80">
                             <button
                                 onClick={handleZoomOut}
                                 disabled={scale <= 1}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all disabled:opacity-30"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-200/80 transition-all disabled:opacity-30"
                                 title="Zoom Out"
                             >
                                 <ZoomOut className="w-4 h-4" />
                             </button>
-                            <span className="text-white text-xs font-bold px-2">{Math.round(scale * 100)}%</span>
+                            <span className="text-slate-900 text-xs font-bold px-2">{Math.round(scale * 100)}%</span>
                             <button
                                 onClick={handleZoomIn}
                                 disabled={scale >= 4}
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all disabled:opacity-30"
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-700 hover:bg-slate-200/80 transition-all disabled:opacity-30"
                                 title="Zoom In"
                             >
                                 <ZoomIn className="w-4 h-4" />
@@ -202,7 +202,7 @@ export function ProductZoomModal({
                         {scale > 1 && (
                             <button
                                 onClick={resetZoom}
-                                className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+                                className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 transition-all"
                                 title="Reset Zoom"
                             >
                                 <RotateCcw className="w-4 h-4" />
@@ -211,7 +211,7 @@ export function ProductZoomModal({
 
                         <button
                             onClick={onClose}
-                            className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all ml-2"
+                            className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-900 hover:text-white transition-all ml-1"
                             title="Close"
                         >
                             <X className="w-5 h-5" />
@@ -222,7 +222,7 @@ export function ProductZoomModal({
                 {/* Main Viewport */}
                 <div
                     ref={containerRef}
-                    className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
+                    className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing bg-white"
                     onMouseDown={handleMouseDown}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleMouseUp}
@@ -230,18 +230,18 @@ export function ProductZoomModal({
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                 >
-                    {/* Navigation Buttons (Desktop) */}
+                    {/* Navigation Buttons (Desktop & Tablet) */}
                     {images.length > 1 && (
                         <>
                             <button
                                 onClick={() => handleIndexChange((currentIndex - 1 + images.length) % images.length)}
-                                className="absolute left-4 z-10 w-12 h-12 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                                className="absolute left-4 z-10 w-12 h-12 rounded-full bg-white/90 border border-slate-200 text-slate-800 shadow-md flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all"
                             >
                                 <ChevronLeft className="w-6 h-6" />
                             </button>
                             <button
                                 onClick={() => handleIndexChange((currentIndex + 1) % images.length)}
-                                className="absolute right-4 z-10 w-12 h-12 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                                className="absolute right-4 z-10 w-12 h-12 rounded-full bg-white/90 border border-slate-200 text-slate-800 shadow-md flex items-center justify-center hover:bg-slate-900 hover:text-white transition-all"
                             >
                                 <ChevronRight className="w-6 h-6" />
                             </button>
@@ -274,26 +274,26 @@ export function ProductZoomModal({
                     </div>
 
                     {/* Mobile helper hint */}
-                    <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 pointer-events-none bg-black/60 border border-white/10 px-4 py-1.5 rounded-full text-white/70 text-[10px] uppercase font-bold tracking-widest backdrop-blur-md">
+                    <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10 pointer-events-none bg-slate-900/80 border border-slate-800 px-4 py-1.5 rounded-full text-white text-[10px] uppercase font-bold tracking-widest backdrop-blur-md shadow-lg">
                         Double-tap or Pinch to Zoom · Drag to Pan
                     </div>
                 </div>
 
                 {/* Thumbnails Footer Strip */}
                 {images.length > 1 && (
-                    <div className="relative z-10 py-4 px-4 bg-black/40 border-t border-white/10 flex items-center justify-center gap-3 overflow-x-auto no-scrollbar">
+                    <div className="relative z-10 py-4 px-4 bg-white border-t border-slate-100 flex items-center justify-center gap-3 overflow-x-auto no-scrollbar">
                         {images.map((img, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => handleIndexChange(idx)}
                                 className={`relative w-14 h-14 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
-                                    currentIndex === idx ? "border-primary scale-110 shadow-lg shadow-primary/30" : "border-white/20 opacity-50 hover:opacity-100"
+                                    currentIndex === idx ? "border-primary scale-110 shadow-lg shadow-primary/20 bg-white" : "border-slate-200 opacity-60 hover:opacity-100 bg-slate-50"
                                 }`}
                             >
                                 {img.startsWith('data:') ? (
-                                    <img src={img} alt="" className="w-full h-full object-contain p-1 bg-white/5" />
+                                    <img src={img} alt="" className="w-full h-full object-contain p-1" />
                                 ) : (
-                                    <Image src={img} alt="" fill className="object-contain p-1 bg-white/5" />
+                                    <Image src={img} alt="" fill className="object-contain p-1" />
                                 )}
                             </button>
                         ))}
