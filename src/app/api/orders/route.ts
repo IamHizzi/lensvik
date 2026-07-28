@@ -12,7 +12,7 @@ export async function GET(request: Request) {
         const limitParam = url.searchParams.get('limit');
         const limit = limitParam ? Math.min(Math.max(parseInt(limitParam, 10), 1), 500) : 0;
 
-        const query = Order.find({}).sort({ createdAt: -1 }).lean();
+        const query = Order.find({}).sort({ createdAt: -1 }).allowDiskUse(true).lean();
         if (limit > 0) query.limit(limit);
 
         const orders = await query;

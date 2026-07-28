@@ -21,6 +21,7 @@ export async function GET() {
         // Get recent orders
         const recentOrders = await Order.find({})
             .sort({ createdAt: -1 })
+            .allowDiskUse(true)
             .limit(5);
 
         // Status breakdown

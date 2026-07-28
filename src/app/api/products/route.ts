@@ -59,6 +59,7 @@ export async function GET(request: Request) {
 
         let productsQuery = Product.find(query, { referenceImage: 0, videoData: 0, images: { $slice: 2 } })
             .sort({ createdAt: -1 })
+            .allowDiskUse(true)
             .lean();
 
         // Always enforce a reasonable limit to avoid Vercel 4.5MB response limit

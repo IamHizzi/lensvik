@@ -49,5 +49,9 @@ const ProductSchema = new Schema({
     reviews: { type: Number, default: 0 }
 }, { timestamps: true });
 
+ProductSchema.index({ createdAt: -1 });
+ProductSchema.index({ status: 1, createdAt: -1 });
+ProductSchema.index({ category: 1, status: 1 });
+
 // Check if model exists before defining to avoid OverwriteModelError in Next.js hot-reloading
 export default models.Product || model('Product', ProductSchema);

@@ -64,7 +64,7 @@ export async function getProductsServer(
         if (category) {
             query.category = { $regex: new RegExp(`^${category}$`, 'i') };
         }
-        let q = ProductModel.find(query, { referenceImage: 0, videoData: 0, images: { $slice: 2 } }).sort({ createdAt: -1 }).lean();
+        let q = ProductModel.find(query, { referenceImage: 0, videoData: 0, images: { $slice: 2 } }).sort({ createdAt: -1 }).allowDiskUse(true).lean();
         if (limit > 0) q = q.limit(limit) as typeof q;
         const docs = await q;
         return (docs as any[]).map(doc => normalizeDoc(doc, false));
