@@ -30,8 +30,14 @@ export default function ProductsPage() {
     try {
       const res = await fetch('/api/products');
       const data = await res.json();
-      setProducts(data);
+      if (res.ok && Array.isArray(data)) {
+        setProducts(data);
+      } else {
+        setProducts([]);
+        toast.error(data?.error || 'Failed to fetch products');
+      }
     } catch (error) {
+      setProducts([]);
       toast.error('Failed to fetch products');
     } finally {
       setLoading(false);

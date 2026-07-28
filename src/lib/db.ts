@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lensvik';
-
-if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
+const MONGODB_URI = process.env.MONGODB_URI;
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -19,23 +15,38 @@ if (!cached) {
 
 async function dbConnect() {
     if (cached.conn) {
-        return cached.conn;
+        if (mongoose.connection.readyState === 1) {
+            return cached.conn;
+        }
+        // Stale or disconnected connection - reset cache
+        cached.conn = null;
+        cached.promise = null;
+    }
+
+    const uri = process.env.MONGODB_URI || (process.env.NODE_ENV === 'development' ? 'mongodb://localhost:27017/lensvik' : '');
+    
+    if (!uri) {
+        const errMsg = 'MONGODB_URI environment variable is missing. Please set MONGODB_URI in Vercel project environment variables.';
+        console.error(`❌ ${errMsg}`);
+        throw new Error(errMsg);
     }
 
     if (!cached.promise) {
         const opts = {
             bufferCommands: false,
-            serverSelectionTimeoutMS: 2000,
-            connectTimeoutMS: 2000,
-            family: 4 // Use IPv4 to avoid slow ::1 timeout on some systems
+            maxPoolSize: 10,
+            serverSelectionTimeoutMS: 8000,
+            connectTimeoutMS: 8000,
+            socketTimeoutMS: 45000,
         };
 
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            console.log("MongoDB Connected");
-            return mongoose;
+        cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
+            console.log("MongoDB Connected Successfully");
+            return mongooseInstance;
         }).catch(err => {
-            console.warn("MongoDB Connection Failed, using mock data mode.");
-            cached.promise = null; // Allow retry on next request if desired, or keep null to stick to mock
+            console.error("❌ MongoDB Connection Error:", err.message);
+            cached.promise = null;
+            cached.conn = null;
             throw err;
         });
     }
@@ -44,6 +55,7 @@ async function dbConnect() {
         cached.conn = await cached.promise;
     } catch (e) {
         cached.promise = null;
+        cached.conn = null;
         throw e;
     }
 
@@ -51,3 +63,4 @@ async function dbConnect() {
 }
 
 export default dbConnect;
+

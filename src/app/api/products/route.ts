@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/models/Product';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: Request) {
     try {
         await dbConnect();
@@ -54,22 +57,31 @@ export async function GET(request: Request) {
             query.tags = { $in: features };
         }
 
-        let productsQuery = Product.find(query).sort({ createdAt: -1 });
-        
-        if (limit > 0) {
-            productsQuery = productsQuery.limit(limit);
-        }
+        let productsQuery = Product.find(query, { referenceImage: 0, videoData: 0, images: { $slice: 2 } })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Always enforce a reasonable limit to avoid Vercel 4.5MB response limit
+        // Admin panel calls without limit get 200, frontend calls with limit use their value
+        const effectiveLimit = limit > 0 ? limit : 200;
+        productsQuery = productsQuery.limit(effectiveLimit) as typeof productsQuery;
 
         const products = await productsQuery;
 
         // Strip heavy data URI arrays from list responses — only send lightweight references
-        const normalizedProducts = products.map(p => {
-            const obj = p.toObject();
+        const normalizedProducts = (products as any[]).map(obj => {
             const images = obj.images && obj.images.length > 0 ? obj.images : [];
-            const thumbnail = images[1] || images[0] || '/images/dfd.png';
-            const vtoImg = images[0] || images[1] || '/images/dfd.png';
+            const thumbnail = obj.image || images[1] || images[0] || '/images/dfd.png';
+            const vtoImg = obj.vtoImage || images[0] || images[1] || '/images/dfd.png';
+
+            // Calculate total stock from variants if no top-level stock field
+            let stock = obj.stock ?? 0;
+            if (obj.variants && obj.variants.length > 0) {
+                stock = obj.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+            }
+
             return {
-                _id: obj._id,
+                _id: obj._id?.toString() ?? obj._id,
                 name: obj.name,
                 price: obj.price,
                 comparePrice: obj.comparePrice,
@@ -90,19 +102,28 @@ export async function GET(request: Request) {
                 reviews: obj.reviews,
                 measurements: obj.measurements,
                 options: obj.options,
-                variants: obj.variants,
-                referenceImage: obj.referenceImage,
+                variants: obj.variants ? obj.variants.map((v: any) => ({
+                    color: v.color,
+                    size: v.size,
+                    lensType: v.lensType,
+                    price: v.price,
+                    stock: v.stock
+                })) : undefined,
                 seo: obj.seo,
                 sku: obj.sku,
                 barcode: obj.barcode,
+                stock,
                 createdAt: obj.createdAt,
             };
         });
 
         return NextResponse.json(normalizedProducts);
-    } catch (error) {
-        console.error('Database connection failed:', error);
-        return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+    } catch (error: any) {
+        console.error('Failed to fetch products:', error);
+        return NextResponse.json(
+            { error: error?.message || 'Failed to fetch products. Check database connection.' },
+            { status: 500 }
+        );
     }
 }
 

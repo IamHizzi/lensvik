@@ -27,9 +27,10 @@ export default function InventoryPage() {
     try {
       const res = await fetch('/api/products');
       const products = await res.json();
+      const safeProducts = Array.isArray(products) ? products : [];
       
       const items: any[] = [];
-      products.forEach((p: any) => {
+      safeProducts.forEach((p: any) => {
         if (p.variants && p.variants.length > 0) {
           p.variants.forEach((v: any, vIdx: number) => {
             items.push({
@@ -66,7 +67,11 @@ export default function InventoryPage() {
       });
       
       setInventory(items);
+      if (!res.ok) {
+        toast.error('Failed to fetch inventory from server');
+      }
     } catch (error) {
+      setInventory([]);
       toast.error('Failed to fetch inventory');
     } finally {
       setLoading(false);

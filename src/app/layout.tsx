@@ -1,21 +1,8 @@
-import { Raleway, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/context/CartContext";
 import { CustomerProvider } from "@/context/CustomerContext";
 import { Metadata } from "next";
-
-const raleway = Raleway({
-  variable: "--font-raleway",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
 
 export const metadata: Metadata = {
   title: "LENSVIK | Premium Eyewear & Virtual Try-On",
@@ -34,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${raleway.variable} ${poppins.variable} font-sans antialiased`}
+        className="font-sans antialiased"
       >
         <CustomerProvider>
           <CartProvider>

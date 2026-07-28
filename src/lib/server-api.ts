@@ -61,7 +61,7 @@ export async function getProductsServer(
 export async function getProductByIdServer(id: string): Promise<Product | null> {
     try {
         await dbConnect();
-        const doc = await ProductModel.findById(id).lean();
+        const doc = await ProductModel.findOne({ _id: id }).lean();
         if (!doc) return null;
         return normalizeDoc(doc);
     } catch {

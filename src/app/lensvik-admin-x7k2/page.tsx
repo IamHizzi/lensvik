@@ -103,24 +103,36 @@ export default function AdminDashboard() {
       const ordersData = await ordersRes.json();
       const productsData = await productsRes.json();
       
-      setOrders(ordersData);
-      setProducts(productsData);
+      const safeOrders = Array.isArray(ordersData) ? ordersData : [];
+      const safeProducts = Array.isArray(productsData) ? productsData : [];
+
+      setOrders(safeOrders);
+      setProducts(safeProducts);
+
+      if (!ordersRes.ok || !productsRes.ok) {
+        toast.error('API request failed. Please check MONGODB_URI on Vercel.');
+      }
 
       // Process monthly data
       const rev = new Array(12).fill(0);
       const ord = new Array(12).fill(0);
       
-      ordersData.forEach((order: any) => {
+      safeOrders.forEach((order: any) => {
+        if (!order.createdAt) return;
         const date = new Date(order.createdAt);
         const month = date.getMonth();
-        rev[month] += order.totalAmount || 0;
-        ord[month] += 1;
+        if (month >= 0 && month < 12) {
+          rev[month] += order.totalAmount || 0;
+          ord[month] += 1;
+        }
       });
       
       setRevenueByMonth(rev);
       setOrdersByMonth(ord);
 
     } catch (error) {
+      setOrders([]);
+      setProducts([]);
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);

@@ -43,15 +43,23 @@ export default function AnalyticsPage() {
     try {
       const res = await fetch('/api/orders');
       const data = await res.json();
-      setOrders(data);
+      const safeOrders = Array.isArray(data) ? data : [];
+      setOrders(safeOrders);
 
       const rev = new Array(12).fill(0);
-      data.forEach((o: any) => {
+      safeOrders.forEach((o: any) => {
+        if (!o.createdAt) return;
         const month = new Date(o.createdAt).getMonth();
-        rev[month] += (o.totalAmount || 0) / 1000; // Store in K
+        if (month >= 0 && month < 12) {
+          rev[month] += (o.totalAmount || 0) / 1000; // Store in K
+        }
       });
       setMonthlyRevenue(rev);
+      if (!res.ok) {
+        toast.error(data?.error || 'Failed to load analytics');
+      }
     } catch (error) {
+      setOrders([]);
       toast.error('Failed to load analytics');
     } finally {
       setLoading(false);
