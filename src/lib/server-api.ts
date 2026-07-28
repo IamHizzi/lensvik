@@ -12,10 +12,10 @@ import ProductModel from '@/models/Product';
 import type { Product } from './api';
 
 /** Normalize a raw Mongoose document to match the shared Product type */
-function normalizeDoc(doc: any): Product {
+function normalizeDoc(doc: any, isDetail = false): Product {
     const obj = doc.toObject ? doc.toObject() : doc;
-    const images: string[] = obj.images && obj.images.length > 0 ? obj.images : [];
-    const image = images[0] || '/images/dfd.png';
+    const rawImages: string[] = obj.images && obj.images.length > 0 ? obj.images : [];
+    const image = obj.image || rawImages[1] || rawImages[0] || '/images/dfd.png';
 
     // Deep copy and sanitize mongo properties (like ObjectIds)
     const cleanVariants = Array.isArray(obj.variants) 
@@ -25,11 +25,26 @@ function normalizeDoc(doc: any): Product {
           }))
         : [];
 
+    if (!isDetail) {
+        // Strip heavy base64 fields (videoData, referenceImage) for lists to keep payloads small
+        const { referenceImage, videoData, ...rest } = obj;
+        return {
+            ...rest,
+            _id: obj._id?.toString() ?? obj._id,
+            image,
+            images: rawImages.slice(0, 2),
+            variants: cleanVariants,
+            originalPrice: obj.originalPrice ?? obj.comparePrice ?? undefined,
+            createdAt: obj.createdAt ? new Date(obj.createdAt).toISOString() : undefined,
+            updatedAt: obj.updatedAt ? new Date(obj.updatedAt).toISOString() : undefined,
+        };
+    }
+
     return {
         ...obj,
         _id: obj._id?.toString() ?? obj._id,
         image,
-        images,
+        images: rawImages,
         variants: cleanVariants,
         originalPrice: obj.originalPrice ?? obj.comparePrice ?? undefined,
         createdAt: obj.createdAt ? new Date(obj.createdAt).toISOString() : undefined,
@@ -49,10 +64,10 @@ export async function getProductsServer(
         if (category) {
             query.category = { $regex: new RegExp(`^${category}$`, 'i') };
         }
-        let q = ProductModel.find(query).sort({ createdAt: -1 }).lean();
+        let q = ProductModel.find(query, { referenceImage: 0, videoData: 0, images: { $slice: 2 } }).sort({ createdAt: -1 }).lean();
         if (limit > 0) q = q.limit(limit) as typeof q;
         const docs = await q;
-        return (docs as any[]).map(normalizeDoc);
+        return (docs as any[]).map(doc => normalizeDoc(doc, false));
     } catch {
         return [];
     }
@@ -63,7 +78,7 @@ export async function getProductByIdServer(id: string): Promise<Product | null> 
         await dbConnect();
         const doc = await ProductModel.findOne({ _id: id }).lean();
         if (!doc) return null;
-        return normalizeDoc(doc);
+        return normalizeDoc(doc, true);
     } catch {
         return null;
     }
