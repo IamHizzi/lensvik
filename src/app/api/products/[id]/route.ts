@@ -34,16 +34,25 @@ export async function PATCH(
     try {
         await dbConnect();
         const { id } = await context.params;
-        const body = await request.json();
-        // images[0] = try-on image, images[1] = thumbnail
-        if (Array.isArray(body.images) && body.images.length > 0) {
-            body.image = body.images[1] || body.images[0];
-            body.vtoImage = body.images[0] || body.images[1];
+        let body = await request.json();
+
+        // Handle dot-notation updates (e.g. { "variants.0.stock": 15 }) from inventory page
+        const isDotNotation = Object.keys(body).some(k => k.includes('.'));
+        
+        if (!isDotNotation) {
+            // Full product update from edit form
+            // images[0] = try-on image, images[1] = thumbnail
+            if (Array.isArray(body.images) && body.images.length > 0) {
+                body.image = body.images[1] || body.images[0];
+                body.vtoImage = body.images[0] || body.images[1];
+            }
         }
+
+        const updateOp = isDotNotation ? { $set: body } : { $set: body };
 
         const updatedProduct = await Product.findOneAndUpdate(
             { _id: id },
-            { $set: body },
+            updateOp,
             { new: true }
         );
 

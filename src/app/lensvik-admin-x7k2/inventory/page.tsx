@@ -80,19 +80,21 @@ export default function InventoryPage() {
 
   const handleUpdateStock = async (item: any) => {
     try {
-      const res = await fetch(`/api/products/${item.productId}`);
-      const product = await res.json();
+      // Use dot-notation for MongoDB $set — lightweight payload, no base64 images
+      let payload: any;
       
       if (item.variantIndex === -1) {
-        product.stock = editValue;
+        // Update top-level stock
+        payload = { stock: editValue };
       } else {
-        product.variants[item.variantIndex].stock = editValue;
+        // Update variant stock at specific index
+        payload = { [`variants.${item.variantIndex}.stock`]: editValue };
       }
       
       const updateRes = await fetch(`/api/products/${item.productId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
+        body: JSON.stringify(payload)
       });
       
       if (updateRes.ok) {
@@ -100,10 +102,11 @@ export default function InventoryPage() {
         setEditingId(null);
         fetchInventory();
       } else {
-        throw new Error('Failed to update');
+        const err = await updateRes.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to update');
       }
-    } catch (error) {
-      toast.error('Update failed');
+    } catch (error: any) {
+      toast.error(error.message || 'Update failed');
     }
   };
 

@@ -5,6 +5,7 @@ import { Upload, X, Plus, Sparkles, Eye, Save, ArrowLeft, Glasses, Tag, Package,
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { compressImage } from '@/lib/compressImage';
 
 const CATEGORIES = ['Sunglasses', 'Eyeglasses', 'Prescription Glasses', 'Blue Light Glasses', 'Contact Lenses', 'Accessories'];
 const FRAME_COLORS = ['Black', 'Matte Black', 'Tortoise', 'Gold', 'Silver', 'Grey', 'Gunmetal', 'Rose Gold', 'Brown', 'Navy', 'Clear', 'Red', 'Pink', 'Maroon', 'Blue', 'Purple', 'Green', 'Marble', 'Orange', 'Yellow', 'White', 'Two Tone or Multi'];
@@ -32,6 +33,7 @@ export default function AddProductPage() {
     gender: 'Unisex', material: '', shape: '', rim: '', size: '', status: 'Draft', collectionName: '',
     pdMin: '', pdMax: '', bridgeWidth: '', templeLength: '', lensWidth: '', frameHeight: '',
     metaTitle: '', metaDesc: '', tags: '', referenceImage: '', lensSubtype: '',
+    stock: '',
   });
   const [options, setOptions] = useState({
     prescriptionCompatible: true,
@@ -96,7 +98,8 @@ export default function AddProductPage() {
             size,
             lensType: selectedLensTypes[0] || 'Clear',
             price: Number(form.price),
-            stock: 100
+            sku: form.sku || undefined,
+            stock: Number(form.stock || 100)
           }))
         )
       };
@@ -130,22 +133,24 @@ export default function AddProductPage() {
     const files = Array.from(e.dataTransfer.files);
     files.forEach(f => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImages(prev => [...prev, reader.result as string]);
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setImages(prev => [...prev, compressed]);
       };
       reader.readAsDataURL(f);
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(f => {
+    for (const f of files) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImages(prev => [...prev, reader.result as string]);
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setImages(prev => [...prev, compressed]);
       };
       reader.readAsDataURL(f);
-    });
+    }
   };
 
   const handleRefDrop = (e: React.DragEvent) => {
@@ -154,8 +159,9 @@ export default function AddProductPage() {
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm({ ...form, referenceImage: reader.result as string });
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setForm({ ...form, referenceImage: compressed });
       };
       reader.readAsDataURL(file);
     }
@@ -165,8 +171,9 @@ export default function AddProductPage() {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm({ ...form, referenceImage: reader.result as string });
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setForm({ ...form, referenceImage: compressed });
       };
       reader.readAsDataURL(file);
     }

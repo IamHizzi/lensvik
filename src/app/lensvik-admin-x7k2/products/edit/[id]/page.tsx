@@ -6,6 +6,7 @@ import { Upload, X, Plus, Sparkles, Eye, Save, ArrowLeft, Glasses, Tag, Package,
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { compressImage } from '@/lib/compressImage';
 
 const CATEGORIES = ['Sunglasses', 'Eyeglasses', 'Prescription Glasses', 'Blue Light Glasses', 'Contact Lenses', 'Accessories'];
 const FRAME_COLORS = ['Black', 'Matte Black', 'Tortoise', 'Gold', 'Silver', 'Grey', 'Gunmetal', 'Rose Gold', 'Brown', 'Navy', 'Clear', 'Red', 'Pink', 'Maroon', 'Blue', 'Purple', 'Green', 'Marble', 'Orange', 'Yellow', 'White', 'Two Tone or Multi'];
@@ -36,6 +37,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     gender: 'Unisex', material: '', shape: '', rim: '', size: '', status: 'Draft', collectionName: '',
     pdMin: '', pdMax: '', bridgeWidth: '', templeLength: '', lensWidth: '', frameHeight: '',
     metaTitle: '', metaDesc: '', tags: '', referenceImage: '', lensSubtype: '',
+    stock: '',
   });
   const [options, setOptions] = useState({
     prescriptionCompatible: true,
@@ -55,6 +57,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       if (!res.ok) throw new Error('Product not found');
       const data = await res.json();
 
+      // Calculate total stock from variants or use top-level stock
+      const totalStock = data.stock?.toString() || 
+        (data.variants?.length ? data.variants.reduce((s: number, v: any) => s + (v.stock || 0), 0).toString() : '');
+
       setForm({
         name: data.name || '',
         category: data.category || '',
@@ -68,6 +74,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         rim: data.rim || '',
         size: data.size || data.variants?.[0]?.size || '',
         status: data.status || 'Draft',
+        stock: totalStock,
         collectionName: data.collectionName || '',
         referenceImage: data.referenceImage || '',
         lensSubtype: data.subcategory || '',
@@ -119,7 +126,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     try {
       const cleanNum = (val: any) => (val === '' || val === undefined || val === null) ? undefined : Number(val);
 
-      const payload = {
+      // Build minimal payload - only send changed fields, skip heavy base64 data
+      const payload: Record<string, any> = {
         name: form.name,
         description,
         category: form.category,
@@ -133,11 +141,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         rim: form.rim,
         referenceImage: form.referenceImage || undefined,
         videoUrl: videoUrl || undefined,
-        videoData: videoFile || undefined,
         subcategory: form.lensSubtype || undefined,
-        images,
-        image: images[1] || images[0] || undefined,
-        vtoImage: images[0] || images[1] || undefined,
         status: statusOverride || form.status,
         collectionName: form.collectionName,
         tags: (form.tags || '').split(',').map(t => t.trim()).filter(Boolean),
@@ -154,16 +158,29 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           metaTitle: form.metaTitle,
           metaDesc: form.metaDesc,
         },
-        variants: selectedColors.flatMap(color =>
-          (selectedSizes.length > 0 ? selectedSizes : ['M']).map(size => ({
-            color,
-            size,
-            lensType: selectedLensTypes[0] || 'Clear',
-            price: Number(form.price),
-            stock: 100
-          }))
-        )
       };
+
+      // Only include images/videoData if changed (avoid base64 bloat in every save)
+      if (images.length > 0) {
+        payload.images = images;
+        payload.image = images[1] || images[0];
+        payload.vtoImage = images[0] || images[1];
+      }
+      if (videoFile) {
+        payload.videoData = videoFile;
+      }
+
+      // Include variants with stock from form or default
+      payload.variants = selectedColors.flatMap(color =>
+        (selectedSizes.length > 0 ? selectedSizes : ['M']).map(size => ({
+          color,
+          size,
+          lensType: selectedLensTypes[0] || 'Clear',
+          price: Number(form.price),
+          sku: form.sku || undefined,
+          stock: Number(form.stock || 100)
+        }))
+      );
 
       const res = await fetch(`/api/products/${id}`, {
         method: 'PATCH',
@@ -191,22 +208,24 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     const files = Array.from(e.dataTransfer.files);
     files.forEach(f => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImages(prev => [...prev, reader.result as string]);
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setImages(prev => [...prev, compressed]);
       };
       reader.readAsDataURL(f);
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    files.forEach(f => {
+    for (const f of files) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImages(prev => [...prev, reader.result as string]);
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setImages(prev => [...prev, compressed]);
       };
       reader.readAsDataURL(f);
-    });
+    }
   };
 
   const handleRefDrop = (e: React.DragEvent) => {
@@ -215,8 +234,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm({ ...form, referenceImage: reader.result as string });
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setForm({ ...form, referenceImage: compressed });
       };
       reader.readAsDataURL(file);
     }
@@ -226,8 +246,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setForm({ ...form, referenceImage: reader.result as string });
+      reader.onloadend = async () => {
+        const compressed = await compressImage(reader.result as string);
+        setForm({ ...form, referenceImage: compressed });
       };
       reader.readAsDataURL(file);
     }

@@ -33,7 +33,8 @@ const ProductSchema = new Schema({
         size: String,
         lensType: String,
         price: Number,
-        stock: Number
+        sku: String,
+        stock: { type: Number, default: 100 }
     }],
     options: {
         prescriptionCompatible: Boolean,
