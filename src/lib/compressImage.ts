@@ -3,7 +3,7 @@
  * to avoid Vercel's 4.5MB serverless function body limit.
  * Targets ~200KB per image max.
  */
-export function compressImage(base64Src: string, maxWidth = 800, quality = 0.6): Promise<string> {
+export function compressImage(base64Src: string, maxWidth = 1400, quality = 0.92): Promise<string> {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
