@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 const CATEGORIES = ['Sunglasses', 'Eyeglasses', 'Prescription Glasses', 'Blue Light Glasses', 'Contact Lenses', 'Accessories'];
-const FRAME_COLORS = ['Black', 'Matte Black', 'Tortoise', 'Gold', 'Silver', 'Grey', 'Gunmetal', 'Rose Gold', 'Brown', 'Navy', 'Clear', 'Red', 'Pink', 'Maroon', 'Blue', 'Purple', 'Green', 'Marble', 'Two Tone or Multi'];
+const FRAME_COLORS = ['Black', 'Matte Black', 'Tortoise', 'Gold', 'Silver', 'Grey', 'Gunmetal', 'Rose Gold', 'Brown', 'Navy', 'Clear', 'Red', 'Pink', 'Maroon', 'Blue', 'Purple', 'Green', 'Marble', 'Orange', 'Yellow', 'White', 'Two Tone or Multi'];
 const LENS_TYPES = ['Clear', 'UV400', 'Polarized', 'Anti-Reflective', 'Blue Light Filter', 'Photochromic', 'Mirrored'];
 const FRAME_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 const MATERIALS = ['Plastic', 'Acetate', 'Mix Material', 'Metal', 'TR', 'Titanium'];
@@ -41,7 +41,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     prescriptionCompatible: true,
     blueLightFilter: true,
     virtualTryOn: false,
-    lensCustomization: true,
   });
 
   const router = useRouter();
@@ -122,6 +121,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
       const payload = {
         name: form.name,
+        description,
         category: form.category,
         price: Number(form.price),
         comparePrice: cleanNum(form.comparePrice),
